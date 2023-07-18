@@ -1,10 +1,9 @@
 pragma circom 2.0.0;
 
-
-
 template Num2Bits(n) {
     signal input in;
     signal output out[n];
+
     var lc1=0;
     var e2=1;
 
@@ -13,7 +12,6 @@ template Num2Bits(n) {
         out[i] * (out[i] -1 ) === 0;
         lc1 += out[i] * e2;
         e2 = e2+e2;
-
     }
     lc1 === in;
 }
@@ -30,9 +28,7 @@ template LessThan(n) {
     out <== 1-n2b.out[n];
 }
 
-
 template LessEqThan(n) {
-
     signal input in[2];
     signal output out;
 
@@ -45,17 +41,15 @@ template LessEqThan(n) {
 }
 
 template GrayscaleChecker(n) {
-
     signal input orig[n][3];
-
     signal input gray[n];
 
     signal output n_check;
  
     component lt[n][2];
-/* = LessEqThan(16);
-    component lt2 = LessEqThan(16);
-*/
+//  = LessEqThan(16);
+//    component lt2 = LessEqThan(16);
+
     for (var i = 0; i < n; i++) {      
         var inter = 30 * orig[i][0] + 59 * orig[i][1] + 11 * orig[i][2];
 
@@ -70,8 +64,7 @@ template GrayscaleChecker(n) {
         lt[i][1].in[0] <== 100 * gray[i] - inter;
         lt[i][1].out === 1; 
     }
-
-     n_check <== n;
+    n_check <== n;
 }
 
 component main = GrayscaleChecker(8000);

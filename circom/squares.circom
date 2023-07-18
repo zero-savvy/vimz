@@ -42,44 +42,39 @@ template CheckBrightness() {
 
 
 template Bright(n) {
+     signal input orig[n][3];
+     signal input new[n][3];
+     signal input squares[n][3][6];
+     signal input positiveRemainder[n][3];
+     signal input negativeRemainder[n][3];
+     signal input alpha;
+     signal input posBeta;
+     signal input negBeta;
 
-    signal input orig[n][3];
-    signal input new[n][3];
-    signal input squares[n][3][6];
-   
-    signal input positiveRemainder[n][3];
-    signal input negativeRemainder[n][3];
-    
-    signal input alpha;
-    signal input posBeta;
-    signal input negBeta;
+     signal output n_check;
 
-    signal output n_check;
+     component checkBright[n][3];
 
-    component checkBright[n][3];
- 
-    for (var i = 0; i < n; i++) {
-	for (var j = 0; j < 3; j++) {
-             checkBright[i][j] = CheckBrightness();
-             checkBright[i][j].calcVal <==  alpha * orig[i][j] + posBeta - negBeta;
-             checkBright[i][j].actualVal <== new[i][j];
-             checkBright[i][j].remainder <== positiveRemainder[i][j] - negativeRemainder[i][j];
+     for (var i = 0; i < n; i++) {
+          for (var j = 0; j < 3; j++) {
+               checkBright[i][j] = CheckBrightness();
+               checkBright[i][j].calcVal <==  alpha * orig[i][j] + posBeta - negBeta;
+               checkBright[i][j].actualVal <== new[i][j];
+               checkBright[i][j].remainder <== positiveRemainder[i][j] - negativeRemainder[i][j];
 
-	     checkBright[i][j].x1 <== squares[i][j][0] * squares[i][j][0];
-             checkBright[i][j].x2 <== squares[i][j][1] * squares[i][j][1];
-             checkBright[i][j].x3 <== squares[i][j][2] * squares[i][j][2];
+               checkBright[i][j].x1 <== squares[i][j][0] * squares[i][j][0];
+               checkBright[i][j].x2 <== squares[i][j][1] * squares[i][j][1];
+               checkBright[i][j].x3 <== squares[i][j][2] * squares[i][j][2];
 
-             checkBright[i][j].x4 <== squares[i][j][3] * squares[i][j][3];
-             checkBright[i][j].x5 <== squares[i][j][4] * squares[i][j][4];
-             checkBright[i][j].x6 <== squares[i][j][5] * squares[i][j][5];
+               checkBright[i][j].x4 <== squares[i][j][3] * squares[i][j][3];
+               checkBright[i][j].x5 <== squares[i][j][4] * squares[i][j][4];
+               checkBright[i][j].x6 <== squares[i][j][5] * squares[i][j][5];
 
-             checkBright[i][j].out1 === 0;
-             checkBright[i][j].out2 === 0;
-             checkBright[i][j].out3 === 0; 
-        }
-    }
-
-    
+               checkBright[i][j].out1 === 0;
+               checkBright[i][j].out2 === 0;
+               checkBright[i][j].out3 === 0; 
+          }
+     }
      n_check <== n;
 }
 

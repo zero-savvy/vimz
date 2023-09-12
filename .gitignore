@@ -1,2 +1,6 @@
 *.jpg
 */venv/
+circom/*_cpp/
+circom/*_js/
+circom/*.r1cs
+circom/*.sym

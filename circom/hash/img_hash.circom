@@ -353,25 +353,32 @@ template EasyImgHasher (height, width) {
     signal output hash;
 
     // For rows
-    component hasher[height*width];
+    component hasher[height*width-2];
 
-    hasher[1] = Hasher(2);
-    hasher[1].values[0] <== img[0][0];
-    hasher[1].values[1] <== img[0][1];
+    hasher[0] = Hasher(2);
+    hasher[0].values[0] <== img[0][0];
+    hasher[0].values[1] <== img[0][1];
 
-    for(var i=0; i < height; i++) {
-        for(var j=0; j<width; j++) {
-            if (i == 0 && (j == 0 || j ==1)) {
-                // do nothing
-            } else {
-                hasher[i*width+j] = Hasher(2);
-                hasher[i*width+j].values[0] <== hasher[i*width+j-1].hash;
-                hasher[i*width+j].values[1] <== img[i][j];
-            }
-        }
+    for(var i=1; i < height*width-2; i++) {
+        hasher[i] = Hasher(2);
+        hasher[i].values[0] <== hasher[i-1].hash;
+        hasher[i].values[1] <== img[(i+1) \ width][(i+1) % width];
     }
 
-    hash <== hasher[height*width-1].hash;
+    // for(var i=0; i < height; i++) {
+    //     for(var j=0; j<width; j++) {
+    //         if (i == 0 && (j == 0 || j ==1)) {
+    //             // do nothing
+    //         } else {
+    //             hasher[i*width+j] = Hasher(2);
+    //             hasher[i*width+j].values[0] <== hasher[i*width+j-1].hash;
+    //             hasher[i*width+j].values[1] <== img[i][j];
+    //         }
+    //     }
+    // }
+
+    hash <== hasher[height*width-3].hash;
 
 }
-component main = EasyImgHasher(480, 30);
+// component main = EasyImgHasher(90, 128); // HD/8 image
+// component main = EasyImgHasher(80, 48); // SD/8 image

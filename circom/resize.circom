@@ -29,7 +29,7 @@ template Resize(hOrig, wOrig, hNew, wNew) {
 	n_check <== 1;
 }
 
-component main = Resize(3, 6, 3, 2);
+component main = Resize(10, 20, 5, 10);
 
 
 

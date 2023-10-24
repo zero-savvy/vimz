@@ -51,7 +51,7 @@ template GreyScaleWithHash(height, width) {
 }
 
 // component main = GreyScale(90, 128); // HD/8 image
-// component main = GreyScale(80, 48); // SD/8 image
+// component main = GreyScale(60, 64); // SD/8 image
 
 // component main = GreyScaleWithHash(90, 128); // HD/8 image
-component main = GreyScaleWithHash(80, 48); // SD/8 image
+component main = GreyScaleWithHash(60, 64); // SD/8 image

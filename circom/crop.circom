@@ -80,4 +80,4 @@ template Crop(hOrig, wOrig, hNew, wNew) {
 	check === hash * 423;
 }
 
-component main {public[hash]}= Crop(100, 100, 10, 20);
+component main {public[hash]}= Crop(720, 128, 480, 64);

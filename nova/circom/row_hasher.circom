@@ -26,6 +26,6 @@ template RowHasher (width) {
         hasher[i].values[1] <== img[i+1];
     }
 
-    hash <== hasher[width-1].hash;
+    hash <== hasher[width-2].hash;
 
 }

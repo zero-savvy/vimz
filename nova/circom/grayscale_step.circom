@@ -1,9 +1,34 @@
 pragma circom 2.0.0;
 
-include "row_hasher.circom";
-include "../../circom/utils/pixels.circom";
-include "../../circom/round.circom";
+include "utils/row_hasher.circom";
+include "utils/pixels.circom";
+include "circomlib/circuits/bitify.circom";
 
+
+template GrayscaleChecker(n) {
+    signal input orig[n][3];
+    signal input gray[n];
+
+    signal output n_check;
+ 
+    component lt[n][2];
+
+    for (var i = 0; i < n; i++) {      
+        var inter = 30 * orig[i][0] + 59 * orig[i][1] + 11 * orig[i][2];
+
+        lt[i][0] = LessEqThan(16);
+        lt[i][1] = LessEqThan(16);
+
+        lt[i][0].in[1] <== 100;
+        lt[i][0].in[0] <== inter - 100 * gray[i];
+        lt[i][0].out === 1;
+
+        lt[i][1].in[1] <== 100;
+        lt[i][1].in[0] <== 100 * gray[i] - inter;
+        lt[i][1].out === 1; 
+    }
+    n_check <== n;
+}
 
 template GreyScale(width){
     

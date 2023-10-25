@@ -1,11 +1,10 @@
 pragma circom 2.0.0;
 
-include "../../circom/circomlib/circuits/multiplexer.circom";
-include "../../circom/circomlib/circuits/mux1.circom";
-include "../../circom/circomlib/circuits/comparators.circom";
-include "../../circom/utils/pixels.circom";
-include "row_hasher.circom";
-
+include "circomlib/circuits/multiplexer.circom";
+include "circomlib/circuits/mux1.circom";
+include "circomlib/circuits/comparators.circom";
+include "utils/pixels.circom";
+include "utils/row_hasher.circom";
 
 
 template MultiplexerCrop(origSize, cropSize) {

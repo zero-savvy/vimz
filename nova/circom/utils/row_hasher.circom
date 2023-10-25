@@ -1,6 +1,5 @@
 pragma circom 2.0.0;
-include "../../circom/circomlib/circuits/poseidon.circom";
-
+include "../circomlib/circuits/poseidon.circom";
 
 template Hasher(inputSize) {
     signal input values[inputSize];

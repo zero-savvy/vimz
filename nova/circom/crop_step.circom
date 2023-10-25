@@ -4,7 +4,7 @@ include "../../circom/circomlib/circuits/multiplexer.circom";
 include "../../circom/circomlib/circuits/mux1.circom";
 include "../../circom/circomlib/circuits/comparators.circom";
 include "../../circom/utils/pixels.circom";
-include "1d_hash.circom";
+include "row_hasher.circom";
 
 
 

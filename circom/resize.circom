@@ -8,8 +8,8 @@ template Resize(hOrig, wOrig, hNew, wNew) {
 
     for (var i = 0; i < hNew; i++) {
 		for (var j = 0; j < wNew; j++) {
-			var x_l = (wOrig - 1) * j / (wNew - 1);
-			var y_l = (hOrig - 1) * i / (hNew - 1);
+			var x_l = (wOrig - 1) * j \ (wNew - 1);
+			var y_l = (hOrig - 1) * i \ (hNew - 1);
 			var x_h = x_l * (wNew - 1) == (wOrig - 1) * j ? x_l : x_l + 1;
 			var y_h = y_l * (hNew - 1) == (hOrig - 1) * i ? y_l : y_l + 1;
 
@@ -29,7 +29,7 @@ template Resize(hOrig, wOrig, hNew, wNew) {
 	n_check <== 1;
 }
 
-component main = Resize(10, 20, 5, 10);
+component main = Resize(100, 200, 50, 100);
 
 
 

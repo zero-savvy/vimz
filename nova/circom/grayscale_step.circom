@@ -30,7 +30,7 @@ template GrayscaleChecker(n) {
     n_check <== n;
 }
 
-template GreyScale(width){
+template GrayScale(width){
     
     signal input original[width];
     signal input transformed[width];
@@ -55,35 +55,35 @@ template GreyScale(width){
 
 template GrayScaleHash(width){
     signal input prev_orig_hash;
-    signal input prev_trans_hash;
+    signal input prev_gray_hash;
     signal input row_orig [width];
-    signal input row_trans [width];
+    signal input row_gray [width];
     signal output next_orig_hash;
-    signal output next_trans_hash;
+    signal output next_gray_hash;
 
     component orig_row_hasher = RowHasher(width);
-    component trans_row_hasher = RowHasher(width);
+    component gray_row_hasher = RowHasher(width);
     component orig_hasher = Hasher(2);
-    component trans_hasher = Hasher(2);
+    component gray_hasher = Hasher(2);
 
     orig_row_hasher.img <== row_orig;
     orig_hasher.values[0] <== prev_orig_hash;
     orig_hasher.values[1] <== orig_row_hasher.hash;
     next_orig_hash <== orig_hasher.hash;
 
-    trans_row_hasher.img <== row_trans;
-    trans_hasher.values[0] <== prev_trans_hash;
-    trans_hasher.values[1] <== trans_row_hasher.hash;
-    next_trans_hash <== trans_hasher.hash;
+    gray_row_hasher.img <== row_gray;
+    gray_hasher.values[0] <== prev_gray_hash;
+    gray_hasher.values[1] <== gray_row_hasher.hash;
+    next_gray_hash <== gray_hasher.hash;
 
     // grayscale code here ...
-    component checker = GreyScale(width);
+    component checker = GrayScale(width);
     checker.original <== row_orig;
-    checker.transformed <== row_trans;
+    checker.transformed <== row_gray;
 
 }
 
-component main { public [prev_orig_hash, prev_trans_hash] } = GrayScaleHash(128);
+component main { public [prev_orig_hash, prev_gray_hash] } = GrayScaleHash(128);
 
 
 

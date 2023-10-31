@@ -118,38 +118,85 @@ fn main() {
         .version("1.0")
         .author("Zero-Savvy")
         .about("Prove the truthfulness of your media! \n The naming rationale is: ZK + Chronicle ==> Pronounciation: ZIKRONIKEL :D")
-        .arg(Arg::with_name("input")
+        .arg(
+            Arg::with_name("input")
+            .required(true)
             .short("i")
             .long("input")
             .value_name("FILE")
             .help("The JSON file containing the original and the transformed image data to verify.")
-            .takes_value(true))
-        .arg(Arg::with_name("output")
+            .takes_value(true)
+        )
+        .arg(
+            Arg::with_name("output")
+            .required(true)
             .short("o")
             .long("output")
             .value_name("FILE")
             .help("This file will contain the final Proof to be verified by others.")
-            .takes_value(true))
-        .arg(Arg::with_name("function")
+            .takes_value(true)
+        )
+        .arg(
+            Arg::with_name("circuit")
+            .required(true)
+            .short("c")
+            .long("circuit")
+            .value_name("R1CS FILE")
+            .help("The R1CS file of the compiled Circom circuit.")
+            .takes_value(true)
+        )
+        .arg(
+            Arg::with_name("witnessgenerator")
+            .required(true)
+            .short("w")
+            .long("witnessgenerator")
+            .value_name("BINARY/WASM FILE")
+            .help("Witness generator file of the circuit.")
+            .takes_value(true)
+        )
+        .arg(
+            Arg::with_name("function")
+            .required(true)
             .short("f")
             .long("function")
             .value_name("FUNCTION")
             .help("The transformation function.")
             .takes_value(true)
-            .possible_values(&["crop", "greyscale", "resize", "color_transform"]))
+            .possible_values(&["crop", "greyscale", "resize", "color_transform"])
+        )
         .get_matches();
 
-    if let Some(input_file) = matches.value_of("input") {
-        println!("Input file: {}", input_file);
-    }
+    let witness_gen_filepath = matches.value_of("witnessgenerator").unwrap();
+    let circuit_filepath = matches.value_of("circuit").unwrap();
+    let output_filepath = matches.value_of("output").unwrap();
+    let input_filepath = matches.value_of("input").unwrap();
+    let selected_function = matches.value_of("function").unwrap();
 
-    if let Some(output_file) = matches.value_of("output") {
-        println!("Output file: {}", output_file);
-    }
 
-    let witness_gen_filepath = format!("circom/toy_cpp/toy");
-    let circuit_filepath = format!("circom/toy.r1cs");
-    run_test(circuit_filepath.clone(), witness_gen_filepath);
+
+println!("___________________________________________________________________");
+println!("    _____                        _____                         ");
+println!("    /__  /  ___  _________       / ___/____ __   ___   ____  __ ");
+println!("      / /  / _ \\/ ___/ __ \\______\\__ \\/ __ `/ | / / | / / / / / ");
+println!("     / /__/  __/ /  / /_/ /_____/__/ / /_/ /| |/ /| |/ / /_/ /  ");
+println!("    /____/\\___/_/   \\____/     /____/\\__,_/ |___/ |___/\\__, /   ");
+println!("                                                      /____/    ");
+println!("___________________________________________________________________");
+println!("____  _     ___   ___   _      _   __    _     ____      _      _        ___  ");
+println!(" / / | |_/ | |_) / / \\ | |\\ | | | / /`  | |   | |_      \\ \\  / / |  __  / / \\ ");
+println!("/_/_ |_| \\ |_| \\ \\_\\_/ |_| \\| |_| \\_\\_, |_|__ |_|__      \\_\\/  |_| (_() \\_\\_/ ");
+
+
+    println!(" ___________________________");
+    println!("| Input file: {}", input_filepath);
+    println!("| Ouput file: {}", output_filepath);
+    println!("| Selected function: {}", selected_function);
+    println!("| Circuit file: {}", circuit_filepath);
+    println!("| Witness generator: {}", witness_gen_filepath);
+    println!(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
+
+
+    run_test(circuit_filepath.to_string().clone(), witness_gen_filepath.to_string());
 
     // let circuit_filepath = format!("examples/toy/{}/toy.r1cs", group_name);
     // for witness_gen_filepath in [

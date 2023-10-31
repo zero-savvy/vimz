@@ -1,4 +1,5 @@
 use std::{collections::HashMap, env::current_dir, time::Instant};
+use clap::{App, Arg};
 
 use nova_scotia::{
     circom::reader::load_r1cs, create_public_params, create_recursive_circuit, FileLocation, F, S,
@@ -27,7 +28,7 @@ fn run_test(circuit_filepath: String, witness_gen_filepath: String) {
     let witness_generator_file = root.join(witness_gen_filepath);
 
     let mut private_inputs = Vec::new();
-    for i in 0..iteration_count {
+    for i in 2..iteration_count {
         let mut private_input = HashMap::new();
         private_input.insert("adder".to_string(), json!(i));
         private_inputs.push(private_input);
@@ -113,6 +114,39 @@ fn run_test(circuit_filepath: String, witness_gen_filepath: String) {
 }
 
 fn main() {
+    let matches = App::new("zKronicle")
+        .version("1.0")
+        .author("Zero-Savvy")
+        .about("Prove the truthfulness of your media! \n The naming rationale is: ZK + Chronicle ==> Pronounciation: ZIKRONIKEL :D")
+        .arg(Arg::with_name("input")
+            .short("i")
+            .long("input")
+            .value_name("FILE")
+            .help("The JSON file containing the original and the transformed image data to verify.")
+            .takes_value(true))
+        .arg(Arg::with_name("output")
+            .short("o")
+            .long("output")
+            .value_name("FILE")
+            .help("This file will contain the final Proof to be verified by others.")
+            .takes_value(true))
+        .arg(Arg::with_name("function")
+            .short("f")
+            .long("function")
+            .value_name("FUNCTION")
+            .help("The transformation function.")
+            .takes_value(true)
+            .possible_values(&["crop", "greyscale", "resize", "color_transform"]))
+        .get_matches();
+
+    if let Some(input_file) = matches.value_of("input") {
+        println!("Input file: {}", input_file);
+    }
+
+    if let Some(output_file) = matches.value_of("output") {
+        println!("Output file: {}", output_file);
+    }
+
     let witness_gen_filepath = format!("circom/toy_cpp/toy");
     let circuit_filepath = format!("circom/toy.r1cs");
     run_test(circuit_filepath.clone(), witness_gen_filepath);

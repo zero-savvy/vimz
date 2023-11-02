@@ -44,17 +44,25 @@ template MultiplexerCrop(origSize, cropSize) {
 
 template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized){
     // public inputs
-    signal input prev_orig_hash;
-    signal input prev_resized_hash;
+    signal input step_in[2];
     
     // private inputs
     signal input row_orig [rowCountOrig][widthOrig];
     signal input row_resized [rowCountResized][widthResized];
 
     //outputs
-    signal output next_orig_hash;
-    signal output next_resized_hash;
+    signal output step_out[2];
+    
+    // decoding signals
+    signal prev_orig_hash <== step_in[0];
+    signal prev_resized_hash <== step_in[1];
+    
+    // encoding signals
+    signal next_orig_hash;
+    signal next_resized_hash;
 
+    
+    
     component row_hasher_orig[rowCountOrig];
     component hasher_orig [rowCountOrig];
     for (var i = 0; i < rowCountOrig; i++) {
@@ -136,7 +144,9 @@ template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized){
         hasher_resized[i].values[1] <== row_hasher_resized[i].hash;
     }
     next_resized_hash <== hasher_resized[rowCountResized-1].hash;
-    
+
+    step_out[0] <== next_orig_hash;
+    step_out[1] <== next_resized_hash;
 }
 
-component main { public [prev_orig_hash, prev_resized_hash] } = ResizeHash(128, 64, 3, 2);
+component main { public [step_out] } = ResizeHash(128, 64, 3, 2);

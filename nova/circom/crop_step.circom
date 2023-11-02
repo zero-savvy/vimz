@@ -44,28 +44,34 @@ template MultiplexerCrop(origSize, cropSize) {
 
 template CropHash(widthOrig, widthCrop, heightCrop){
     // public inputs
-    signal input prev_orig_hash;
-    signal input prev_trans_hash;
-    signal input row_index;
-    signal input crop_start_x;
-    signal input crop_start_y;
+    signal input step_in[5];
     
     // private inputs
     signal input row_orig [widthOrig];
-
+    
     //outputs
-    signal output next_orig_hash;
-    signal output next_trans_hash;
-    signal output next_row_index;
-    signal output same_crop_start_x;
-    signal output same_crop_start_y;
+    signal output step_out[5];
+    
+    signal decompressed_row_orig [widthOrig * 10];
+
+    // Decode input Signals
+    signal prev_orig_hash <== step_in[0];
+    signal prev_crop_hash <== step_in[1];
+    signal row_index <== step_in[2];
+    signal crop_start_x <== step_in[3];
+    signal crop_start_y <== step_in[4];
+
+    // encoding signals
+    signal next_orig_hash;
+    signal next_crop_hash;
+    signal next_row_index;
+    signal same_crop_start_x;
+    signal same_crop_start_y;
 
     component orig_row_hasher = RowHasher(widthOrig);
     component trans_row_hasher = RowHasher(widthCrop);
     component orig_hasher = Hasher(2);
     component trans_hasher = Hasher(2);
-
-    signal decompressed_row_orig [widthOrig * 10];
 
 
     orig_row_hasher.img <== row_orig;
@@ -77,7 +83,6 @@ template CropHash(widthOrig, widthCrop, heightCrop){
     // calc cropped hash
     // ----------------------------
     component decompressor[widthOrig];
-
 
     for (var i=0; i<widthOrig; i++) {
         decompressor[i] = DecompressorCrop();
@@ -101,11 +106,11 @@ template CropHash(widthOrig, widthCrop, heightCrop){
     for (var i=0; i<widthCrop; i++) {
         trans_row_hasher.img[i] <== cropped_data[i].out;
     }
-    trans_hasher.values[0] <== prev_trans_hash;
+    trans_hasher.values[0] <== prev_crop_hash;
     trans_hasher.values[1] <== trans_row_hasher.hash;
     
     component selector = Mux1();
-    selector.c[0] <== prev_trans_hash;
+    selector.c[0] <== prev_crop_hash;
     selector.c[1] <== trans_hasher.hash;
 
     // if the row is within the cropped area
@@ -118,13 +123,20 @@ template CropHash(widthOrig, widthCrop, heightCrop){
 
     selector.s <== gte.out * lt.out;
 
-    next_trans_hash <== selector.out;
+    next_crop_hash <== selector.out;
 
     same_crop_start_x <== crop_start_x;
     same_crop_start_y <== crop_start_y;
 
-    next_row_index <== row_index;
+    next_row_index <== row_index + 1;
+
+    signal step_out[0] <== next_orig_hash;
+    signal step_out[1] <== next_crop_hash;
+    signal step_out[2] <== next_row_index;
+    signal step_out[3] <== same_crop_start_x;
+    signal step_out[4] <== same_crop_start_y;
+
     
 }
 
-component main { public [prev_orig_hash, prev_trans_hash, row_index, crop_start_x, crop_start_y] } = CropHash(128, 10, 20);
+component main { public [step_in] } = CropHash(128, 10, 20);

@@ -56,10 +56,8 @@ if image_path:
     compressed_grayscale_image = convert_to_grayscale(image_path)
     print("Applied graysacle filter successfully.")
     out = {
-        "prev_orig_hash": "0x00",
-        "prev_gray_hash": "0x00",
-        "row_orig": compressed_original_image[1246][:128],
-        "row_gray": compressed_grayscale_image[1246][:128],
+        "original": compressed_original_image,
+        "transformed": compressed_grayscale_image,
         }
     with open(output_path, 'w') as fp:
         json.dump(out, fp, indent=4)

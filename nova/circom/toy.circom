@@ -7,9 +7,10 @@ template Example () {
 
     signal output step_out[2];
 
-    signal input adder;
+    signal input original[2];
+    signal input transformed[2];
 
-    step_out[0] <== step_in[0] * adder;
+    step_out[0] <== step_in[0] * original[0];
     step_out[1] <== step_in[0] * step_in[1];
 }
 

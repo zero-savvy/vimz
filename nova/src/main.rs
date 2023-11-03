@@ -1,4 +1,4 @@
-use std::{collections::HashMap, env::current_dir, time::Instant};
+use std::{collections::HashMap, env::current_dir, time::Instant, fs::File, io::{Write, Read}};
 use clap::{App, Arg};
 
 use nova_scotia::{
@@ -9,9 +9,26 @@ use nova_snark::{
     traits::{circuit::StepCircuit, Group},
     CompressedSNARK, PublicParams,
 };
+use serde::{Serialize, Deserialize};
 use serde_json::json;
 
-fn run_test(circuit_filepath: String, witness_gen_filepath: String) {
+#[derive(Serialize, Deserialize)]
+struct zKronoData {
+    field1: String,
+    field2: i32,
+}
+
+#[derive(Deserialize)]
+struct zKronoInput {
+    original: Vec<Vec<String>>,
+    transformed: Vec<Vec<String>>,
+}
+
+
+fn fold_fold_fold(circuit_filepath: String,
+            witness_gen_filepath: String,
+            output_file_path: String,
+            input_file_path: String) {
     type G1 = pasta_curves::pallas::Point;
     type G2 = pasta_curves::vesta::Point;
 
@@ -20,19 +37,42 @@ fn run_test(circuit_filepath: String, witness_gen_filepath: String) {
         witness_gen_filepath,
         std::any::type_name::<G1>()
     );
-    let iteration_count = 50;
+    let iteration_count = 5;
     let root = current_dir().unwrap();
 
     let circuit_file = root.join(circuit_filepath);
     let r1cs = load_r1cs::<G1, G2>(&FileLocation::PathBuf(circuit_file));
     let witness_generator_file = root.join(witness_gen_filepath);
 
+    let mut input_file = File::open(input_file_path.clone()).expect("Failed to open the file");
+    let mut input_file_json_string = String::new();
+    input_file.read_to_string(&mut input_file_json_string).expect("Unable to read from the file");
+    
+    let input_data: zKronoInput = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+    // let reader = BufReader::new(file);
+
+    // Deserialize the JSON data into the defined structure
+    // let data: Data = serde_json::from_reader(reader).expect("Failed to parse JSON");
+
     let mut private_inputs = Vec::new();
-    for i in 2..iteration_count {
+    for i in 0..iteration_count {
         let mut private_input = HashMap::new();
-        private_input.insert("adder".to_string(), json!(i));
+        // private_input.insert("adder".to_string(), json!(i+2));
+        private_input.insert("row_orig".to_string(), json!(input_data.original[0]));
+        private_input.insert("row_gray".to_string(), json!(input_data.transformed[0]));
         private_inputs.push(private_input);
     }
+
+    let json_stringqwe = serde_json::to_string(&private_inputs).unwrap();
+
+    // Open a file for writing
+    let mut file_refactor = File::create("WWWWWWWWW.json").expect("Unable to create the file");
+
+    // Write the JSON string to the file
+    file_refactor.write_all(json_stringqwe.as_bytes()).expect("Unable to write to the file");
+
+    println!("Data has been written to output.json");
+
 
     let start_public_input = [F::<G1>::from(10), F::<G1>::from(10)];
 
@@ -96,10 +136,31 @@ fn run_test(circuit_filepath: String, witness_gen_filepath: String) {
     assert!(res.is_ok());
     let compressed_snark = res.unwrap();
 
+    //--- dump data ---//
+    // Create some data to serialize as JSON
+    
+    // Serialize the data to a JSON string
+    let json_string = serde_json::to_string(&compressed_snark).unwrap();
+
+    // Open a file for writing
+    let mut file = File::create(output_file_path.clone()).expect("Unable to create the file");
+
+    // Write the JSON string to the file
+    file.write_all(json_string.as_bytes()).expect("Unable to write to the file");
+
+    println!("Data has been written to output.json");
+
+    println!("-------------- Load Data --------");
+    let mut file = File::open(output_file_path.clone()).expect("Unable to open the file");
+    let mut json_string = String::new();
+    file.read_to_string(&mut json_string).expect("Unable to read from the file");
+    
+    let compressed_snark2: CompressedSNARK<_, _, _, _, _, _> = serde_json::from_str(&json_string).expect("Deserialization failed");
+
     // verify the compressed SNARK
     println!("Verifying a CompressedSNARK...");
     let start = Instant::now();
-    let res = compressed_snark.verify(
+    let res = compressed_snark2.verify(
         &vk,
         iteration_count,
         start_public_input.to_vec(),
@@ -114,7 +175,7 @@ fn run_test(circuit_filepath: String, witness_gen_filepath: String) {
 }
 
 fn main() {
-    let matches = App::new("zKronicle")
+    let matches = App::new("zKrono")
         .version("1.0")
         .author("Zero-Savvy")
         .about("Prove the truthfulness of your media! \n The naming rationale is: ZK + Chronicle ==> Pronounciation: ZIKRONIKEL :D")
@@ -172,20 +233,12 @@ fn main() {
     let input_filepath = matches.value_of("input").unwrap();
     let selected_function = matches.value_of("function").unwrap();
 
-
-
-println!("___________________________________________________________________");
-println!("    _____                        _____                         ");
-println!("    /__  /  ___  _________       / ___/____ __   ___   ____  __ ");
-println!("      / /  / _ \\/ ___/ __ \\______\\__ \\/ __ `/ | / / | / / / / / ");
-println!("     / /__/  __/ /  / /_/ /_____/__/ / /_/ /| |/ /| |/ / /_/ /  ");
-println!("    /____/\\___/_/   \\____/     /____/\\__,_/ |___/ |___/\\__, /   ");
-println!("                                                      /____/    ");
-println!("___________________________________________________________________");
-println!("____  _     ___   ___   _      _   __    _     ____      _      _        ___  ");
-println!(" / / | |_/ | |_) / / \\ | |\\ | | | / /`  | |   | |_      \\ \\  / / |  __  / / \\ ");
-println!("/_/_ |_| \\ |_| \\ \\_\\_/ |_| \\| |_| \\_\\_, |_|__ |_|__      \\_\\/  |_| (_() \\_\\_/ ");
-
+    println!("     _  __                        ");
+    println!(" ___| |/ /_ __ ___  _ __   ___    ");
+    println!("|_  / ' /| '__/ _ \\| '_ \\ / _ \\ ");
+    println!(" / /| . \\| | | (_) | | | | (_) |  ");
+    println!("/___|_|\\_\\_|  \\___/|_| |_|\\___/");
+                                                 
 
     println!(" ___________________________");
     println!("| Input file: {}", input_filepath);
@@ -196,7 +249,11 @@ println!("/_/_ |_| \\ |_| \\ \\_\\_/ |_| \\| |_| \\_\\_, |_|__ |_|__      \\_\\/
     println!(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
 
 
-    run_test(circuit_filepath.to_string().clone(), witness_gen_filepath.to_string());
+    fold_fold_fold(circuit_filepath.to_string().clone(),
+             witness_gen_filepath.to_string(),
+             output_filepath.to_string(),
+             input_filepath.to_string()
+            );
 
     // let circuit_filepath = format!("examples/toy/{}/toy.r1cs", group_name);
     // for witness_gen_filepath in [

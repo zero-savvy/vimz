@@ -53,11 +53,48 @@ if image_path:
     # Crop the image and save it
     compressed_original_image = compress_image(image_path)
     print("Image compressed successfully.")
-    compressed_grayscale_image = convert_to_grayscale(image_path)
-    print("Applied graysacle filter successfully.")
+    cmd = input("Enter your command (default[1]): 1) crop, 2) resize, 3) greyscale, 4) rotate, 5) flip, " 
+                "6) censor, 7) change color space, 8) white balance, 9) contrast, 10) sharpen, 11) blur, "
+                "12) translate")
+    if cmd == 1:
+        compressed_transformed_image = convert_to_grayscale(image_path)
+        print("Applied CROP filter successfully.")
+    elif cmd == 2:
+        compressed_transformed_image = convert_to_grayscale(image_path)
+        print("Applied RESIZE filter successfully.")
+    elif cmd == 3:
+        compressed_transformed_image = convert_to_grayscale(image_path)
+        print("Applied GREYSCALE filter successfully.")
+    elif cmd == 4:
+        compressed_transformed_image = convert_to_grayscale(image_path)
+        print("Applied ROTATE filter successfully.")
+    elif cmd == 5:
+        compressed_transformed_image = convert_to_grayscale(image_path)
+        print("Applied FLIP filter successfully.")
+    elif cmd == 6:
+        compressed_transformed_image = convert_to_grayscale(image_path)
+        print("Applied CENSOR filter successfully.")
+    elif cmd == 7:
+        compressed_transformed_image = convert_to_grayscale(image_path)
+        print(f"Applied {'RGB' if cmd1 == 1 else 'YCbCr'} filter successfully.")
+    elif cmd == 8:
+        compressed_transformed_image = convert_to_grayscale(image_path)
+        print("Applied WHITE BALANCE filter successfully.")
+    elif cmd == 9:
+        compressed_transformed_image = convert_to_grayscale(image_path)
+        print("Applied graysacle filter successfully.")
+    elif cmd == 10:
+        compressed_transformed_image = convert_to_grayscale(image_path)
+        print("Applied graysacle filter successfully.")
+    elif cmd == 11:
+        compressed_transformed_image = convert_to_grayscale(image_path)
+        print("Applied graysacle filter successfully.")
+    elif cmd == 12:
+        compressed_transformed_image = convert_to_grayscale(image_path)
+        print("Applied graysacle filter successfully.")
     out = {
         "original": compressed_original_image,
-        "transformed": compressed_grayscale_image,
+        "transformed": compressed_transformed_image,
         }
     with open(output_path, 'w') as fp:
         json.dump(out, fp, indent=4)

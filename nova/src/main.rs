@@ -37,7 +37,7 @@ fn fold_fold_fold(circuit_filepath: String,
         witness_gen_filepath,
         std::any::type_name::<G1>()
     );
-    let iteration_count = 5;
+    let iteration_count = 720;
     let root = current_dir().unwrap();
 
     let circuit_file = root.join(circuit_filepath);
@@ -58,21 +58,10 @@ fn fold_fold_fold(circuit_filepath: String,
     for i in 0..iteration_count {
         let mut private_input = HashMap::new();
         // private_input.insert("adder".to_string(), json!(i+2));
-        private_input.insert("row_orig".to_string(), json!(input_data.original[0]));
-        private_input.insert("row_gray".to_string(), json!(input_data.transformed[0]));
+        private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
+        private_input.insert("row_gray".to_string(), json!(input_data.transformed[i]));
         private_inputs.push(private_input);
     }
-
-    let json_stringqwe = serde_json::to_string(&private_inputs).unwrap();
-
-    // Open a file for writing
-    let mut file_refactor = File::create("WWWWWWWWW.json").expect("Unable to create the file");
-
-    // Write the JSON string to the file
-    file_refactor.write_all(json_stringqwe.as_bytes()).expect("Unable to write to the file");
-
-    println!("Data has been written to output.json");
-
 
     let start_public_input = [F::<G1>::from(10), F::<G1>::from(10)];
 

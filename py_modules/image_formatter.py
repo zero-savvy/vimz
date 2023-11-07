@@ -6,6 +6,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+VESTA_PRIME = 28948022309329048855892746252171976963363056481941647379679742748393362948097
+
+
 def get_image_path():
     root = tk.Tk()
     root.withdraw()
@@ -72,6 +75,67 @@ def compress(image_in):
                 hexValue = ''
         output_array.append(row)
     return output_array
+
+
+def conv2d(array, kernel, weight=1):
+    # Get the dimensions of the input array and kernel
+    array_height, array_width = len(array), len(array[0])
+    kernel_height, kernel_width = len(kernel), len(kernel[0])
+
+    # Calculate the output dimensions
+    output_height = array_height - kernel_height + 1
+    output_width = array_width - kernel_width + 1
+
+    # Initialize the output (convolved) array
+    convolved_array = [[0 for _ in range(output_width)] for _ in range(output_height)]
+
+    # Perform the convolution using nested loops
+    for i in range(output_height):
+        for j in range(output_width):
+            conv_value = 0
+            for m in range(kernel_height):
+                for n in range(kernel_width):
+                    conv_value += array[i + m][j + n] * kernel[m][n]
+            convolved_array[i][j] = conv_value // weight
+
+    return convolved_array
+
+
+def sharppen_image(image_path):
+    kernel = np.array([
+        [0, -1, 0],
+        [-1,  5, -1],
+        [0, -1, 0]
+    ])
+    with Image.open(image_path) as image:
+        image_np = np.array(image)
+        r_channel, g_channel, b_channel = np.rollaxis(image_np, axis=-1)
+        r_adjusted = conv2d(r_channel, kernel)
+        g_adjusted = conv2d(g_channel, kernel)
+        b_adjusted = conv2d(b_channel, kernel)
+        adjusted_image = np.dstack((r_adjusted, g_adjusted, b_adjusted))
+        plot_images_side_by_side_auto_size(np.array(image), adjusted_image)
+        return compress(adjusted_image)
+
+
+def blur_image(image_path):
+    kernel = np.array([
+        [1, 1, 1],
+        [1, 1, 1],
+        [1, 1, 1]
+    ])
+    with Image.open(image_path) as image:
+        image_np = np.array(image)
+        r_channel, g_channel, b_channel = np.rollaxis(image_np, axis=-1)
+        r_adjusted = conv2d(r_channel, kernel, 9)
+        g_adjusted = conv2d(g_channel, kernel, 9)
+        b_adjusted = conv2d(b_channel, kernel, 9)
+        adjusted_image = np.dstack((r_adjusted, g_adjusted, b_adjusted))
+        plot_images_side_by_side_auto_size(np.array(image), adjusted_image)
+        return compress(adjusted_image)
+
+
+
 
 
 def convert_to_grayscale(image_path):
@@ -153,11 +217,11 @@ if image_path:
         compressed_transformed_image = adjust_contrast(image_path, desired_contrast)
         print("Applied CONTRAST filter successfully.")
     elif cmd == 10:
-        compressed_transformed_image = convert_to_grayscale(image_path)
-        print("Applied graysacle filter successfully.")
+        compressed_transformed_image = sharppen_image(image_path)
+        print("Applied SHARPNESS filter successfully.")
     elif cmd == 11:
-        compressed_transformed_image = convert_to_grayscale(image_path)
-        print("Applied graysacle filter successfully.")
+        compressed_transformed_image = blur_image(image_path)
+        print("Applied BLUR filter successfully.")
     elif cmd == 12:
         compressed_transformed_image = convert_to_grayscale(image_path)
         print("Applied graysacle filter successfully.")

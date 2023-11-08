@@ -30,60 +30,101 @@ template GrayscaleChecker(n) {
     n_check <== n;
 }
 
-template GrayScale(width){
+template Convolve(width, kernel_height, kernel_wdith){
     
-    signal input original[width];
-    signal input transformed[width];
+    signal input row_orig[kernel_height][width];
+    signal input row_tran[kernel_height][width];
     
-    component decompressor[width];
-    component decompressor_grey[width];
-    component greychecker[width];
+    // ASSERT the Kernel matrice to be an sqaure of odd size
+    kernel_wdith === kernel_height;
+    1 === kernel_height % 2;
 
-    for (var j=0; j<width; j++) {
-        decompressor[j] = Decompressor();
-        decompressor[j].in <== original[j];
+    signal target_pixel_location <== (kernel_height \ 2) + 1; 
+    
+    signal input kernel[kernel_height][kernel_wdith];
+    
+    var decompressedWidth = width * 10;
+    signal decompressed_row_orig [kernel_height][decompressedWidth][3];
+    signal decompressed_row_tran [kernel_height][decompressedWidth][3];
 
-        decompressor_grey[j] = DecompressorGrey();
-        decompressor_grey[j].in <== transformed[j];
-        
-        greychecker[j] = GrayscaleChecker(10);
-        greychecker[j].orig <== decompressor[j].out;
-        greychecker[j].gray <== decompressor_grey[j].out;
+    component decompressor_orig[kernel_height][width];
+    component decompressor_tran[kernel_height][width];
+    for (var k = 0; k < kernel_height; k++) {
+        for (var i = 0; i < width; i++) {
+            decompressor_orig[k][i] = Decompressor();
+            decompressor_orig[k][i].in <== row_orig[k][i];
+            decompressor_tran[k][i] = Decompressor();
+            decompressor_tran[k][i].in <== row_tran[k][i];
+            for (var j = 0; j < 10; j++) {
+                decompressed_row_orig[k][i*10+j] <== decompressor_orig[k][i].out[j];
+                decompressed_row_tran[k][i*10+j] <== decompressor_tran[k][i].out[j];
+            }
+        }
     }
+
+    // ----------------------------
+    // Execute Convolution
+    // ----------------------------
+    var target_pixel_location = kernel_height \ 2 + 1;
+    var conv_value;
+
+    for (var c = 0; c < 3; c++) {
+        for (var i = 0; i < decompressedWidth; i++) {
+            conv_value = 0;
+            for (var m = 0; m < kernel_height) {
+                for ( var n = 0; n < kernel_width) {
+                    conv_value += row_orig[i + m][j + n] * kernel[m][n];
+                }
+            }
+            convolved_array[i][j] = conv_value // weight
+
+        }
+    }
+    
+
 
 }
 
-template GrayScaleHash(width){
+template ConvolveHash(width){
+    // public inputs
     signal input step_in[2];
-    // signal input prev_orig_hash;
-    // signal input prev_gray_hash;
+    
+    // private inputs
+    signal input row_orig [rowCountOrig][widthOrig];
+    signal input row_resized [rowCountResized][widthResized];
+
+    //outputs
     signal output step_out[2];
-    // signal output next_orig_hash;
-    // signal output next_gray_hash;
     
-    // Private inputs
-    signal input row_orig [width];
-    signal input row_gray [width];
+    // decoding signals
+    signal prev_orig_hash <== step_in[0];
+    signal prev_resized_hash <== step_in[1];
     
-    component orig_row_hasher = RowHasher(width);
-    component gray_row_hasher = RowHasher(width);
-    component orig_hasher = Hasher(2);
-    component gray_hasher = Hasher(2);
+    // encoding signals
+    signal next_orig_hash;
+    signal next_resized_hash;
+    
+    component row_hasher_orig[rowCountOrig];
+    component hasher_orig [rowCountOrig];
+    for (var i = 0; i < rowCountOrig; i++) {
+        row_hasher_orig[i] = RowHasher(widthOrig);
+        hasher_orig[i] = Hasher(2);
+    }
 
-    orig_row_hasher.img <== row_orig;
-    orig_hasher.values[0] <== step_in[0]; // prev_orig_hash
-    orig_hasher.values[1] <== orig_row_hasher.hash;
-    step_out[0] <== orig_hasher.hash; // next_orig_hash
+    component row_hasher_resized[rowCountResized];
+    component hasher_resized [rowCountResized];
+    for (var i = 0; i < rowCountResized; i++) {
+        row_hasher_resized[i] = RowHasher(widthResized);
+        hasher_resized[i] = Hasher(2);
+    } 
 
-    gray_row_hasher.img <== row_gray;
-    gray_hasher.values[0] <== step_in[1]; // prev_gray_hash
-    gray_hasher.values[1] <== gray_row_hasher.hash;
-    step_out[1] <== gray_hasher.hash; // next_grey_hash
+    for (var i = 0; i < rowCountOrig; i++) {
+        row_hasher_orig[i].img <== row_orig[i];
+        hasher_orig[i].values[0] <== i == 0 ? prev_orig_hash : hasher_orig[i-1].hash;
+        hasher_orig[i].values[1] <== row_hasher_orig[i].hash;
+    }
+    next_orig_hash <== hasher_orig[rowCountOrig-1].hash;
 
-    // grayscale code here ...
-    component checker = GrayScale(width);
-    checker.original <== row_orig;
-    checker.transformed <== row_gray;
 
 }
 

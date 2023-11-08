@@ -61,8 +61,6 @@ template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized){
     signal next_orig_hash;
     signal next_resized_hash;
 
-    
-    
     component row_hasher_orig[rowCountOrig];
     component hasher_orig [rowCountOrig];
     for (var i = 0; i < rowCountOrig; i++) {
@@ -81,8 +79,6 @@ template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized){
     var decompressedwidthResized = widthResized * 10;
     signal decompressed_row_orig [rowCountOrig][decompressedwidthOrig][3];
     signal decompressed_row_resized [rowCountResized][decompressedwidthResized][3];
-
-
 
     for (var i = 0; i < rowCountOrig; i++) {
         row_hasher_orig[i].img <== row_orig[i];

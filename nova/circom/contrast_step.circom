@@ -19,124 +19,128 @@ template ContrastChecker(n) {
 
     signal output n_check;
  
-    component lt[n][12];
+    component lt[n][3][4];
     component selector[n][3];
     component gt_selector[n][3];
 
+    var means[3];
+    means[0] = r_mean;
+    means[1] = g_mean;
+    means[2] = b_mean;
+
     // r_adjusted = ((r_channel - np.mean(r_channel)) * desired_contrast + np.mean(r_channel)).clip(0, 255).astype(np.uint8)
-    for (var i = 0; i < n; i++) {      
-        var r_adjusted = ((orig[i][0]) - r_mean) * cf + 1000 * r_mean;
-        var g_adjusted = ((orig[i][1]) - g_mean) * cf + 1000 * g_mean;
-        var b_adjusted = ((orig[i][2]) - b_mean) * cf + 1000 * b_mean;
+    for (var color = 0; color < 3; color++) {      
+        for (var i = 0; i < n; i++) {      
+            var adjusted = ((1000 * orig[i][color]) - means[color]) * cf + 1000 * means[color];
+            
+            log("mean: ", means[color]);
+            log("ORIG:", orig[i][color]);
+            log("trans:", contrast[i][color]);
+            log("calced:", adjusted);
+            log("--------------------------------");
 
-        log("means: ", r_mean, g_mean, b_mean);
-        log("ORIG:", orig[i][0], orig[i][1], orig[i][2]);
-        log("trans:", contrast[i][0], contrast[i][1], contrast[i][2]);
-        log("calced:", r_adjusted, g_adjusted, b_adjusted);
-        log("--------------------------------");
-
-        
-        //=========================== red =======================
-        lt[i][0] = LessEqThan(32);
-        lt[i][1] = LessEqThan(32);
-
-        lt[i][0].in[1] <== 0 - r_adjusted;
-        lt[i][0].in[0] <==  r_adjusted;
-
-        lt[i][1].in[1] <== 255000;
-        lt[i][1].in[0] <==  r_adjusted;
-        
-        
-        gt_selector[i][0] = Mux1();
-        gt_selector[i][0].c[1] <== 255000;
-        gt_selector[i][0].c[0] <== r_adjusted;
-        gt_selector[i][0].s <== lt[i][1].out;
+            
+            //=========================== red =======================
+            
+            // find sign of r_adjusted
+            lt[i][color][0] = LessEqThan(32);
+            lt[i][color][1] = LessEqThan(32);
+            lt[i][color][0].in[1] <== 0 - adjusted;
+            lt[i][color][0].in[0] <==  adjusted;
+            lt[i][color][1].in[0] <== 255000000;
+            lt[i][color][1].in[1] <==  adjusted;
+            
+            gt_selector[i][color] = Mux1();
+            gt_selector[i][color].c[1] <== 255000000;
+            gt_selector[i][color].c[0] <== adjusted;
+            gt_selector[i][color].s <== lt[i][color][1].out;
 
 
-        selector[i][0] = Mux1();
-        selector[i][0].c[0] <== gt_selector[i][0].out;
-        selector[i][0].c[1] <== 0;
-        selector[i][0].s <== lt[i][0].out;
+            selector[i][color] = Mux1();
+            selector[i][color].c[0] <== gt_selector[i][color].out;
+            selector[i][color].c[1] <== 0;
+            selector[i][color].s <== lt[i][color][0].out;
 
-        var final_r_value = selector[i][0].out;
-        log("final_r_value:" , final_r_value);
-        lt[i][6] = LessEqThan(32);
-        lt[i][7] = LessEqThan(32);
+            var final_value = selector[i][color].out;
+            log("final_value:" , final_value);
+            lt[i][color][2] = LessEqThan(32);
+            lt[i][color][3] = LessEqThan(32);
 
-        lt[i][6].in[1] <== 1000;
-        lt[i][6].in[0] <==  final_r_value - (1000 * contrast[i][0]);
-        lt[i][6].out === 1;
+            lt[i][color][2].in[1] <== 1000000;
+            lt[i][color][2].in[0] <== final_value - (1000000 * contrast[i][color]);
+            lt[i][color][2].out === 1;
 
-        lt[i][7].in[1] <== 1000;
-        lt[i][7].in[0] <== (1000 * contrast[i][0]) - final_r_value;
-        lt[i][7].out === 1; 
+            lt[i][color][3].in[1] <== 1000000;
+            lt[i][color][3].in[0] <== (1000000 * contrast[i][color]) - final_value;
+            lt[i][color][3].out === 1; 
 
         //=========================== green ======================
-        lt[i][2] = LessEqThan(32);
-        lt[i][3] = LessEqThan(32);
+        // // find sign of g_adjusted
+        // lt[i][2] = LessEqThan(32);
+        // lt[i][3] = LessEqThan(32);
 
-        lt[i][2].in[1] <== 0 - g_adjusted;
-        lt[i][2].in[0] <==  g_adjusted;
+        // lt[i][2].in[1] <== 0 - g_adjusted;
+        // lt[i][2].in[0] <==  g_adjusted;
 
-        lt[i][3].in[1] <== 255000;
-        lt[i][3].in[0] <==  g_adjusted;
+        // lt[i][3].in[1] <== 255000;
+        // lt[i][3].in[0] <==  g_adjusted;
         
-        gt_selector[i][1] = Mux1();
-        gt_selector[i][1].c[1] <== 255000;
-        gt_selector[i][1].c[0] <== g_adjusted;
-        gt_selector[i][1].s <== lt[i][3].out;
+        // gt_selector[i][1] = Mux1();
+        // gt_selector[i][1].c[1] <== 255000;
+        // gt_selector[i][1].c[0] <== g_adjusted;
+        // gt_selector[i][1].s <== lt[i][3].out;
 
 
-        selector[i][1] = Mux1();
-        selector[i][1].c[0] <== gt_selector[i][1].out;
-        selector[i][1].c[1] <== 0;
-        selector[i][1].s <== lt[i][2].out;
+        // selector[i][1] = Mux1();
+        // selector[i][1].c[0] <== gt_selector[i][1].out;
+        // selector[i][1].c[1] <== 0;
+        // selector[i][1].s <== lt[i][2].out;
 
-        var final_g_value = selector[i][1].out;
-        lt[i][8] = LessEqThan(32);
-        lt[i][9] = LessEqThan(32);
+        // var final_g_value = selector[i][1].out;
+        // lt[i][8] = LessEqThan(32);
+        // lt[i][9] = LessEqThan(32);
 
-        lt[i][8].in[1] <== 1000;
-        lt[i][8].in[0] <==  final_g_value - (1000 * contrast[i][1]);
-        lt[i][8].out === 1;
+        // lt[i][8].in[1] <== 1000;
+        // lt[i][8].in[0] <==  final_g_value - (1000 * contrast[i][1]);
+        // lt[i][8].out === 1;
 
-        lt[i][9].in[1] <== 1000;
-        lt[i][9].in[0] <== (1000 * contrast[i][1]) - final_g_value;
-        lt[i][9].out === 1; 
-        //=========================== blue ======================
+        // lt[i][9].in[1] <== 1000;
+        // lt[i][9].in[0] <== (1000 * contrast[i][1]) - final_g_value;
+        // lt[i][9].out === 1; 
+        // //=========================== blue ======================
 
-        lt[i][4] = LessEqThan(32);
-        lt[i][5] = LessEqThan(32);
+        // lt[i][4] = LessEqThan(32);
+        // lt[i][5] = LessEqThan(32);
 
-        lt[i][4].in[1] <== 0 - b_adjusted;
-        lt[i][4].in[0] <==  b_adjusted;
+        // lt[i][4].in[1] <== 0 - b_adjusted;
+        // lt[i][4].in[0] <==  b_adjusted;
 
-        lt[i][5].in[1] <== 255000;
-        lt[i][5].in[0] <==  b_adjusted;
+        // lt[i][5].in[1] <== 255000;
+        // lt[i][5].in[0] <==  b_adjusted;
         
-        gt_selector[i][2] = Mux1();
-        gt_selector[i][2].c[1] <== 255000;
-        gt_selector[i][2].c[0] <== b_adjusted;
-        gt_selector[i][2].s <== lt[i][5].out;
+        // gt_selector[i][2] = Mux1();
+        // gt_selector[i][2].c[1] <== 255000;
+        // gt_selector[i][2].c[0] <== b_adjusted;
+        // gt_selector[i][2].s <== lt[i][5].out;
 
 
-        selector[i][2] = Mux1();
-        selector[i][2].c[0] <== gt_selector[i][2].out;
-        selector[i][2].c[1] <== 0;
-        selector[i][2].s <== lt[i][4].out;
+        // selector[i][2] = Mux1();
+        // selector[i][2].c[0] <== gt_selector[i][2].out;
+        // selector[i][2].c[1] <== 0;
+        // selector[i][2].s <== lt[i][4].out;
 
-        var final_b_value = selector[i][2].out;
-        lt[i][10] = LessEqThan(32);
-        lt[i][11] = LessEqThan(32);
+        // var final_b_value = selector[i][2].out;
+        // lt[i][10] = LessEqThan(32);
+        // lt[i][11] = LessEqThan(32);
 
-        lt[i][10].in[1] <== 1000;
-        lt[i][10].in[0] <==  final_b_value - (1000 * contrast[i][2]);
-        lt[i][10].out === 1;
+        // lt[i][10].in[1] <== 1000;
+        // lt[i][10].in[0] <==  final_b_value - (1000 * contrast[i][2]);
+        // lt[i][10].out === 1;
 
-        lt[i][11].in[1] <== 1000;
-        lt[i][11].in[0] <== (1000 * contrast[i][2]) - final_b_value;
-        lt[i][11].out === 1; 
-
+        // lt[i][11].in[1] <== 1000;
+        // lt[i][11].in[0] <== (1000 * contrast[i][2]) - final_b_value;
+        // lt[i][11].out === 1; 
+        }
     }
 
     n_check <== n;

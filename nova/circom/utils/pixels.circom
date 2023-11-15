@@ -26,6 +26,34 @@ template Decompressor(){
 	}
 }
 
+template DecompressorKernel(kernel_size){
+    signal input in;
+	signal output out[kernel_size][kernel_size][2];
+
+	component toBits = Num2Bits(kernel_size*9); // 8-bit value, 1-bit sign
+	// component toNum[kernel_size][kernel_size*2];
+
+	toBits.in <== in;
+
+	for (var i=0; i<kernel_size; i++) {
+		for (var j=0; j<kernel_size; j++) {
+			toNum[i][j*2] = Bits2Num(8);
+			// toNum[i][j*2+1] = Bits2Num(1);
+			toNum[i][j*2].in[0] <== toBits.out[i*kernel_size*9+j*9];
+			toNum[i][j*2].in[1] <== toBits.out[i*kernel_size*9+j*9+1];
+			toNum[i][j*2].in[2] <== toBits.out[i*kernel_size*9+j*9+2];
+			toNum[i][j*2].in[3] <== toBits.out[i*kernel_size*9+j*9+3];
+			toNum[i][j*2].in[4] <== toBits.out[i*kernel_size*9+j*9+4];
+			toNum[i][j*2].in[5] <== toBits.out[i*kernel_size*9+j*9+5];
+			toNum[i][j*2].in[6] <== toBits.out[i*kernel_size*9+j*9+6];
+			toNum[i][j*2].in[7] <== toBits.out[i*kernel_size*9+j*9+7];
+			
+			out[i][j][1] <== toNum[i][j].out;  //value
+			out[i][j][0] <== toBits.out[i*kernel_size*9+j*9+8];  // sign
+		}
+	}
+}
+
 
 template DecompressorGrey(){
     signal input in;

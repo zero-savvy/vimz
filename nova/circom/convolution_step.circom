@@ -30,22 +30,22 @@ template GrayscaleChecker(n) {
     n_check <== n;
 }
 
-template Convolve(width, kernel_height, kernel_wdith){
+template Convolve(width, kernel_size){
     
-    signal input row_orig[kernel_height][width];
-    signal input row_tran[kernel_height][width];
+    signal input row_orig[kernel_size][width];
+    signal input row_conv[width];
+    signal input kernel[kernel_size][kernel_size];
     
     // ASSERT the Kernel matrice to be an sqaure of odd size
-    kernel_wdith === kernel_height;
-    1 === kernel_height % 2;
+    // kernel_wdith === kernel_height;
+    1 === kernel_size % 2;
 
-    signal target_pixel_location <== (kernel_height \ 2) + 1; 
+    signal target_pixel_location <== (kernel_size \ 2) + 1; 
     
-    signal input kernel[kernel_height][kernel_wdith];
     
     var decompressedWidth = width * 10;
-    signal decompressed_row_orig [kernel_height][decompressedWidth][3];
-    signal decompressed_row_tran [kernel_height][decompressedWidth][3];
+    signal decompressed_row_orig [kernel_size][decompressedWidth][3];
+    signal decompressed_row_tran [kernel_size][decompressedWidth][3];
 
     component decompressor_orig[kernel_height][width];
     component decompressor_tran[kernel_height][width];
@@ -65,14 +65,14 @@ template Convolve(width, kernel_height, kernel_wdith){
     // ----------------------------
     // Execute Convolution
     // ----------------------------
-    var target_pixel_location = kernel_height \ 2 + 1;
+    var target_pixel_location = kernel_size \ 2 + 1;
     var conv_value;
 
     for (var c = 0; c < 3; c++) {
         for (var i = 0; i < decompressedWidth; i++) {
             conv_value = 0;
-            for (var m = 0; m < kernel_height) {
-                for ( var n = 0; n < kernel_width) {
+            for (var m = 0; m < kernel_size) {
+                for ( var n = 0; n < kernel_size) {
                     conv_value += row_orig[i + m][j + n] * kernel[m][n];
                 }
             }
@@ -85,50 +85,73 @@ template Convolve(width, kernel_height, kernel_wdith){
 
 }
 
-template ConvolveHash(width){
-    // public inputs
-    signal input step_in[2];
+template ConvolveHash(width, kernel_size){
+    // public inputs and outputs
+    signal input step_in[kernel_size+3];
+    // signal input prev_orig_hash_0;
+    // signal input prev_orig_hash_1;
+    // signal input prev_orig_hash_2;
+    // signal input prev_orig_hash_3;
+    // signal input prev_orig_hash;
+    // signal input prev_conv_hash;
+    // signal input compressed_kernel;
+    // signal input row_index;
+    
+    signal output step_out[kernel_size+3];
+    // signal output next_orig_hash_1;
+    // signal output next_orig_hash_2;
+    // signal output next_orig_hash_3;
+    // signal output next_orig_hash_4;
+    // signal output next_orig_hash;
+    // signal output next_conv_hash;
+    // signal output compressed_kernel;
+    // signal output row_index;
     
     // private inputs
-    signal input row_orig [rowCountOrig][widthOrig];
-    signal input row_resized [rowCountResized][widthResized];
+    signal input row_orig [kernel_size][width];
+    signal input row_conv [width];
 
-    //outputs
-    signal output step_out[2];
-    
-    // decoding signals
-    signal prev_orig_hash <== step_in[0];
-    signal prev_resized_hash <== step_in[1];
-    
-    // encoding signals
-    signal next_orig_hash;
-    signal next_resized_hash;
-    
-    component row_hasher_orig[rowCountOrig];
-    component hasher_orig [rowCountOrig];
-    for (var i = 0; i < rowCountOrig; i++) {
-        row_hasher_orig[i] = RowHasher(widthOrig);
-        hasher_orig[i] = Hasher(2);
+    var row_hashes[kernel_size];
+
+    component orig_row_hasher[kernel_size];
+    component orig_hasher;
+
+    for (var i = 0; i < kernel_size; i++) {
+        orig_row_hasher[i] = RowHasher(width);
+        orig_row_hasher[i].img <== row_orig[i];
+        row_hashes[i] = orig_row_hasher[i].hash;
     }
 
-    component row_hasher_resized[rowCountResized];
-    component hasher_resized [rowCountResized];
-    for (var i = 0; i < rowCountResized; i++) {
-        row_hasher_resized[i] = RowHasher(widthResized);
-        hasher_resized[i] = Hasher(2);
-    } 
+    orig_hasher = Hasher(2);
+    orig_hasher.values[0] <== prev_orig_hash;
+    orig_hasher.values[1] <== row_hashes[(kernel_size \ 2) + 1]; // hash with hash of middle row  
+    next_orig_hash <== orig_hasher.hash;
 
-    for (var i = 0; i < rowCountOrig; i++) {
-        row_hasher_orig[i].img <== row_orig[i];
-        hasher_orig[i].values[0] <== i == 0 ? prev_orig_hash : hasher_orig[i-1].hash;
-        hasher_orig[i].values[1] <== row_hasher_orig[i].hash;
+    component conv_row_hasher;
+    component conv_hasher;
+
+    conv_row_hasher = RowHasher(width);
+    conv_row_hasher.img <== row_conv;
+
+    conv_hasher = Hasher(2);
+    conv_hasher.values[0] <== prev_conv_hash;
+    conv_hasher.values[1] <== conv_row_hasher.hash; 
+    next_conv_hash <== conv_hasher.hash;
+
+    for (var i = 0; i < kernel_size-1; i++) {
+        row_hashes[i] === step_in[i];
+        step_out[i] <== row_hashes[i+1]; 
     }
-    next_orig_hash <== hasher_orig[rowCountOrig-1].hash;
 
+    component decompressor_kernel = 
 
+    component conv_checker = Convolve(width, kernel_size);
+    conv_checker.row_orig <== row_orig;
+    conv_checker.row_conv <== row_conv;
+    conv_checker.kernel <== kernel;
 }
 
-component main { public [step_in] } = GrayScaleHash(128);
+component main { public [step_in] } = ConvolveHash(128);
 
 
 

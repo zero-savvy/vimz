@@ -5,89 +5,88 @@ include "utils/pixels.circom";
 include "circomlib/circuits/bitify.circom";
 
 
-template GrayscaleChecker(n) {
-    signal input orig[n][3];
-    signal input gray[n];
-
-    signal output n_check;
- 
-    component lt[n][2];
-
-    for (var i = 0; i < n; i++) {      
-        var inter = 299 * orig[i][0] + 587 * orig[i][1] + 114 * orig[i][2];
-
-        lt[i][0] = LessEqThan(16);
-        lt[i][1] = LessEqThan(16);
-
-        lt[i][0].in[1] <== 1000;
-        lt[i][0].in[0] <== inter - 1000 * gray[i];
-        lt[i][0].out === 1;
-
-        lt[i][1].in[1] <== 1000;
-        lt[i][1].in[0] <== 1000 * gray[i] - inter;
-        lt[i][1].out === 1; 
-    }
-    n_check <== n;
-}
-
 template Convolve(width, kernel_size){
     
     signal input row_orig[kernel_size][width];
     signal input row_conv[width];
-    signal input kernel[kernel_size][kernel_size];
+    // signal input kernel[kernel_size][kernel_size];
+
+    var kernel[kernel_size][kernel_size];
+    kernel [0][0] = 0;
+    kernel [0][1] = 0;
+    kernel [0][2] = 0;
+    kernel [1][0] = 0;
+    kernel [1][1] = 1;
+    kernel [1][2] = 0;
+    kernel [2][0] = 0;
+    kernel [2][1] = 0;
+    kernel [2][2] = 0;
     
     // ASSERT the Kernel matrice to be an sqaure of odd size
     // kernel_wdith === kernel_height;
     1 === kernel_size % 2;
 
-    signal target_pixel_location <== (kernel_size \ 2) + 1; 
+    // signal target_pixel_location <== (kernel_size \ 2) + 1; 
     
     
     var decompressedWidth = width * 10;
-    signal decompressed_row_orig [kernel_size][decompressedWidth][3];
-    signal decompressed_row_tran [kernel_size][decompressedWidth][3];
+    var extendedWidth = decompressedWidth + kernel_size - 1;
 
-    component decompressor_orig[kernel_height][width];
-    component decompressor_tran[kernel_height][width];
-    for (var k = 0; k < kernel_height; k++) {
+    signal decompressed_row_orig [kernel_size][extendedWidth][3];
+    component decompressor_orig[kernel_size][width];
+    for (var k = 0; k < kernel_size; k++) {
+        for (var i = 0; i < kernel_size \ 2; i++) {
+            decompressed_row_orig[k][i][0] <== 0;  // R
+            decompressed_row_orig[k][i][1] <== 0;  // G
+            decompressed_row_orig[k][i][2] <== 0;  // B
+
+            decompressed_row_orig[k][extendedWidth - i - 1][0] <== 0;  // R
+            decompressed_row_orig[k][extendedWidth - i - 1][1] <== 0;  // G
+            decompressed_row_orig[k][extendedWidth - i - 1][2] <== 0;  // B
+        }
         for (var i = 0; i < width; i++) {
             decompressor_orig[k][i] = Decompressor();
             decompressor_orig[k][i].in <== row_orig[k][i];
-            decompressor_tran[k][i] = Decompressor();
-            decompressor_tran[k][i].in <== row_tran[k][i];
             for (var j = 0; j < 10; j++) {
-                decompressed_row_orig[k][i*10+j] <== decompressor_orig[k][i].out[j];
-                decompressed_row_tran[k][i*10+j] <== decompressor_tran[k][i].out[j];
+                decompressed_row_orig[k][(kernel_size\2)+i*10+j] <== decompressor_orig[k][i].out[j];
             }
+        }
+    }
+
+    signal decompressed_row_conv [decompressedWidth][3];
+    component decompressor_conv[width];
+    for (var i = 0; i < width; i++) {
+        decompressor_conv[i] = Decompressor();
+        decompressor_conv[i].in <== row_conv[i];
+        for (var j = 0; j < 10; j++) {
+            decompressed_row_conv[i*10+j] <== decompressor_conv[i].out[j];
         }
     }
 
     // ----------------------------
     // Execute Convolution
     // ----------------------------
-    var target_pixel_location = kernel_size \ 2 + 1;
+    // var target_pixel_location = kernel_size \ 2 + 1;
     var conv_value;
+    var weight = 1;  // TODO: weights other than 1
 
-    for (var c = 0; c < 3; c++) {
+    for (var color = 0; color < 3; color++) {
         for (var i = 0; i < decompressedWidth; i++) {
             conv_value = 0;
-            for (var m = 0; m < kernel_size) {
-                for ( var n = 0; n < kernel_size) {
-                    conv_value += row_orig[i + m][j + n] * kernel[m][n];
+            for (var m = 0; m < kernel_size; m++) {
+                for (var n = 0; n < kernel_size; n++) {
+                    conv_value += decompressed_row_orig[m][i + n][color] * kernel[m][n];
                 }
             }
-            convolved_array[i][j] = conv_value // weight
-
+            log(decompressed_row_conv[i][color], conv_value);
+            decompressed_row_conv[i][color] * weight === conv_value;
         }
     }
-    
-
-
 }
 
 template ConvolveHash(width, kernel_size){
     // public inputs and outputs
-    signal input step_in[kernel_size+3];
+    signal input step_in[kernel_size+2];
     // signal input prev_orig_hash_0;
     // signal input prev_orig_hash_1;
     // signal input prev_orig_hash_2;
@@ -95,9 +94,8 @@ template ConvolveHash(width, kernel_size){
     // signal input prev_orig_hash;
     // signal input prev_conv_hash;
     // signal input compressed_kernel;
-    // signal input row_index;
     
-    signal output step_out[kernel_size+3];
+    signal output step_out[kernel_size+2];
     // signal output next_orig_hash_1;
     // signal output next_orig_hash_2;
     // signal output next_orig_hash_3;
@@ -105,7 +103,6 @@ template ConvolveHash(width, kernel_size){
     // signal output next_orig_hash;
     // signal output next_conv_hash;
     // signal output compressed_kernel;
-    // signal output row_index;
     
     // private inputs
     signal input row_orig [kernel_size][width];
@@ -123,9 +120,9 @@ template ConvolveHash(width, kernel_size){
     }
 
     orig_hasher = Hasher(2);
-    orig_hasher.values[0] <== prev_orig_hash;
+    orig_hasher.values[0] <== step_in[kernel_size-1];
     orig_hasher.values[1] <== row_hashes[(kernel_size \ 2) + 1]; // hash with hash of middle row  
-    next_orig_hash <== orig_hasher.hash;
+    step_out[kernel_size-1] <== orig_hasher.hash;
 
     component conv_row_hasher;
     component conv_hasher;
@@ -134,24 +131,25 @@ template ConvolveHash(width, kernel_size){
     conv_row_hasher.img <== row_conv;
 
     conv_hasher = Hasher(2);
-    conv_hasher.values[0] <== prev_conv_hash;
+    conv_hasher.values[0] <== step_in[kernel_size];
     conv_hasher.values[1] <== conv_row_hasher.hash; 
-    next_conv_hash <== conv_hasher.hash;
+    step_out[kernel_size] <== conv_hasher.hash;
 
     for (var i = 0; i < kernel_size-1; i++) {
-        row_hashes[i] === step_in[i];
+        // row_hashes[i] === step_in[i];
         step_out[i] <== row_hashes[i+1]; 
     }
 
-    component decompressor_kernel = 
+    component decompressor_kernel = DecompressorKernel(kernel_size);
+    decompressor_kernel.in <== step_in[kernel_size+1];
 
     component conv_checker = Convolve(width, kernel_size);
     conv_checker.row_orig <== row_orig;
     conv_checker.row_conv <== row_conv;
-    conv_checker.kernel <== kernel;
+    // conv_checker.kernel <== decompressor_kernel.out;
 }
 
-component main { public [step_in] } = ConvolveHash(128);
+component main { public [step_in] } = ConvolveHash(128, 3);
 
 
 

@@ -118,7 +118,7 @@ template UnwrapAndExtend(width, kernel_size) {
     }
 }
 
-template Blur(width, kernel_size) {
+template BlurCheck(width, kernel_size) {
 
     signal input row_orig[kernel_size][width];
     signal input row_conv[width];
@@ -136,7 +136,7 @@ template Blur(width, kernel_size) {
     blur_checker.decompressed_row_conv <== unwrapper.out_conv;
 }
 
-template Sharpen(width, kernel_size) {
+template SharpenCheck(width, kernel_size) {
 
     signal input row_orig[kernel_size][width];
     signal input row_conv[width];
@@ -154,7 +154,7 @@ template Sharpen(width, kernel_size) {
     sharpen_checker.decompressed_row_conv <== unwrapper.out_conv;
 }
 
-template ConvolveHash(width, kernel_size){
+template IntegrityCheck(width, kernel_size) {
     // public inputs and outputs
     signal input step_in[kernel_size+2];
     // signal input prev_orig_hash_0;
@@ -188,7 +188,7 @@ template ConvolveHash(width, kernel_size){
         orig_row_hasher[i].img <== row_orig[i];
         row_hashes[i] = orig_row_hasher[i].hash;
     }
-
+    
     orig_hasher = Hasher(2);
     orig_hasher.values[0] <== step_in[kernel_size-1];
     orig_hasher.values[1] <== row_hashes[(kernel_size \ 2) + 1]; // hash with hash of middle row  
@@ -210,16 +210,14 @@ template ConvolveHash(width, kernel_size){
         step_out[i] <== row_hashes[i+1]; 
     }
 
-    component decompressor_kernel = DecompressorKernel(kernel_size);
-    decompressor_kernel.in <== step_in[kernel_size+1];
+    // component decompressor_kernel = DecompressorKernel(kernel_size);
+    // decompressor_kernel.in <== step_in[kernel_size+1];
 
-    component conv_checker = Sharpen(width, kernel_size);
-    conv_checker.row_orig <== row_orig;
-    conv_checker.row_conv <== row_conv;
+    // component conv_checker = SharpenCheck(width, kernel_size);
+    // conv_checker.row_orig <== row_orig;
+    // conv_checker.row_conv <== row_conv;
     // conv_checker.kernel <== decompressor_kernel.out;
+
 }
 
-component main { public [step_in] } = ConvolveHash(128, 3);
-
-
-
+// component main { public [step_in] } = IntegrityCheck(128, 3);

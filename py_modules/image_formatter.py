@@ -175,6 +175,16 @@ def adjust_brightness(np_image, brightness_factor):
         plot_images_side_by_side_auto_size(image_np, adjusted_image)
     
         return compress(adjusted_image)
+    
+
+def crop_image(image_path, x: int, y:int, new_width: int, new_height:int):
+    with Image.open(image_path) as image:
+        image_np = np.array(image)
+        adjusted_image = image_np[y:y+new_height, x:x+new_width]
+        # adjusted_image = [[image_np[i][j] for j in range(x, x+new_width)] for i in range(y, y+new_height)]
+        plot_images_side_by_side_auto_size(image_np, adjusted_image)
+    
+        return compress(adjusted_image)
 
 
 # Get the image path using Tkinter file dialog
@@ -191,7 +201,18 @@ if image_path:
                 "6) censor, 7) change color space, 8) brightness, 9) contrast, 10) sharpen, 11) blur, "
                 "12) translate: ") or "1")
     if cmd == 1:
-        compressed_transformed_image = convert_to_grayscale(image_path)
+        x = int(input("Enter x coordination:"))
+        y = int(input("Enter y coordination:"))
+        crop_size = int(input("Enter crop_size:"))
+        if crop_size == 1:
+            w = 640
+            h = 480
+        elif crop_size == 2:
+            w = 1280
+            h = 720
+        else:
+            print("The entered command was wrong. It should an Integer from 1 to 2.")
+        compressed_transformed_image = crop_image(image_path, x, y, w, h)
         print("Applied CROP filter successfully.")
     elif cmd == 2:
         compressed_transformed_image = convert_to_grayscale(image_path)

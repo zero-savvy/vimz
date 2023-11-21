@@ -130,13 +130,13 @@ template CropHash(widthOrig, widthCrop, heightCrop){
 
     next_row_index <== row_index + 1;
 
-    signal step_out[0] <== next_orig_hash;
-    signal step_out[1] <== next_crop_hash;
-    signal step_out[2] <== next_row_index;
-    signal step_out[3] <== same_crop_start_x;
-    signal step_out[4] <== same_crop_start_y;
+    step_out[0] <== next_orig_hash;
+    step_out[1] <== next_crop_hash;
+    step_out[2] <== next_row_index;
+    step_out[3] <== same_crop_start_x;
+    step_out[4] <== same_crop_start_y;
 
     
 }
 
-component main { public [step_in] } = CropHash(128, 10, 20);
+component main { public [step_in] } = CropHash(128, 64, 480);

@@ -33,11 +33,11 @@ template ContrastChecker(n) {
         for (var i = 0; i < n; i++) {      
             var adjusted = ((1000 * orig[i][color]) - means[color]) * cf + 1000 * means[color];
             
-            log("mean: ", means[color]);
-            log("ORIG:", orig[i][color]);
-            log("trans:", contrast[i][color]);
-            log("calced:", adjusted);
-            log("--------------------------------");
+            // log("mean: ", means[color]);
+            // log("ORIG:", orig[i][color]);
+            // log("trans:", contrast[i][color]);
+            // log("calced:", adjusted);
+            // log("--------------------------------");
 
             
             //=========================== red =======================
@@ -62,7 +62,7 @@ template ContrastChecker(n) {
             selector[i][color].s <== lt[i][color][0].out;
 
             var final_value = selector[i][color].out;
-            log("final_value:" , final_value);
+            // log("final_value:" , final_value);
             lt[i][color][2] = LessEqThan(32);
             lt[i][color][3] = LessEqThan(32);
 
@@ -196,7 +196,7 @@ template ContrastHash(width){
     
     // Private inputs
     signal input row_orig [width];
-    signal input row_contrast [width];
+    signal input row_tran [width];
     
     component orig_row_hasher = RowHasher(width);
     component contrast_row_hasher = RowHasher(width);
@@ -208,15 +208,20 @@ template ContrastHash(width){
     orig_hasher.values[1] <== orig_row_hasher.hash;
     step_out[0] <== orig_hasher.hash; // next_orig_hash
 
-    contrast_row_hasher.img <== row_contrast;
+    contrast_row_hasher.img <== row_tran;
     contrast_hasher.values[0] <== step_in[1]; // prev_contrast_hash
     contrast_hasher.values[1] <== contrast_row_hasher.hash;
     step_out[1] <== contrast_hasher.hash; // next_contrast_hash
+    
     step_out[2] <== step_in[2];
+    step_out[3] <== step_in[3];
+    step_out[4] <== step_in[4];
+    step_out[5] <== step_in[5];
+    
     // contrast code here ...
     component checker = Contrast(width);
     checker.original <== row_orig;
-    checker.transformed <== row_contrast;
+    checker.transformed <== row_tran;
     checker.cf <== step_in[2];
     checker.r_mean <== step_in[3];
     checker.g_mean <== step_in[4];

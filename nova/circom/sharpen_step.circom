@@ -25,17 +25,17 @@ template Sharpen(width, kernel_size){
     
     // private inputs
     signal input row_orig [kernel_size][width];
-    signal input row_conv [width];
+    signal input row_tran [width];
 
     component integrity_checker = IntegrityCheck(width, kernel_size);
     integrity_checker.step_in <== step_in;
     integrity_checker.row_orig <== row_orig;
-    integrity_checker.row_conv <== row_conv;
+    integrity_checker.row_conv <== row_tran;
     step_out <== integrity_checker.step_out;
 
     component conv_checker = SharpenCheck(width, kernel_size);
     conv_checker.row_orig <== row_orig;
-    conv_checker.row_conv <== row_conv;
+    conv_checker.row_conv <== row_tran;
     // conv_checker.kernel <== decompressor_kernel.out;
 }
 

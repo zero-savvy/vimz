@@ -63,7 +63,7 @@ template GrayScaleHash(width){
     
     // Private inputs
     signal input row_orig [width];
-    signal input row_gray [width];
+    signal input row_tran [width];
     
     component orig_row_hasher = RowHasher(width);
     component gray_row_hasher = RowHasher(width);
@@ -75,7 +75,7 @@ template GrayScaleHash(width){
     orig_hasher.values[1] <== orig_row_hasher.hash;
     step_out[0] <== orig_hasher.hash; // next_orig_hash
 
-    gray_row_hasher.img <== row_gray;
+    gray_row_hasher.img <== row_tran;
     gray_hasher.values[0] <== step_in[1]; // prev_gray_hash
     gray_hasher.values[1] <== gray_row_hasher.hash;
     step_out[1] <== gray_hasher.hash; // next_grey_hash
@@ -83,7 +83,7 @@ template GrayScaleHash(width){
     // grayscale code here ...
     component checker = GrayScale(width);
     checker.original <== row_orig;
-    checker.transformed <== row_gray;
+    checker.transformed <== row_tran;
 
 }
 

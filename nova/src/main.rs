@@ -12,20 +12,26 @@ use nova_snark::{
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 
-#[derive(Serialize, Deserialize)]
-struct zKronoData {
-    field1: String,
-    field2: i32,
-}
-
 #[derive(Deserialize)]
-struct zKronoInput {
+struct ZKronoInput {
     original: Vec<Vec<String>>,
     transformed: Vec<Vec<String>>,
 }
 
+#[derive(Deserialize)]
+struct ZKronoInputCrop {
+    original: Vec<Vec<String>>,
+}
 
-fn fold_fold_fold(circuit_filepath: String,
+#[derive(Deserialize)]
+struct ZKronoInputResize {
+    original: Vec<Vec<Vec<String>>>,
+    transformed: Vec<Vec<Vec<String>>>,
+}
+
+
+fn fold_fold_fold(selected_function: String,
+            circuit_filepath: String,
             witness_gen_filepath: String,
             output_file_path: String,
             input_file_path: String) {
@@ -48,22 +54,56 @@ fn fold_fold_fold(circuit_filepath: String,
     let mut input_file_json_string = String::new();
     input_file.read_to_string(&mut input_file_json_string).expect("Unable to read from the file");
     
-    let input_data: zKronoInput = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+    let mut private_inputs = Vec::new();
+    let mut start_public_input: Vec<F::<G1>> = Vec::new();
+
+    if selected_function == "crop" {
+        let input_data: ZKronoInputCrop = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+        for i in 0..iteration_count {
+            let mut private_input = HashMap::new();
+            // private_input.insert("adder".to_string(), json!(i+2));
+            private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
+            private_inputs.push(private_input);
+        }
+    } else if selected_function == "resize" {
+        let input_data: ZKronoInputResize = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+        for i in 0..iteration_count {
+            let mut private_input = HashMap::new();
+            // private_input.insert("adder".to_string(), json!(i+2));
+            private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
+            private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
+            private_inputs.push(private_input);
+        }
+    } else {
+        start_public_input.push(F::<G1>::from(0));
+        start_public_input.push(F::<G1>::from(0));
+        if selected_function == "contrast" {
+            print!("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
+            print!("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
+            print!("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
+            print!("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
+            start_public_input.push(F::<G1>::from(1400));  // brightness factor
+            start_public_input.push(F::<G1>::from(122479));  // r_mean
+            start_public_input.push(F::<G1>::from(91636));  // b_mean
+            start_public_input.push(F::<G1>::from(91982));  // g_mean
+        }
+        let input_data: ZKronoInput = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+        for i in 0..iteration_count {
+            let mut private_input = HashMap::new();
+            // private_input.insert("adder".to_string(), json!(i+2));
+            private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
+            private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
+            private_inputs.push(private_input);
+        }
+    }
+    
     // let reader = BufReader::new(file);
 
     // Deserialize the JSON data into the defined structure
     // let data: Data = serde_json::from_reader(reader).expect("Failed to parse JSON");
 
-    let mut private_inputs = Vec::new();
-    for i in 0..iteration_count {
-        let mut private_input = HashMap::new();
-        // private_input.insert("adder".to_string(), json!(i+2));
-        private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
-        private_input.insert("row_gray".to_string(), json!(input_data.transformed[i]));
-        private_inputs.push(private_input);
-    }
+    
 
-    let start_public_input = [F::<G1>::from(10), F::<G1>::from(10)];
 
     let pp: PublicParams<G1, G2, _, _> = create_public_params(r1cs.clone());
 
@@ -167,7 +207,7 @@ fn main() {
     let matches = App::new("zKrono")
         .version("1.0")
         .author("Zero-Savvy")
-        .about("Prove the truthfulness of your media! \n The naming rationale is: ZK + Chronicle ==> Pronounciation: ZIKRONIKEL :D")
+        .about("Prove the truthfulness of your media! \n The naming rationale is: ZK + Chronicles ==> Pronounciation: ZI-KRONO :D")
         .arg(
             Arg::with_name("input")
             .required(true)
@@ -212,7 +252,7 @@ fn main() {
             .value_name("FUNCTION")
             .help("The transformation function.")
             .takes_value(true)
-            .possible_values(&["crop", "greyscale", "resize", "color_transform"])
+            .possible_values(&["crop", "greyscale", "resize", "color_transform", "sharpen", "contrast", "blur"])
         )
         .get_matches();
 
@@ -226,7 +266,7 @@ fn main() {
     println!(" ___| |/ /_ __ ___  _ __   ___    ");
     println!("|_  / ' /| '__/ _ \\| '_ \\ / _ \\ ");
     println!(" / /| . \\| | | (_) | | | | (_) |  ");
-    println!("/___|_|\\_\\_|  \\___/|_| |_|\\___/");
+    println!("/___|_|\\_\\_|  \\___/|_| |_|\\___/  v1.0.0");
                                                  
 
     println!(" ___________________________");
@@ -238,10 +278,11 @@ fn main() {
     println!(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
 
 
-    fold_fold_fold(circuit_filepath.to_string().clone(),
-             witness_gen_filepath.to_string(),
-             output_filepath.to_string(),
-             input_filepath.to_string()
+    fold_fold_fold(selected_function.to_string().clone(),
+                circuit_filepath.to_string().clone(),
+                witness_gen_filepath.to_string(),
+                output_filepath.to_string(),
+                input_filepath.to_string()
             );
 
     // let circuit_filepath = format!("examples/toy/{}/toy.r1cs", group_name);

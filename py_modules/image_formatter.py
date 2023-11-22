@@ -192,7 +192,6 @@ image_path = get_image_path()
 
 if image_path:
     # Example usage
-    output_path = 'transformation.json'  # Path to save the cropped image
     
     # Crop the image and save it
     compressed_original_image = compress_image(image_path)
@@ -201,6 +200,7 @@ if image_path:
                 "6) censor, 7) change color space, 8) brightness, 9) contrast, 10) sharpen, 11) blur, "
                 "12) translate: ") or "1")
     if cmd == 1:
+        output_path = 'transformation_crop.json'  # Path to save the cropped image
         x = int(input("Enter x coordination:"))
         y = int(input("Enter y coordination:"))
         crop_size = int(input("Enter crop_size:"))
@@ -215,46 +215,59 @@ if image_path:
         compressed_transformed_image = crop_image(image_path, x, y, w, h)
         print("Applied CROP filter successfully.")
     elif cmd == 2:
+        output_path = 'transformation_resize.json'  # Path to save the cropped image
         compressed_transformed_image = convert_to_grayscale(image_path)
         print("Applied RESIZE filter successfully.")
     elif cmd == 3:
+        output_path = 'transformation_greyscale.json'  # Path to save the cropped image
         compressed_transformed_image = convert_to_grayscale(image_path)
         print("Applied GREYSCALE filter successfully.")
     elif cmd == 4:
+        output_path = 'transformation_rotate.json'  # Path to save the cropped image
         compressed_transformed_image = convert_to_grayscale(image_path)
         print("Applied ROTATE filter successfully.")
     elif cmd == 5:
+        output_path = 'transformation_flip.json'  # Path to save the cropped image
         compressed_transformed_image = convert_to_grayscale(image_path)
         print("Applied FLIP filter successfully.")
     elif cmd == 6:
+        output_path = 'transformation_censor.json'  # Path to save the cropped image
         compressed_transformed_image = convert_to_grayscale(image_path)
         print("Applied CENSOR filter successfully.")
     elif cmd == 7:
+        output_path = 'transformation_colorchaing.json'  # Path to save the cropped image
         compressed_transformed_image = convert_to_grayscale(image_path)
         print(f"Applied {'RGB' if cmd1 == 1 else 'YCbCr'} filter successfully.")
     elif cmd == 8:
+        output_path = 'transformation_brightness.json'  # Path to save the cropped image
         desired_brightness = float(input("Enter desired brightness factor (1.00 = no effect):"))
         compressed_transformed_image = adjust_brightness(image_path, desired_brightness)
         print("Applied BRIGHTNESS filter successfully.")
     elif cmd == 9:
+        output_path = 'transformation_contrast.json'  # Path to save the cropped image
         desired_contrast = float(input("Enter desired contrast (1.00 = no effect):"))
         compressed_transformed_image = adjust_contrast(image_path, desired_contrast)
         print("Applied CONTRAST filter successfully.")
     elif cmd == 10:
+        output_path = 'transformation_sharpen.json'  # Path to save the cropped image
         compressed_transformed_image = sharppen_image(image_path)
         print("Applied SHARPNESS filter successfully.")
     elif cmd == 11:
+        output_path = 'transformation_blur.json'  # Path to save the cropped image
         compressed_transformed_image = blur_image(image_path)
         print("Applied BLUR filter successfully.")
     elif cmd == 12:
+        output_path = 'transformation_translate.json'  # Path to save the cropped image
         compressed_transformed_image = convert_to_grayscale(image_path)
-        print("Applied graysacle filter successfully.")
+        print("Applied TRANSLATE filter successfully.")
     else:
         print("The entered command was wrong. It should an Integer from 1 to 12.")
     out = {
         "original": compressed_original_image,
+        } if cmd == 1 else {
+        "original": compressed_original_image,
         "transformed": compressed_transformed_image,
-        }
+        } 
     with open(output_path, 'w') as fp:
         json.dump(out, fp, indent=4)
     print("Image data dumped successfully.")

@@ -78,10 +78,6 @@ fn fold_fold_fold(selected_function: String,
         start_public_input.push(F::<G1>::from(0));
         start_public_input.push(F::<G1>::from(0));
         if selected_function == "contrast" {
-            print!("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
-            print!("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
-            print!("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
-            print!("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
             start_public_input.push(F::<G1>::from(1400));  // brightness factor
             start_public_input.push(F::<G1>::from(122479));  // r_mean
             start_public_input.push(F::<G1>::from(91636));  // b_mean

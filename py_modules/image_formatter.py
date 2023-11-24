@@ -208,6 +208,7 @@ if image_path:
     cmd = int(input("Enter your command (default[1]): 1) crop, 2) resize, 3) greyscale, 4) rotate, 5) flip, " 
                 "6) censor, 7) change color space, 8) brightness, 9) contrast, 10) sharpen, 11) blur, "
                 "12) translate: ") or "1")
+    
     if cmd == 1:
         output_path = 'transformation_crop.json'  # Path to save the cropped image
         x = int(input("Enter x coordination:"))
@@ -223,6 +224,9 @@ if image_path:
             print("The entered command was wrong. It should an Integer from 1 to 2.")
         compressed_transformed_image = crop_image(image_path, x, y, w, h)
         print("Applied CROP filter successfully.")
+
+        out["x"] = x
+        out["y"] = y
 
     elif cmd == 2:
         output_path = 'transformation_resize.json'  # Path to save the cropped image

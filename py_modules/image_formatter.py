@@ -149,17 +149,20 @@ def adjust_contrast(image_path, desired_contrast):
     with Image.open(image_path) as image:
         image_np = np.array(image)
         r_channel, g_channel, b_channel = np.rollaxis(image_np, axis=-1)
-        r_adjusted = ((r_channel - np.mean(r_channel)) * desired_contrast + np.mean(r_channel)).clip(0, 255).astype(np.uint8)
-        g_adjusted = ((g_channel - np.mean(g_channel)) * desired_contrast + np.mean(g_channel)).clip(0, 255).astype(np.uint8)
-        b_adjusted = ((b_channel - np.mean(b_channel)) * desired_contrast + np.mean(b_channel)).clip(0, 255).astype(np.uint8)
+        r_mean = int(np.mean(r_channel) *1000)
+        b_mean = int(np.mean(b_channel) *1000)
+        g_mean = int(np.mean(b_channel) *1000)
+        r_adjusted = ((r_channel - float(r_mean) / 1000) * desired_contrast + float(r_mean) / 1000).clip(0, 255).astype(np.uint8)
+        g_adjusted = ((g_channel - float(g_mean) / 1000) * desired_contrast + float(g_mean) / 1000).clip(0, 255).astype(np.uint8)
+        b_adjusted = ((b_channel - float(b_mean) / 1000) * desired_contrast + float(b_mean) / 1000).clip(0, 255).astype(np.uint8)
         adjusted_image = np.dstack((r_adjusted, g_adjusted, b_adjusted))
-        print('np.mean(r_channel): ', np.mean(r_channel))
-        print('np.mean(g_channel): ', np.mean(g_channel))
-        print('np.mean(b_channel): ', np.mean(b_channel))
+        print('np.mean(r_channel): ', r_mean)
+        print('np.mean(g_channel): ', g_mean)
+        print('np.mean(b_channel): ', b_mean)
         plot_images_side_by_side_auto_size(image_np, adjusted_image)
-        return int(np.mean(r_channel) *1000), \
-            int(np.mean(g_channel) *1000), \
-            int(np.mean(b_channel) *1000), \
+        return r_mean, \
+            g_mean, \
+            b_mean, \
             compress(adjusted_image)
 
 

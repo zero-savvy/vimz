@@ -29,6 +29,13 @@ struct ZKronoInputContrast {
 }
 
 #[derive(Deserialize)]
+struct ZKronoInputBrightness {
+    original: Vec<Vec<String>>,
+    transformed: Vec<Vec<String>>,
+    factor: u64,
+}
+
+#[derive(Deserialize)]
 struct ZKronoInputCrop {
     original: Vec<Vec<String>>,
 }
@@ -89,10 +96,20 @@ fn fold_fold_fold(selected_function: String,
         start_public_input.push(F::<G1>::from(0));
         if selected_function == "contrast" {
             let input_data: ZKronoInputContrast = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
-            start_public_input.push(F::<G1>::from(input_data.factor));  // brightness factor
+            start_public_input.push(F::<G1>::from(input_data.factor));  // constrast factor
             start_public_input.push(F::<G1>::from(input_data.r_mean));  // r_mean
             start_public_input.push(F::<G1>::from(input_data.b_mean));  // b_mean
             start_public_input.push(F::<G1>::from(input_data.g_mean));  // g_mean
+            for i in 0..iteration_count {
+                let mut private_input = HashMap::new();
+                // private_input.insert("adder".to_string(), json!(i+2));
+                private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
+                private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
+                private_inputs.push(private_input);
+            }
+        } else if selected_function == "brightness" {
+            let input_data: ZKronoInputBrightness = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+            start_public_input.push(F::<G1>::from(input_data.factor));  // brightness factor
             for i in 0..iteration_count {
                 let mut private_input = HashMap::new();
                 // private_input.insert("adder".to_string(), json!(i+2));
@@ -268,7 +285,7 @@ fn main() {
             .value_name("FUNCTION")
             .help("The transformation function.")
             .takes_value(true)
-            .possible_values(&["crop", "greyscale", "resize", "color_transform", "sharpen", "contrast", "blur"])
+            .possible_values(&["crop", "greyscale", "resize", "color_transform", "sharpen", "contrast", "blur", "brightness"])
         )
         .get_matches();
 

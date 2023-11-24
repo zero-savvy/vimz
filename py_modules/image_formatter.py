@@ -273,6 +273,8 @@ if image_path:
         print("Applied BRIGHTNESS filter successfully.")
         
         out["transformed"] = compressed_transformed_image
+        out["factor"] = int(desired_brightness * 1000)
+
 
     elif cmd == 9:
         output_path = 'transformation_contrast.json'  # Path to save the cropped image

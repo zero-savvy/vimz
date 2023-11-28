@@ -82,21 +82,25 @@ def conv2d(array, kernel, weight=1):
     array_height, array_width = len(array), len(array[0])
     kernel_height, kernel_width = len(kernel), len(kernel[0])
 
-    # Calculate the output dimensions
-    output_height = array_height - kernel_height + 1
-    output_width = array_width - kernel_width + 1
-
+    # Extend the array with zeros
+    border_size = kernel_height // 2
+    extended = [[0 for _ in range(array_width + border_size * 2)] for _ in range(array_height + border_size * 2)]
+    for i in range(array_height):
+        for j in range(array_width):
+            extended[i+border_size][j+border_size] = array[i][j]
+    
     # Initialize the output (convolved) array
-    convolved_array = [[0 for _ in range(output_width)] for _ in range(output_height)]
+    convolved_array = [[0 for _ in range(array_width)] for _ in range(array_height)]
 
     # Perform the convolution using nested loops
-    for i in range(output_height):
-        for j in range(output_width):
+    for i in range(array_height):
+        for j in range(array_width):
             conv_value = 0
             for m in range(kernel_height):
                 for n in range(kernel_width):
-                    conv_value += array[i + m][j + n] * kernel[m][n]
+                    conv_value += extended[i + m][j + n] * kernel[m][n]
             convolved_array[i][j] = conv_value // weight
+            # convolved_array[i][j] = extended[i][j]
 
     return convolved_array
 
@@ -104,7 +108,7 @@ def conv2d(array, kernel, weight=1):
 def sharppen_image(image_path):
     kernel = np.array([
         [0, -1, 0],
-        [-1,  5, -1],
+        [-1, 5, -1],
         [0, -1, 0]
     ])
     with Image.open(image_path) as image:
@@ -127,12 +131,14 @@ def blur_image(image_path):
     with Image.open(image_path) as image:
         image_np = np.array(image)
         r_channel, g_channel, b_channel = np.rollaxis(image_np, axis=-1)
+
         r_adjusted = conv2d(r_channel, kernel, 9)
         g_adjusted = conv2d(g_channel, kernel, 9)
         b_adjusted = conv2d(b_channel, kernel, 9)
         adjusted_image = np.dstack((r_adjusted, g_adjusted, b_adjusted))
         plot_images_side_by_side_auto_size(np.array(image), adjusted_image)
-        return compress(adjusted_image)
+
+        return compress(adjusted_image), [["0x00"] * (len(image_np[0]) // 10)]
 
 
 
@@ -301,10 +307,11 @@ if image_path:
 
     elif cmd == 11:
         output_path = 'transformation_blur.json'  # Path to save the cropped image
-        compressed_transformed_image = blur_image(image_path)
+        compressed_transformed_image, compressed_zeros = blur_image(image_path)
         print("Applied BLUR filter successfully.")
         
         out["transformed"] = compressed_transformed_image
+        out["original"] = compressed_zeros + out["original"] + compressed_zeros
 
     elif cmd == 12:
         output_path = 'transformation_translate.json'  # Path to save the cropped image

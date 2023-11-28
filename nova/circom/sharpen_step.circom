@@ -5,7 +5,7 @@ include "convolution_step.circom";
 
 template Sharpen(width, kernel_size){
     // public inputs and outputs
-    signal input step_in[kernel_size+2];
+    signal input step_in[kernel_size+1];
     // signal input prev_orig_hash_0;
     // signal input prev_orig_hash_1;
     // signal input prev_orig_hash_2;
@@ -14,7 +14,7 @@ template Sharpen(width, kernel_size){
     // signal input prev_conv_hash;
     // signal input compressed_kernel;
     
-    signal output step_out[kernel_size+2];
+    signal output step_out[kernel_size+1];
     // signal output next_orig_hash_1;
     // signal output next_orig_hash_2;
     // signal output next_orig_hash_3;

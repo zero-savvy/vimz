@@ -3,6 +3,7 @@ pragma circom 2.0.0;
 include "utils/row_hasher.circom";
 include "utils/pixels.circom";
 include "circomlib/circuits/bitify.circom";
+include "circomlib/circuits/comparators.circom";
 
 
 template ConvolveBlur(decompressedWidth) {
@@ -23,7 +24,9 @@ template ConvolveBlur(decompressedWidth) {
         kernel [2][2] = 1;
     // var target_pixel_location = kernel_size \ 2 + 1;
     // var conv_value;
-    var weight = 9;  // TODO: weights other than 1
+    var weight = 9;
+
+    component lt[decompressedWidth][3][2];
 
     for (var color = 0; color < 3; color++) {
         for (var i = 0; i < decompressedWidth; i++) {
@@ -31,10 +34,19 @@ template ConvolveBlur(decompressedWidth) {
             for (var m = 0; m < kernel_size; m++) {
                 for (var n = 0; n < kernel_size; n++) {
                     conv_value += decompressed_row_orig[m][i + n][color] * kernel[m][n];
+                    // log(decompressed_row_orig[m][i + n][color], kernel[m][n]);
                 }
             }
-            log(decompressed_row_conv[i][color], conv_value);
-            decompressed_row_conv[i][color] * weight === conv_value;
+            // log(decompressed_row_conv[i][color], conv_value);
+            lt[i][color][0] = LessEqThan(16);
+            lt[i][color][0].in[0] <== conv_value - decompressed_row_conv[i][color] * weight;
+            lt[i][color][0].in[1] <== 9 * weight;
+            lt[i][color][1] = LessEqThan(16);
+            lt[i][color][1].in[0] <== decompressed_row_conv[i][color] * weight - conv_value;
+            lt[i][color][1].in[1] <== 9 * weight;
+
+            lt[i][color][0].out === 1;
+            lt[i][color][1].out === 1;
         }
     }
 }
@@ -57,7 +69,9 @@ template ConvolveSharpen(decompressedWidth) {
         kernel [2][2] = 0;
     // var target_pixel_location = kernel_size \ 2 + 1;
     // var conv_value;
-    var weight = 1;  // TODO: weights other than 1
+    var weight = 1;
+
+    component lt[decompressedWidth][3][2];
 
     for (var color = 0; color < 3; color++) {
         for (var i = 0; i < decompressedWidth; i++) {
@@ -67,8 +81,16 @@ template ConvolveSharpen(decompressedWidth) {
                     conv_value += decompressed_row_orig[m][i + n][color] * kernel[m][n];
                 }
             }
-            log(decompressed_row_conv[i][color], conv_value);
-            decompressed_row_conv[i][color] * weight === conv_value;
+            // log(decompressed_row_conv[i][color], conv_value);
+            lt[i][color][0] = LessEqThan(16);
+            lt[i][color][0].in[0] <== conv_value - decompressed_row_conv[i][color];
+            lt[i][color][0].in[1] <== 9;
+            lt[i][color][1] = LessEqThan(16);
+            lt[i][color][1].in[0] <== decompressed_row_conv[i][color] - conv_value;
+            lt[i][color][1].in[1] <== 9;
+
+            lt[i][color][0].out === 1;
+            lt[i][color][1].out === 1;
         }
     }
 }
@@ -156,7 +178,7 @@ template SharpenCheck(width, kernel_size) {
 
 template IntegrityCheck(width, kernel_size) {
     // public inputs and outputs
-    signal input step_in[kernel_size+2];
+    signal input step_in[kernel_size+1];
     // signal input prev_orig_hash_0;
     // signal input prev_orig_hash_1;
     // signal input prev_orig_hash_2;
@@ -165,7 +187,7 @@ template IntegrityCheck(width, kernel_size) {
     // signal input prev_conv_hash;
     // signal input compressed_kernel;
     
-    signal output step_out[kernel_size+2];
+    signal output step_out[kernel_size+1];
     // signal output next_orig_hash_1;
     // signal output next_orig_hash_2;
     // signal output next_orig_hash_3;
@@ -205,10 +227,15 @@ template IntegrityCheck(width, kernel_size) {
     conv_hasher.values[1] <== conv_row_hasher.hash; 
     step_out[kernel_size] <== conv_hasher.hash;
 
+    component zero_checker[kernel_size - 1];
     for (var i = 0; i < kernel_size-1; i++) {
-        // row_hashes[i] === step_in[i];
+        zero_checker[i] = IsZero();
+        zero_checker[i].in <== step_in[i];
+        row_hashes[i] * (1 - zero_checker[i].out) === step_in[i];
         step_out[i] <== row_hashes[i+1]; 
     }
+
+    // log(row_hashes[0], row_hashes[1], row_hashes[2]);
 
     // component decompressor_kernel = DecompressorKernel(kernel_size);
     // decompressor_kernel.in <== step_in[kernel_size+1];

@@ -100,6 +100,10 @@ def conv2d(array, kernel, weight=1):
                 for n in range(kernel_width):
                     conv_value += extended[i + m][j + n] * kernel[m][n]
             convolved_array[i][j] = conv_value // weight
+            if convolved_array[i][j] > 255:
+                convolved_array[i][j] = 255
+            elif convolved_array[i][j] < 0:
+                convolved_array[i][j] = 0
             # convolved_array[i][j] = extended[i][j]
 
     return convolved_array
@@ -119,7 +123,8 @@ def sharppen_image(image_path):
         b_adjusted = conv2d(b_channel, kernel)
         adjusted_image = np.dstack((r_adjusted, g_adjusted, b_adjusted))
         plot_images_side_by_side_auto_size(np.array(image), adjusted_image)
-        return compress(adjusted_image)
+
+        return compress(adjusted_image), [["0x00"] * (len(image_np[0]) // 10)]
 
 
 def blur_image(image_path):
@@ -300,10 +305,11 @@ if image_path:
 
     elif cmd == 10:
         output_path = 'transformation_sharpen.json'  # Path to save the cropped image
-        compressed_transformed_image = sharppen_image(image_path)
+        compressed_transformed_image, compressed_zeros = sharppen_image(image_path)
         print("Applied SHARPNESS filter successfully.")
         
         out["transformed"] = compressed_transformed_image
+        out["original"] = compressed_zeros + out["original"] + compressed_zeros
 
     elif cmd == 11:
         output_path = 'transformation_blur.json'  # Path to save the cropped image

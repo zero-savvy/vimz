@@ -4,6 +4,8 @@ include "utils/row_hasher.circom";
 include "utils/pixels.circom";
 include "circomlib/circuits/bitify.circom";
 include "circomlib/circuits/comparators.circom";
+include "circomlib/circuits/multiplexer.circom";
+include "circomlib/circuits/mux1.circom";
 
 
 template ConvolveBlur(decompressedWidth) {
@@ -67,11 +69,13 @@ template ConvolveSharpen(decompressedWidth) {
         kernel [2][0] = 0;
         kernel [2][1] = -1;
         kernel [2][2] = 0;
-    // var target_pixel_location = kernel_size \ 2 + 1;
-    // var conv_value;
+
     var weight = 1;
 
     component lt[decompressedWidth][3][2];
+    component ltt[decompressedWidth][3][2];
+    component selector[decompressedWidth][3];
+    component gt_selector[decompressedWidth][3];
 
     for (var color = 0; color < 3; color++) {
         for (var i = 0; i < decompressedWidth; i++) {
@@ -82,11 +86,34 @@ template ConvolveSharpen(decompressedWidth) {
                 }
             }
             // log(decompressed_row_conv[i][color], conv_value);
+
+            // Clip the value to [0..255] range
+            // find sign of r_adjusted
+            ltt[i][color][0] = LessEqThan(32);
+            ltt[i][color][1] = LessEqThan(32);
+            ltt[i][color][0].in[1] <== 0 - conv_value;
+            ltt[i][color][0].in[0] <==  conv_value;
+            ltt[i][color][1].in[0] <== 255;
+            ltt[i][color][1].in[1] <==  conv_value;
+            
+            gt_selector[i][color] = Mux1();
+            gt_selector[i][color].c[1] <== 255;
+            gt_selector[i][color].c[0] <== conv_value;
+            gt_selector[i][color].s <== ltt[i][color][1].out;
+
+
+            selector[i][color] = Mux1();
+            selector[i][color].c[0] <== gt_selector[i][color].out;
+            selector[i][color].c[1] <== 0;
+            selector[i][color].s <== ltt[i][color][0].out;
+
+            var final_value = selector[i][color].out;
+
             lt[i][color][0] = LessEqThan(16);
-            lt[i][color][0].in[0] <== conv_value - decompressed_row_conv[i][color];
+            lt[i][color][0].in[0] <== final_value - decompressed_row_conv[i][color];
             lt[i][color][0].in[1] <== 9;
             lt[i][color][1] = LessEqThan(16);
-            lt[i][color][1].in[0] <== decompressed_row_conv[i][color] - conv_value;
+            lt[i][color][1].in[0] <== decompressed_row_conv[i][color] - final_value;
             lt[i][color][1].in[1] <== 9;
 
             lt[i][color][0].out === 1;
@@ -102,7 +129,7 @@ template UnwrapAndExtend(width, kernel_size) {
     
     // ASSERT the Kernel matrice to be an sqaure of odd size
     // kernel_wdith === kernel_height;
-    1 === kernel_size % 2;
+    // 1 === kernel_size % 2;
     
     var decompressedWidth = width * 10;
     var extendedWidth = decompressedWidth + kernel_size - 1;
@@ -234,16 +261,6 @@ template IntegrityCheck(width, kernel_size) {
         row_hashes[i] * (1 - zero_checker[i].out) === step_in[i];
         step_out[i] <== row_hashes[i+1]; 
     }
-
-    // log(row_hashes[0], row_hashes[1], row_hashes[2]);
-
-    // component decompressor_kernel = DecompressorKernel(kernel_size);
-    // decompressor_kernel.in <== step_in[kernel_size+1];
-
-    // component conv_checker = SharpenCheck(width, kernel_size);
-    // conv_checker.row_orig <== row_orig;
-    // conv_checker.row_conv <== row_conv;
-    // conv_checker.kernel <== decompressor_kernel.out;
 
 }
 

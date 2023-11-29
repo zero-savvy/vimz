@@ -124,7 +124,7 @@ fn fold_fold_fold(selected_function: String,
                 private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
                 private_inputs.push(private_input);
             }
-        } else if selected_function == "blur" || selected_function == "sharpness"  {
+        } else if selected_function == "blur" || selected_function == "sharpen"  {
             let input_data: ZKronoInput = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
             start_public_input.push(F::<G1>::from(0));  // row1 hash
             start_public_input.push(F::<G1>::from(0));  // row2 hash

@@ -202,6 +202,17 @@ def crop_image(image_path, x: int, y:int, new_width: int, new_height:int):
         plot_images_side_by_side_auto_size(image_np, adjusted_image)
     
         return compress(adjusted_image)
+    
+
+def resize_image(image_path, new_height:int, new_width: int):
+    with Image.open(image_path) as image:
+        image_np = np.array(image)
+        adjusted_image = image.resize((new_width, new_height))
+        adjusted_image_np = np.array(adjusted_image)
+        # adjusted_image = [[image_np[i][j] for j in range(x, x+new_width)] for i in range(y, y+new_height)]
+        plot_images_side_by_side_auto_size(image_np, adjusted_image_np)
+
+        return compress(adjusted_image_np)
 
 
 # Get the image path using Tkinter file dialog
@@ -233,6 +244,7 @@ if image_path:
             h = 720
         else:
             print("The entered command was wrong. It should an Integer from 1 to 2.")
+            exit()
         compressed_transformed_image = crop_image(image_path, x, y, w, h)
         print("Applied CROP filter successfully.")
 
@@ -240,8 +252,17 @@ if image_path:
         out["y"] = y
 
     elif cmd == 2:
-        output_path = 'transformation_resize.json'  # Path to save the cropped image
-        compressed_transformed_image = convert_to_grayscale(image_path)
+        output_path = 'transformation_resize.json'  # Path to save the resized image
+        new_size = int(input("Enter resize: 1) HD --> SD, 2) FHD --> HD: "))
+        if new_size == 1:
+            w = 640
+            h = 480
+        elif new_size == 2:
+            w = 1280
+            h = 720
+        else:
+            print("The entered command was wrong. It should an Integer from 1 to 2.")
+        compressed_transformed_image = resize_image(image_path, h, w)
         print("Applied RESIZE filter successfully.")
 
         out["transformed"] = compressed_transformed_image

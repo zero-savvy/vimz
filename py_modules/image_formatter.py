@@ -206,13 +206,52 @@ def crop_image(image_path, x: int, y:int, new_width: int, new_height:int):
 
 def resize_image(image_path, new_height:int, new_width: int):
     with Image.open(image_path) as image:
-        image_np = np.array(image)
-        adjusted_image = image.resize((new_width, new_height))
-        adjusted_image_np = np.array(adjusted_image)
-        # adjusted_image = [[image_np[i][j] for j in range(x, x+new_width)] for i in range(y, y+new_height)]
-        plot_images_side_by_side_auto_size(image_np, adjusted_image_np)
+        # image_np = np.array(image)
+        # adjusted_image = image.resize((new_width, new_height), resample=Image.Resampling.BILINEAR)
+        # adjusted_image_np = np.array(adjusted_image)
 
-        return compress(adjusted_image_np)
+        # adjusted_image = [[image_np[i][j] for j in range(x, x+new_width)] for i in range(y, y+new_height)]
+        
+        img_array = np.array(image)
+
+        # Get the dimensions of the original image
+        height, width, channels = img_array.shape
+        height = 3
+        new_height = 2
+
+        # Calculate the scaling factors for each dimension
+        scale_y = new_height / height
+        scale_x = new_width / width
+
+        # Initialize the new image array
+        new_img_array = np.zeros((new_height, new_width, channels), dtype=np.uint8)
+
+        # Perform bilinear interpolation
+        for i in range(new_height):
+            for j in range(new_width):
+                y = i / scale_y
+                x = j / scale_x
+
+                y_floor, x_floor = int(np.floor(y)), int(np.floor(x))
+                y_ceil, x_ceil = min(y_floor + 1, height - 1), min(x_floor + 1, width - 1)
+
+                y_decimal, x_decimal = y - y_floor, x - x_floor
+
+                # Bilinear interpolation
+                interpolated_value = (
+                    (1 - x_decimal) * (1 - y_decimal) * img_array[y_floor, x_floor] +
+                    x_decimal * (1 - y_decimal) * img_array[y_floor, x_ceil] +
+                    (1 - x_decimal) * y_decimal * img_array[y_ceil, x_floor] +
+                    x_decimal * y_decimal * img_array[y_ceil, x_ceil]
+                )
+
+                new_img_array[i, j] = np.round(interpolated_value).astype(np.uint8)
+
+
+            
+        plot_images_side_by_side_auto_size(img_array, new_img_array)
+
+        return compress(new_img_array)
 
 
 # Get the image path using Tkinter file dialog

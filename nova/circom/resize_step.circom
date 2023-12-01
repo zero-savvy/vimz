@@ -110,26 +110,51 @@ template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized){
             }
         }
     }
+    component lt[rowCountResized][decompressedwidthResized][3][2];
 
     for (var rgb = 0; rgb < 3; rgb++) {
         for (var i = 0; i < rowCountResized; i++) {
             for (var j = 0; j < decompressedwidthResized; j++) {
-                var x_l = (decompressedwidthOrig - 1) * j \ (decompressedwidthResized - 1);
-                var y_l = (rowCountOrig - 1) * i \ (rowCountResized - 1);
-                var x_h = x_l * (decompressedwidthResized - 1) == (decompressedwidthOrig - 1) * j ? x_l : x_l + 1;
-                var y_h = y_l * (rowCountResized - 1) == (rowCountOrig - 1) * i ? y_l : y_l + 1;
+                // var summ = decompressed_row_orig[i][j*2][rgb]
+                //         + decompressed_row_orig[i][j*2+1][rgb]
+                //         + decompressed_row_orig[i+1][j*2][rgb]
+                //         + decompressed_row_orig[i+1][j*2+1][rgb];
+                // log(summ, decompressed_row_resized[i][j][rgb]);
+                
+                lt[i][j][rgb][0] = LessEqThan(11);
+                lt[i][j][rgb][1] = LessEqThan(11);
 
-                var xRatioWeighted = ((decompressedwidthOrig - 1) * j) - (decompressedwidthResized - 1) * x_l;
-                var yRatioWeighted = ((rowCountOrig - 1) * i) - (rowCountResized - 1) * y_l;
+                log(i,j,rgb);
+                
+                
+                // decompressed_row_resized[i][j][rgb] * 4 === sum;
 
-                var denom = (decompressedwidthResized - 1) * (rowCountResized - 1);
+
+                var x_l = (decompressedwidthOrig) * j \ (decompressedwidthResized);
+                var y_l = (rowCountOrig) * i \ (rowCountResized);
+                var x_h = x_l * (decompressedwidthResized) == (decompressedwidthOrig) * j ? x_l : x_l + 1;
+                var y_h = y_l * (rowCountResized) == (rowCountOrig) * i ? y_l : y_l + 1;
+
+                var xRatioWeighted = ((decompressedwidthOrig) * j) - (decompressedwidthResized) * x_l;
+                var yRatioWeighted = ((rowCountOrig) * i) - (rowCountResized) * y_l;
+
+                var denom = (decompressedwidthResized - 1) * (rowCountResized -1);
 
                 var sum = decompressed_row_orig[y_l][x_l][rgb] * (decompressedwidthResized - 1 - xRatioWeighted) * (rowCountResized - 1 - yRatioWeighted)
                 + decompressed_row_orig[y_l][x_h][rgb] * xRatioWeighted * (rowCountResized - 1 - yRatioWeighted)
                 + decompressed_row_orig[y_h][x_l][rgb] * yRatioWeighted * (decompressedwidthResized - 1 - xRatioWeighted)
                 + decompressed_row_orig[y_h][x_h][rgb] * xRatioWeighted * yRatioWeighted;
 
-                decompressed_row_resized[i][j][rgb] * denom === sum;		
+                log(sum, decompressed_row_resized[i][j][rgb] * denom);
+                // decompressed_row_resized[i][j][rgb] * denom === sum;		
+
+                lt[i][j][rgb][0].in[1] <== 4;
+                lt[i][j][rgb][0].in[0] <== sum - (denom * decompressed_row_resized[i][j][rgb]);
+                lt[i][j][rgb][0].out === 1;
+
+                lt[i][j][rgb][1].in[1] <== 4;
+                lt[i][j][rgb][1].in[0] <== (denom * decompressed_row_resized[i][j][rgb]) - sum;
+                lt[i][j][rgb][1].out === 1; 
             }		
         }
     }
@@ -145,4 +170,4 @@ template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized){
     step_out[1] <== next_resized_hash;
 }
 
-component main { public [step_out] } = ResizeHash(128, 64, 3, 2);
+component main { public [step_in] } = ResizeHash(128, 64, 3, 2);

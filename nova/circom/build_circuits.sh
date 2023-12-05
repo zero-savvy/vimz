@@ -27,8 +27,6 @@ fi
 for file in "${file_list[@]}"; do
     echo "$file"
     if [ -f "$file" ]; then
-        # Replace the following command with your desired command
-        # For example, let's just print the file name here
         echo " "
         echo -e "\033[1;34m==================================================\033[0m"
         echo -e "\033[1;34mProcessing file: $file\033[0m"
@@ -43,9 +41,5 @@ for file in "${file_list[@]}"; do
             echo -e "\033[1;32mRunning make in $cpp_directory\033[0m"
             make
         )
-        
-        # Add your commands here
-        # Example: Command to perform some operation on the file
-        # your_command "$file"
     fi
 done

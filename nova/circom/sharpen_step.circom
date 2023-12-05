@@ -36,7 +36,6 @@ template Sharpen(width, kernel_size){
     component conv_checker = SharpenCheck(width, kernel_size);
     conv_checker.row_orig <== row_orig;
     conv_checker.row_conv <== row_tran;
-    // conv_checker.kernel <== decompressor_kernel.out;
 }
 
 component main { public [step_in] } = Sharpen(128, 3);

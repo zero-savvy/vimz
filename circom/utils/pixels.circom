@@ -52,6 +52,35 @@ template DecompressorGrey(){
 }
 
 
+template CompressorCrop(){
+    signal input in[10];
+	signal output out;
+
+	component toNum = Bits2Num(240);
+	component toBits[10];
+
+	for (var i=0; i<10; i++) {
+		toBits[i] = Num2Bits(24);
+		toBits[i].in <== in[i];
+		for (var j=0; j<24; j++) {
+			toNum.in[i*24+j] <== toBits[i].out[j];
+		}
+	}
+	out <== toNum.out;
+}
+
+template DecompressorCrop(){
+    signal input in;
+	signal output out[10];
+
+	component decomp = DecompressorGrey();
+	
+	decomp.in <== in;
+	out <== decomp.out;
+}
+
+
+
 template Test () {
 	signal input sig1;
 	signal input sig2;

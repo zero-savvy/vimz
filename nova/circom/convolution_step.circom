@@ -24,8 +24,7 @@ template ConvolveBlur(decompressedWidth) {
         kernel [2][0] = 1;
         kernel [2][1] = 1;
         kernel [2][2] = 1;
-    // var target_pixel_location = kernel_size \ 2 + 1;
-    // var conv_value;
+    
     var weight = 9;
 
     component lt[decompressedWidth][3][2];
@@ -36,10 +35,9 @@ template ConvolveBlur(decompressedWidth) {
             for (var m = 0; m < kernel_size; m++) {
                 for (var n = 0; n < kernel_size; n++) {
                     conv_value += decompressed_row_orig[m][i + n][color] * kernel[m][n];
-                    // log(decompressed_row_orig[m][i + n][color], kernel[m][n]);
                 }
             }
-            // log(decompressed_row_conv[i][color], conv_value);
+   
             lt[i][color][0] = LessEqThan(16);
             lt[i][color][0].in[0] <== conv_value - decompressed_row_conv[i][color] * weight;
             lt[i][color][0].in[1] <== 9 * weight;
@@ -85,7 +83,6 @@ template ConvolveSharpen(decompressedWidth) {
                     conv_value += decompressed_row_orig[m][i + n][color] * kernel[m][n];
                 }
             }
-            // log(decompressed_row_conv[i][color], conv_value);
 
             // Clip the value to [0..255] range
             // find sign of r_adjusted
@@ -100,7 +97,6 @@ template ConvolveSharpen(decompressedWidth) {
             gt_selector[i][color].c[1] <== 255;
             gt_selector[i][color].c[0] <== conv_value;
             gt_selector[i][color].s <== ltt[i][color][1].out;
-
 
             selector[i][color] = Mux1();
             selector[i][color].c[0] <== gt_selector[i][color].out;
@@ -126,11 +122,7 @@ template UnwrapAndExtend(width, kernel_size) {
     
     signal input row_orig[kernel_size][width];
     signal input row_conv[width];
-    
-    // ASSERT the Kernel matrice to be an sqaure of odd size
-    // kernel_wdith === kernel_height;
-    // 1 === kernel_size % 2;
-    
+        
     var decompressedWidth = width * 10;
     var extendedWidth = decompressedWidth + kernel_size - 1;
 

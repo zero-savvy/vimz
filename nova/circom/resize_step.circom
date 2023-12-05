@@ -110,7 +110,7 @@ template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized, actu
             }
         }
     }
-    // component lt[rowCountResized][decompressedwidthResized][3][2];
+    
     component lte[rowCountResized][decompressedwidthResized][3][2];
 
     for (var rgb = 0; rgb < 3; rgb++) {

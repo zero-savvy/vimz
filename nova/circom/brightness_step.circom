@@ -66,41 +66,6 @@ template BrightnessChecker(n) {
             lt[i][color][3].in[0] <== 1000 * bright[i][color] - final_value;
             lt[i][color][3].out === 1; 
         }
-
-        // //=========================== red =======================
-        // lt[i][0] = LessEqThan(16);
-        // lt[i][1] = LessEqThan(16);
-
-        // lt[i][0].in[1] <== 1000;
-        // lt[i][0].in[0] <==  r - 1000 * bright[i][0];
-        // lt[i][0].out === 1;
-
-        // lt[i][1].in[1] <== 1000;
-        // lt[i][1].in[0] <== 1000 * bright[i][0] - r;
-        // lt[i][1].out === 1; 
-        // //=========================== green ======================
-        // lt[i][2] = LessEqThan(16);
-        // lt[i][3] = LessEqThan(16);
-
-        // lt[i][2].in[1] <== 1000;
-        // lt[i][2].in[0] <==  g - 1000 * bright[i][1];
-        // lt[i][2].out === 1;
-
-        // lt[i][3].in[1] <== 1000;
-        // lt[i][3].in[0] <== 1000 * bright[i][1] - g;
-        // lt[i][3].out === 1; 
-        // //=========================== blue ======================
-
-        // lt[i][4] = LessEqThan(16);
-        // lt[i][5] = LessEqThan(16);
-
-        // lt[i][4].in[1] <== 1000;
-        // lt[i][4].in[0] <==  b - 1000 * bright[i][2];
-        // lt[i][4].out === 1;
-
-        // lt[i][5].in[1] <== 1000;
-        // lt[i][5].in[0] <== 1000 * bright[i][2] - b;
-        // lt[i][5].out === 1; 
     }
 
     n_check <== n;

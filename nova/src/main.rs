@@ -42,12 +42,6 @@ struct ZKronoInputCrop {
     y: u64,
 }
 
-#[derive(Deserialize)]
-struct ZKronoInputResize {
-    original: Vec<Vec<Vec<String>>>,
-    transformed: Vec<Vec<Vec<String>>>,
-}
-
 
 fn fold_fold_fold(selected_function: String,
             circuit_filepath: String,
@@ -62,7 +56,7 @@ fn fold_fold_fold(selected_function: String,
         witness_gen_filepath,
         std::any::type_name::<G1>()
     );
-    let iteration_count = 720;
+    let mut iteration_count = 720;
     let root = current_dir().unwrap();
 
     let circuit_file = root.join(circuit_filepath);
@@ -90,12 +84,15 @@ fn fold_fold_fold(selected_function: String,
             private_inputs.push(private_input);
         }
     } else if selected_function == "resize" {
-        let input_data: ZKronoInputResize = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+        let input_data: ZKronoInput = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+        iteration_count = 240;
+        start_public_input.push(F::<G1>::from(0));
+        start_public_input.push(F::<G1>::from(0));
         for i in 0..iteration_count {
             let mut private_input = HashMap::new();
             // private_input.insert("adder".to_string(), json!(i+2));
-            private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
-            private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
+            private_input.insert("row_orig".to_string(), json!(input_data.original[(i*3)..(i*3)+3]));
+            private_input.insert("row_tran".to_string(), json!(input_data.transformed[(i*2)..(i*2)+2]));
             private_inputs.push(private_input);
         }
     } else {

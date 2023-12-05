@@ -4,6 +4,7 @@ import json
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 
 
 VESTA_PRIME = 28948022309329048855892746252171976963363056481941647379679742748393362948097
@@ -216,12 +217,13 @@ def resize_image(image_path, new_height:int, new_width: int):
 
         # Get the dimensions of the original image
         height, width, channels = img_array.shape
-        height = 3
-        new_height = 2
-
+        
         # Calculate the scaling factors for each dimension
-        scale_y = new_height / height
-        scale_x = new_width / width
+        # scale_y = (new_height - 1) / (height - 1)
+        # scale_x = (new_width - 1) / (width - 1)
+
+        x_ratio = float(width) / float(new_width)
+        y_ratio = float(height) / float(new_height)
 
         # Initialize the new image array
         new_img_array = np.zeros((new_height, new_width, channels), dtype=np.uint8)
@@ -229,26 +231,22 @@ def resize_image(image_path, new_height:int, new_width: int):
         # Perform bilinear interpolation
         for i in range(new_height):
             for j in range(new_width):
-                y = i / scale_y
-                x = j / scale_x
+                x_l = int(j * x_ratio)
+                x_h = int(j * x_ratio) + 1
+                y_l = int(i * y_ratio)
+                y_h = int(i * y_ratio) + 1
+                
+                a = img_array[y_l, x_l]
+                b = img_array[y_l, x_h]
+                c = img_array[y_h, x_l]
+                d = img_array[y_h, x_h]
 
-                y_floor, x_floor = int(np.floor(y)), int(np.floor(x))
-                y_ceil, x_ceil = min(y_floor + 1, height - 1), min(x_floor + 1, width - 1)
+                weight = 2 if i % 2 == 0 else 1
+                weight = float(weight) / 3
+                summ = a * weight + b * weight \
+                    + c * (1 - weight) + d * (1 - weight)
+                new_img_array[i, j] = summ / 2
 
-                y_decimal, x_decimal = y - y_floor, x - x_floor
-
-                # Bilinear interpolation
-                interpolated_value = (
-                    (1 - x_decimal) * (1 - y_decimal) * img_array[y_floor, x_floor] +
-                    x_decimal * (1 - y_decimal) * img_array[y_floor, x_ceil] +
-                    (1 - x_decimal) * y_decimal * img_array[y_ceil, x_floor] +
-                    x_decimal * y_decimal * img_array[y_ceil, x_ceil]
-                )
-
-                new_img_array[i, j] = np.round(interpolated_value).astype(np.uint8)
-
-
-            
         plot_images_side_by_side_auto_size(img_array, new_img_array)
 
         return compress(new_img_array)

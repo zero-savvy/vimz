@@ -71,6 +71,7 @@ fn fold_fold_fold(selected_function: String,
     let mut start_public_input: Vec<F::<G1>> = Vec::new();
 
     if selected_function == "crop" {
+        iteration_count = 180;
         let input_data: ZKronoInputCrop = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
         start_public_input.push(F::<G1>::from(0));
         start_public_input.push(F::<G1>::from(0));
@@ -80,7 +81,7 @@ fn fold_fold_fold(selected_function: String,
         for i in 0..iteration_count {
             let mut private_input = HashMap::new();
             // private_input.insert("adder".to_string(), json!(i+2));
-            private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
+            private_input.insert("row_orig".to_string(), json!(input_data.original[(i*4)..(i*4)+4]));
             private_inputs.push(private_input);
         }
     } else if selected_function == "resize" {

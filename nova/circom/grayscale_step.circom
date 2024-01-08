@@ -16,8 +16,8 @@ template GrayscaleChecker(n) {
     for (var i = 0; i < n; i++) {      
         var inter = 299 * orig[i][0] + 587 * orig[i][1] + 114 * orig[i][2];
 
-        lt[i][0] = LessEqThan(16);
-        lt[i][1] = LessEqThan(16);
+        lt[i][0] = LessEqThan(18);
+        lt[i][1] = LessEqThan(18);
 
         lt[i][0].in[1] <== 1000;
         lt[i][0].in[0] <== inter - 1000 * gray[i];

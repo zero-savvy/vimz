@@ -283,8 +283,7 @@ if image_path:
         compressed_transformed_image = crop_image(image_path, x, y, w, h)
         print("Applied CROP filter successfully.")
 
-        out["x"] = x
-        out["y"] = y
+        out["info"] = x * 2^24 + y * 2*12
 
     elif cmd == 2:
         output_path = 'transformation_resize.json'  # Path to save the resized image

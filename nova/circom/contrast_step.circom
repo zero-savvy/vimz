@@ -21,18 +21,18 @@ template ContrastChecker(n) {
 
     for (var color = 0; color < 3; color++) {      
         for (var i = 0; i < n; i++) {      
-            var adjusted = ((orig[i][color]) - 128) * cf + 12800;
+            var adjusted = ((orig[i][color]) - 128) * cf + 1280;
                     
             // find sign of r_adjusted
-            lt[i][color][0] = LessEqThan(17);
-            lt[i][color][1] = LessEqThan(17);
+            lt[i][color][0] = LessEqThan(13);
+            lt[i][color][1] = LessEqThan(13);
             lt[i][color][0].in[1] <== 0 - adjusted;
             lt[i][color][0].in[0] <==  adjusted;
-            lt[i][color][1].in[0] <== 25500;
+            lt[i][color][1].in[0] <== 2550;
             lt[i][color][1].in[1] <==  adjusted;
             
             gt_selector[i][color] = Mux1();
-            gt_selector[i][color].c[1] <== 25500;
+            gt_selector[i][color].c[1] <== 2550;
             gt_selector[i][color].c[0] <== adjusted;
             gt_selector[i][color].s <== lt[i][color][1].out;
 
@@ -44,15 +44,15 @@ template ContrastChecker(n) {
 
             var final_value = selector[i][color].out;
             // log("final_value:" , final_value, contrast[i][color]);
-            lt[i][color][2] = LessEqThan(17);
-            lt[i][color][3] = LessEqThan(17);
+            lt[i][color][2] = LessEqThan(13);
+            lt[i][color][3] = LessEqThan(13);
 
-            lt[i][color][2].in[1] <== 100;
-            lt[i][color][2].in[0] <== final_value - (100 * contrast[i][color]);
+            lt[i][color][2].in[1] <== 10;
+            lt[i][color][2].in[0] <== final_value - (10 * contrast[i][color]);
             lt[i][color][2].out === 1;
 
-            lt[i][color][3].in[1] <== 100;
-            lt[i][color][3].in[0] <== (100 * contrast[i][color]) - final_value;
+            lt[i][color][3].in[1] <== 10;
+            lt[i][color][3].in[0] <== (10 * contrast[i][color]) - final_value;
             lt[i][color][3].out === 1; 
         }
     }

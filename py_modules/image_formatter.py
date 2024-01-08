@@ -309,33 +309,6 @@ if image_path:
 
         out["transformed"] = compressed_transformed_image
 
-    elif cmd == 4:
-        output_path = 'transformation_rotate.json'  # Path to save the cropped image
-        compressed_transformed_image = convert_to_grayscale(image_path)
-        print("Applied ROTATE filter successfully.")
-        
-        out["transformed"] = compressed_transformed_image
-
-    elif cmd == 5:
-        output_path = 'transformation_flip.json'  # Path to save the cropped image
-        compressed_transformed_image = convert_to_grayscale(image_path)
-        print("Applied FLIP filter successfully.")
-
-        out["transformed"] = compressed_transformed_image
-
-    elif cmd == 6:
-        output_path = 'transformation_censor.json'  # Path to save the cropped image
-        compressed_transformed_image = convert_to_grayscale(image_path)
-        print("Applied CENSOR filter successfully.")
-        
-        out["transformed"] = compressed_transformed_image
-
-    elif cmd == 7:
-        output_path = 'transformation_colorchaing.json'  # Path to save the cropped image
-        compressed_transformed_image = convert_to_grayscale(image_path)
-        print(f"Applied {'RGB' if cmd1 == 1 else 'YCbCr'} filter successfully.")
-        
-        out["transformed"] = compressed_transformed_image
 
     elif cmd == 8:
         output_path = 'transformation_brightness.json'  # Path to save the cropped image
@@ -344,7 +317,7 @@ if image_path:
         print("Applied BRIGHTNESS filter successfully.")
         
         out["transformed"] = compressed_transformed_image
-        out["factor"] = int(desired_brightness * 1000)
+        out["factor"] = int(desired_brightness * 10)
 
 
     elif cmd == 9:
@@ -354,7 +327,7 @@ if image_path:
         print("Applied CONTRAST filter successfully.")
         
         out["transformed"] = compressed_transformed_image
-        out["factor"] = int(desired_contrast*1000)
+        out["factor"] = int(desired_contrast*10)
 
     elif cmd == 10:
         output_path = 'transformation_sharpen.json'  # Path to save the cropped image

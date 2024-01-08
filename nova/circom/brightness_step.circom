@@ -35,15 +35,15 @@ template BrightnessChecker(n) {
         for (var color = 0; color < 3; color++) {
 
             // find sign of r_adjusted
-            lt[i][color][0] = LessEqThan(20);
-            lt[i][color][1] = LessEqThan(20);
+            lt[i][color][0] = LessEqThan(13);
+            lt[i][color][1] = LessEqThan(13);
             lt[i][color][0].in[1] <== 0 - calced[color];
             lt[i][color][0].in[0] <==  calced[color];
-            lt[i][color][1].in[0] <== 255000;
+            lt[i][color][1].in[0] <== 2550;
             lt[i][color][1].in[1] <==  calced[color];
             
             gt_selector[i][color] = Mux1();
-            gt_selector[i][color].c[1] <== 255000;
+            gt_selector[i][color].c[1] <== 2550;
             gt_selector[i][color].c[0] <== calced[color];
             gt_selector[i][color].s <== lt[i][color][1].out;
 
@@ -55,15 +55,15 @@ template BrightnessChecker(n) {
 
             var final_value = selector[i][color].out;
             // log("final_value:" , final_value);
-            lt[i][color][2] = LessEqThan(20);
-            lt[i][color][3] = LessEqThan(20);
+            lt[i][color][2] = LessEqThan(13);
+            lt[i][color][3] = LessEqThan(13);
 
-            lt[i][color][2].in[1] <== 1000;
-            lt[i][color][2].in[0] <== final_value - 1000 * bright[i][color];
+            lt[i][color][2].in[1] <== 10;
+            lt[i][color][2].in[0] <== final_value - 10 * bright[i][color];
             lt[i][color][2].out === 1;
 
-            lt[i][color][3].in[1] <== 1000;
-            lt[i][color][3].in[0] <== 1000 * bright[i][color] - final_value;
+            lt[i][color][3].in[1] <== 10;
+            lt[i][color][3].in[0] <== 10 * bright[i][color] - final_value;
             lt[i][color][3].out === 1; 
         }
     }

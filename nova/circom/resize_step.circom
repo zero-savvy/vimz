@@ -42,7 +42,7 @@ template MultiplexerCrop(origSize, cropSize) {
 }
 
 
-template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized, actualHeightOrig, actualHeightResized){
+template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized){
     // public inputs
     signal input step_in[2];
     
@@ -110,7 +110,7 @@ template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized, actu
             }
         }
     }
-    // component lt[rowCountResized][decompressedwidthResized][3][2];
+    
     component lte[rowCountResized][decompressedwidthResized][3][2];
 
     for (var rgb = 0; rgb < 3; rgb++) {
@@ -150,4 +150,4 @@ template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized, actu
     step_out[1] <== next_resized_hash;
 }
 
-component main { public [step_in] } = ResizeHash(128, 64, 3, 2, 720, 480);
+component main { public [step_in] } = ResizeHash(128, 64, 3, 2);

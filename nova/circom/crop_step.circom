@@ -44,29 +44,33 @@ template MultiplexerCrop(origSize, cropSize) {
 
 template CropHash(widthOrig, widthCrop, heightCrop){
     // public inputs
-    signal input step_in[5];
+    signal input step_in[3];
     
     // private inputs
     signal input row_orig [widthOrig];
     
     //outputs
-    signal output step_out[5];
+    signal output step_out[3];
     
     signal decompressed_row_orig [widthOrig * 10];
 
     // Decode input Signals
-    signal prev_orig_hash <== step_in[0];
-    signal prev_crop_hash <== step_in[1];
-    signal row_index <== step_in[2];
-    signal crop_start_x <== step_in[3];
-    signal crop_start_y <== step_in[4];
+    var prev_orig_hash = step_in[0];
+    var prev_crop_hash = step_in[1];
+    var compressed_info = step_in[2];
+
+    component info_decomp = CropInfoDecompressor();
+    info_decomp.in <== compressed_info;
+    var row_index = info_decomp.row_index;
+    var crop_start_x = info_decomp.x;
+    var crop_start_y = info_decomp.y;
 
     // encoding signals
-    signal next_orig_hash;
-    signal next_crop_hash;
-    signal next_row_index;
-    signal same_crop_start_x;
-    signal same_crop_start_y;
+    var next_orig_hash;
+    var next_crop_hash;
+    var next_row_index;
+    var same_crop_start_x;
+    var same_crop_start_y;
 
     component orig_row_hasher = RowHasher(widthOrig);
     component trans_row_hasher = RowHasher(widthCrop);
@@ -77,7 +81,7 @@ template CropHash(widthOrig, widthCrop, heightCrop){
     orig_row_hasher.img <== row_orig;
     orig_hasher.values[0] <== prev_orig_hash;
     orig_hasher.values[1] <== orig_row_hasher.hash;
-    next_orig_hash <== orig_hasher.hash;
+    next_orig_hash = orig_hasher.hash;
 
     // ----------------------------
     // calc cropped hash
@@ -114,27 +118,25 @@ template CropHash(widthOrig, widthCrop, heightCrop){
     selector.c[1] <== trans_hasher.hash;
 
     // if the row is within the cropped area
-    component gte = GreaterEqThan(252);
+    component gte = GreaterEqThan(12);
     gte.in[0] <== row_index;
     gte.in[1] <== crop_start_y;
-    component lt = LessThan(252);
+    component lt = LessThan(12);
     lt.in[0] <== row_index;
     lt.in[1] <== crop_start_y + heightCrop;
 
     selector.s <== gte.out * lt.out;
 
-    next_crop_hash <== selector.out;
+    next_crop_hash = selector.out;
 
-    same_crop_start_x <== crop_start_x;
-    same_crop_start_y <== crop_start_y;
+    same_crop_start_x = crop_start_x;
+    same_crop_start_y = crop_start_y;
 
-    next_row_index <== row_index + 1;
+    
 
     step_out[0] <== next_orig_hash;
     step_out[1] <== next_crop_hash;
-    step_out[2] <== next_row_index;
-    step_out[3] <== same_crop_start_x;
-    step_out[4] <== same_crop_start_y;
+    step_out[2] <== compressed_info + 1;
 
     
 }

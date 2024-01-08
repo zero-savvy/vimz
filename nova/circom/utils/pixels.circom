@@ -116,6 +116,29 @@ template DecompressorCrop(){
 	out <== decomp.out;
 }
 
+template CropInfoDecompressor(){
+	
+	signal input in;
+	signal output row_index;
+	signal output x;
+	signal output y;
+
+	component toBits = Num2Bits(36);
+	component toNumX = Bits2Num(12);
+	component toNumY = Bits2Num(12);
+	component toNumIndex = Bits2Num(12);
+
+	toBits.in <== in;
+	for (var i=0; i<12; i++) {
+		toNumX.in[i] <== toBits.out[i];
+		toNumY.in[i] <== toBits.out[i+12];
+		toNumIndex.in[i] <== toBits.out[i+24];
+	}
+
+	x <== toNumX.out;
+	y <== toNumY.out;
+	row_index <== toNumIndex.out;
+}
 
 
 template Test () {

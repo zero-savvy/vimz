@@ -35,17 +35,17 @@ template ConvolveBlur(decompressedWidth) {
             var conv_value = 0;
             for (var m = 0; m < kernel_size; m++) {
                 for (var n = 0; n < kernel_size; n++) {
-                    conv_value += decompressed_row_orig[m][i + n][color] * kernel[m][n];
+                    conv_value += decompressed_row_orig[m][i + n][color]; // * kernel[m][n]; --> because all kernel values are 1 in blur!
                     // log(decompressed_row_orig[m][i + n][color], kernel[m][n]);
                 }
             }
             // log(decompressed_row_conv[i][color], conv_value);
-            lt[i][color][0] = LessEqThan(16);
+            lt[i][color][0] = LessEqThan(13);
             lt[i][color][0].in[0] <== conv_value - decompressed_row_conv[i][color] * weight;
-            lt[i][color][0].in[1] <== 9 * weight;
-            lt[i][color][1] = LessEqThan(16);
+            lt[i][color][0].in[1] <== weight;
+            lt[i][color][1] = LessEqThan(13);
             lt[i][color][1].in[0] <== decompressed_row_conv[i][color] * weight - conv_value;
-            lt[i][color][1].in[1] <== 9 * weight;
+            lt[i][color][1].in[1] <== weight;
 
             lt[i][color][0].out === 1;
             lt[i][color][1].out === 1;
@@ -82,15 +82,17 @@ template ConvolveSharpen(decompressedWidth) {
             var conv_value = 0;
             for (var m = 0; m < kernel_size; m++) {
                 for (var n = 0; n < kernel_size; n++) {
-                    conv_value += decompressed_row_orig[m][i + n][color] * kernel[m][n];
+                    if (kernel[m][n] != 0) {
+                        conv_value += decompressed_row_orig[m][i + n][color] * kernel[m][n];
+                    }
                 }
             }
             // log(decompressed_row_conv[i][color], conv_value);
 
             // Clip the value to [0..255] range
             // find sign of r_adjusted
-            ltt[i][color][0] = LessEqThan(32);
-            ltt[i][color][1] = LessEqThan(32);
+            ltt[i][color][0] = LessEqThan(12);
+            ltt[i][color][1] = LessEqThan(12);
             ltt[i][color][0].in[1] <== 0 - conv_value;
             ltt[i][color][0].in[0] <==  conv_value;
             ltt[i][color][1].in[0] <== 255;
@@ -109,12 +111,12 @@ template ConvolveSharpen(decompressedWidth) {
 
             var final_value = selector[i][color].out;
 
-            lt[i][color][0] = LessEqThan(16);
+            lt[i][color][0] = LessEqThan(9);
             lt[i][color][0].in[0] <== final_value - decompressed_row_conv[i][color];
-            lt[i][color][0].in[1] <== 9;
-            lt[i][color][1] = LessEqThan(16);
+            lt[i][color][0].in[1] <== 1;
+            lt[i][color][1] = LessEqThan(9);
             lt[i][color][1].in[0] <== decompressed_row_conv[i][color] - final_value;
-            lt[i][color][1].in[1] <== 9;
+            lt[i][color][1].in[1] <== 1;
 
             lt[i][color][0].out === 1;
             lt[i][color][1].out === 1;

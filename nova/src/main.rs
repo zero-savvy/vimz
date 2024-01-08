@@ -23,9 +23,6 @@ struct ZKronoInputContrast {
     original: Vec<Vec<String>>,
     transformed: Vec<Vec<String>>,
     factor: u64,
-    r_mean: u64,
-    g_mean: u64,
-    b_mean: u64,
 }
 
 #[derive(Deserialize)]
@@ -38,8 +35,7 @@ struct ZKronoInputBrightness {
 #[derive(Deserialize)]
 struct ZKronoInputCrop {
     original: Vec<Vec<String>>,
-    x: u64,
-    y: u64,
+    info: u64,
 }
 
 
@@ -74,9 +70,7 @@ fn fold_fold_fold(selected_function: String,
         let input_data: ZKronoInputCrop = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
         start_public_input.push(F::<G1>::from(0));
         start_public_input.push(F::<G1>::from(0));
-        start_public_input.push(F::<G1>::from(0));
-        start_public_input.push(F::<G1>::from(input_data.x));  // x
-        start_public_input.push(F::<G1>::from(input_data.y));  // y
+        start_public_input.push(F::<G1>::from(input_data.info));  // x
         for i in 0..iteration_count {
             let mut private_input = HashMap::new();
             // private_input.insert("adder".to_string(), json!(i+2));
@@ -101,9 +95,6 @@ fn fold_fold_fold(selected_function: String,
         if selected_function == "contrast" {
             let input_data: ZKronoInputContrast = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
             start_public_input.push(F::<G1>::from(input_data.factor));  // constrast factor
-            start_public_input.push(F::<G1>::from(input_data.r_mean));  // r_mean
-            start_public_input.push(F::<G1>::from(input_data.b_mean));  // b_mean
-            start_public_input.push(F::<G1>::from(input_data.g_mean));  // g_mean
             for i in 0..iteration_count {
                 let mut private_input = HashMap::new();
                 // private_input.insert("adder".to_string(), json!(i+2));

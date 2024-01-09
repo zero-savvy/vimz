@@ -38,6 +38,11 @@ struct ZKronoInputCrop {
     info: u64,
 }
 
+#[derive(Deserialize)]
+struct ZKronoInputCropOpt {
+    original: Vec<Vec<String>>,
+}
+
 
 fn fold_fold_fold(selected_function: String,
             circuit_filepath: String,
@@ -68,10 +73,10 @@ fn fold_fold_fold(selected_function: String,
 
     if selected_function == "crop" {
         // iteration_count = 180;
-        let input_data: ZKronoInputCrop = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+        let input_data: ZKronoInputCropOpt = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
         start_public_input.push(F::<G1>::from(0));
         start_public_input.push(F::<G1>::from(0));
-        start_public_input.push(F::<G1>::from(input_data.info));  // x|y|index
+        start_public_input.push(F::<G1>::from(0));  // x|y|index
         for i in 0..iteration_count {
             let mut private_input = HashMap::new();
             // private_input.insert("adder".to_string(), json!(i+2));

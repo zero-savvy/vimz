@@ -41,6 +41,8 @@ struct ZKronoInputCrop {
 #[derive(Deserialize)]
 struct ZKronoInputCropOpt {
     original: Vec<Vec<String>>,
+    info: u64,
+    hash: u64,
 }
 
 
@@ -72,9 +74,9 @@ fn fold_fold_fold(selected_function: String,
     let mut start_public_input: Vec<F::<G1>> = Vec::new();
 
     if selected_function == "crop" {
-        // iteration_count = 180;
-        let input_data: ZKronoInputCrop = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
-        start_public_input.push(F::<G1>::from(0));
+        iteration_count = 480;
+        let input_data: ZKronoInputCropOpt = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+        start_public_input.push(F::<G1>::from(input_data.hash));
         start_public_input.push(F::<G1>::from(0));
         start_public_input.push(F::<G1>::from(input_data.info));  // x|y|index
         for i in 0..iteration_count {
@@ -307,14 +309,29 @@ fn main() {
     let input_filepath = matches.value_of("input").unwrap();
     let selected_function = matches.value_of("function").unwrap();
 
-    println!("     _  __                        ");
-    println!(" ___| |/ /_ __ ___  _ __   ___    ");
-    println!("|_  / ' /| '__/ _ \\| '_ \\ / _ \\ ");
-    println!(" / /| . \\| | | (_) | | | | (_) |  ");
-    println!("/___|_|\\_\\_|  \\___/|_| |_|\\___/  v1.0.0");
-                                                 
+    // println!("     _  __                        ");
+    // println!(" ___| |/ /_ __ ___  _ __   ___    ");
+    // println!("|_  / ' /| '__/ _ \\| '_ \\ / _ \\ ");
+    // println!(" / /| . \\| | | (_) | | | | (_) |  ");
+    // println!("/___|_|\\_\\_|  \\___/|_| |_|\\___/  v1.0.0");
 
-    println!(" ___________________________");
+    println!(" ________________________________________________");
+    // println!("                                              ");
+    // println!("  ooooo  oooo ooooo oooo     oooo             ");
+    // println!("   888    88   888   888o   o888  ooooooooooo ");
+    // println!("    888  88    888   88 888o8 88       8888   ");
+    // println!("     88888     888   88  888  88    8888      ");
+    // println!("      888     o888o o88o  8  o88o o888ooooooo ");
+
+
+
+    println!("                                     ");
+    println!(" ██     ██  ██  ███    ███  ████████ ");
+    println!(" ██     ██  ██  ████  ████      ███  ");
+    println!("  ██   ██   ██  ██ ████ ██     ██    ");
+    println!("   ██ ██    ██  ██  ██  ██   ███     ");
+    println!("    ███     ██  ██      ██  ████████ v1.1.0 █████");
+    println!(" ________________________________________________");
     println!("| Input file: {}", input_filepath);
     println!("| Ouput file: {}", output_filepath);
     println!("| Selected function: {}", selected_function);

@@ -315,7 +315,7 @@ fn main() {
     // println!(" / /| . \\| | | (_) | | | | (_) |  ");
     // println!("/___|_|\\_\\_|  \\___/|_| |_|\\___/  v1.0.0");
 
-    println!(" ________________________________________________");
+    println!(" ________________________________________________________");
     // println!("                                              ");
     // println!("  ooooo  oooo ooooo oooo     oooo             ");
     // println!("   888    88   888   888o   o888  ooooooooooo ");
@@ -326,12 +326,12 @@ fn main() {
 
 
     println!("                                     ");
-    println!(" ██     ██  ██  ███    ███  ████████ ");
-    println!(" ██     ██  ██  ████  ████      ███  ");
-    println!("  ██   ██   ██  ██ ████ ██     ██    ");
-    println!("   ██ ██    ██  ██  ██  ██   ███     ");
-    println!("    ███     ██  ██      ██  ████████ v1.1.0 █████");
-    println!(" ________________________________________________");
+    println!(" ██     ██  ██  ███    ███  ████████   Verifiable   Image");
+    println!(" ██     ██  ██  ████  ████      ███    Manipulation based");
+    println!("  ██   ██   ██  ██ ████ ██     ██      on  Zeor-Knowledge");
+    println!("   ██ ██    ██  ██  ██  ██   ███                         ");
+    println!("    ███     ██  ██      ██  ████████████ v1.1.0 █████████");
+    println!(" ________________________________________________________");
     println!("| Input file: {}", input_filepath);
     println!("| Ouput file: {}", output_filepath);
     println!("| Selected function: {}", selected_function);

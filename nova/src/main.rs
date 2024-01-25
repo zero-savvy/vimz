@@ -55,7 +55,7 @@ fn fold_fold_fold(selected_function: String,
     type G2 = pasta_curves::vesta::Point;
 
     println!(
-        "Running test with witness generator: {} and group: {}",
+        "Running NOVA with witness generator: {} and group: {}",
         witness_gen_filepath,
         std::any::type_name::<G1>()
     );
@@ -251,10 +251,10 @@ fn fold_fold_fold(selected_function: String,
 }
 
 fn main() {
-    let matches = App::new("zKrono")
-        .version("1.0")
+    let matches = App::new("VIMz")
+        .version("v1.1.0")
         .author("Zero-Savvy")
-        .about("Prove the truthfulness of your media! \n The naming rationale is: ZK + Chronicles ==> Pronounciation: ZI-KRONO :D")
+        .about("Prove the truthfulness of your media! \n The naming rationale: Verifiable Image Manipulation based on ZKP. \n Pronounciation: /ˈwɪmzi/, just like whimsy :D")
         .arg(
             Arg::with_name("input")
             .required(true)
@@ -309,23 +309,8 @@ fn main() {
     let input_filepath = matches.value_of("input").unwrap();
     let selected_function = matches.value_of("function").unwrap();
 
-    // println!("     _  __                        ");
-    // println!(" ___| |/ /_ __ ___  _ __   ___    ");
-    // println!("|_  / ' /| '__/ _ \\| '_ \\ / _ \\ ");
-    // println!(" / /| . \\| | | (_) | | | | (_) |  ");
-    // println!("/___|_|\\_\\_|  \\___/|_| |_|\\___/  v1.0.0");
-
     println!(" ________________________________________________________");
-    // println!("                                              ");
-    // println!("  ooooo  oooo ooooo oooo     oooo             ");
-    // println!("   888    88   888   888o   o888  ooooooooooo ");
-    // println!("    888  88    888   88 888o8 88       8888   ");
-    // println!("     88888     888   88  888  88    8888      ");
-    // println!("      888     o888o o88o  8  o88o o888ooooooo ");
-
-
-
-    println!("                                     ");
+    println!("                                                         ");
     println!(" ██     ██  ██  ███    ███  ████████   Verifiable   Image");
     println!(" ██     ██  ██  ████  ████      ███    Manipulation based");
     println!("  ██   ██   ██  ██ ████ ██     ██      on  Zeor-Knowledge");
@@ -337,7 +322,7 @@ fn main() {
     println!("| Selected function: {}", selected_function);
     println!("| Circuit file: {}", circuit_filepath);
     println!("| Witness generator: {}", witness_gen_filepath);
-    println!(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
+    println!(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
 
 
     fold_fold_fold(selected_function.to_string().clone(),
@@ -346,12 +331,4 @@ fn main() {
                 output_filepath.to_string(),
                 input_filepath.to_string()
             );
-
-    // let circuit_filepath = format!("examples/toy/{}/toy.r1cs", group_name);
-    // for witness_gen_filepath in [
-    //     format!("examples/toy/{}/toy_cpp/toy", group_name),
-    //     format!("examples/toy/{}/toy_js/toy.wasm", group_name),
-    // ] {
-    //     run_test(circuit_filepath.clone(), witness_gen_filepath);
-    // }
 }

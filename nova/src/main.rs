@@ -74,6 +74,18 @@ fn fold_fold_fold(selected_function: String,
     let mut start_public_input: Vec<F::<G1>> = Vec::new();
 
     if selected_function == "crop" {
+        // iteration_count = 480;
+        let input_data: ZKronoInputCrop = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+        start_public_input.push(F::<G1>::from(0));
+        start_public_input.push(F::<G1>::from(0));
+        start_public_input.push(F::<G1>::from(input_data.info));  // x|y|index
+        for i in 0..iteration_count {
+            let mut private_input = HashMap::new();
+            // private_input.insert("adder".to_string(), json!(i+2));
+            private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
+            private_inputs.push(private_input);
+        }
+    } else if selected_function == "optimizedcrop" {
         iteration_count = 480;
         let input_data: ZKronoInputCropOpt = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
         start_public_input.push(F::<G1>::from(input_data.hash));
@@ -299,7 +311,7 @@ fn main() {
             .value_name("FUNCTION")
             .help("The transformation function.")
             .takes_value(true)
-            .possible_values(&["crop", "greyscale", "resize", "color_transform", "sharpen", "contrast", "blur", "brightness"])
+            .possible_values(&["crop", "optimizedcrop", "greyscale", "resize", "color_transform", "sharpen", "contrast", "blur", "brightness"])
         )
         .get_matches();
 

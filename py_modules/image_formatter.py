@@ -270,32 +270,38 @@ if image_path:
         output_path = 'transformation_crop.json'  # Path to save the cropped image
         x = int(input("Enter x coordination:"))
         y = int(input("Enter y coordination:"))
-        crop_size = int(input("Enter crop_size:"))
+        crop_size = int(input("Enter crop_size: 1) SD, 2) HD, 3) FHD: "))
         if crop_size == 1:
             w = 640
             h = 480
         elif crop_size == 2:
             w = 1280
             h = 720
+        elif crop_size == 3:
+            w = 1920
+            h = 1080
         else:
-            print("The entered command was wrong. It should an Integer from 1 to 2.")
+            print("The entered command was wrong. It should an Integer from 1 to 3.")
             exit()
         compressed_transformed_image = crop_image(image_path, x, y, w, h)
         print("Applied CROP filter successfully.")
 
-        out["info"] = x * 2^24 + y * 2*12
+        out["info"] = x * 2**24 + y * 2**12
 
     elif cmd == 2:
         output_path = 'transformation_resize.json'  # Path to save the resized image
-        new_size = int(input("Enter resize: 1) HD --> SD, 2) FHD --> HD: "))
+        new_size = int(input("Enter resize: 1) HD --> SD, 2) FHD --> HD, 3) 4K --> FHD: "))
         if new_size == 1:
             w = 640
             h = 480
         elif new_size == 2:
             w = 1280
             h = 720
+        elif new_size == 3:
+            w = 1920
+            h = 1080
         else:
-            print("The entered command was wrong. It should an Integer from 1 to 2.")
+            print("The entered command was wrong. It should an Integer from 1 to 3.")
         compressed_transformed_image = resize_image(image_path, h, w)
         print("Applied RESIZE filter successfully.")
 

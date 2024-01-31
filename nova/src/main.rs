@@ -50,7 +50,8 @@ fn fold_fold_fold(selected_function: String,
             circuit_filepath: String,
             witness_gen_filepath: String,
             output_file_path: String,
-            input_file_path: String) {
+            input_file_path: String,
+            resolution: String) {
     type G1 = pasta_curves::pallas::Point;
     type G2 = pasta_curves::vesta::Point;
 
@@ -59,7 +60,10 @@ fn fold_fold_fold(selected_function: String,
         witness_gen_filepath,
         std::any::type_name::<G1>()
     );
-    let mut iteration_count = 720;
+    let mut iteration_count = 720; // HD
+    if resolution == "4K" {
+        iteration_count = 2160;
+    }
     let root = current_dir().unwrap();
 
     let circuit_file = root.join(circuit_filepath);
@@ -100,6 +104,9 @@ fn fold_fold_fold(selected_function: String,
     } else if selected_function == "resize" {
         let input_data: ZKronoInput = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
         iteration_count = 240;
+        if resolution == "4K" {
+            iteration_count = 1080;
+        }
         start_public_input.push(F::<G1>::from(0));
         start_public_input.push(F::<G1>::from(0));
         for i in 0..iteration_count {
@@ -313,6 +320,16 @@ fn main() {
             .takes_value(true)
             .possible_values(&["crop", "optimizedcrop", "greyscale", "resize", "color_transform", "sharpen", "contrast", "blur", "brightness"])
         )
+        .arg(
+            Arg::with_name("resolution")
+            .required(true)
+            .short("r")
+            .long("resolution")
+            .value_name("RESOLUTION")
+            .help("The resolution of the image.")
+            .takes_value(true)
+            .possible_values(&["SD", "HD", "FHD", "4K"])
+        )
         .get_matches();
 
     let witness_gen_filepath = matches.value_of("witnessgenerator").unwrap();
@@ -320,6 +337,7 @@ fn main() {
     let output_filepath = matches.value_of("output").unwrap();
     let input_filepath = matches.value_of("input").unwrap();
     let selected_function = matches.value_of("function").unwrap();
+    let resolution = matches.value_of("resolution").unwrap();
 
     println!(" ________________________________________________________");
     println!("                                                         ");
@@ -334,6 +352,7 @@ fn main() {
     println!("| Selected function: {}", selected_function);
     println!("| Circuit file: {}", circuit_filepath);
     println!("| Witness generator: {}", witness_gen_filepath);
+    println!("| Image resolution: {}", resolution);
     println!(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
 
 
@@ -341,6 +360,7 @@ fn main() {
                 circuit_filepath.to_string().clone(),
                 witness_gen_filepath.to_string(),
                 output_filepath.to_string(),
-                input_filepath.to_string()
+                input_filepath.to_string(),
+                resolution.to_string()
             );
 }

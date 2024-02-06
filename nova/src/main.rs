@@ -112,9 +112,15 @@ fn fold_fold_fold(selected_function: String,
         for i in 0..iteration_count {
             let mut private_input = HashMap::new();
             // private_input.insert("adder".to_string(), json!(i+2));
-            private_input.insert("row_orig".to_string(), json!(input_data.original[(i*3)..(i*3)+3]));
-            private_input.insert("row_tran".to_string(), json!(input_data.transformed[(i*2)..(i*2)+2]));
+            if resolution == "HD" {
+                private_input.insert("row_orig".to_string(), json!(input_data.original[(i*3)..(i*3)+3]));
+                private_input.insert("row_tran".to_string(), json!(input_data.transformed[(i*2)..(i*2)+2]));
+            } else if resolution == "4K"{
+                private_input.insert("row_orig".to_string(), json!(input_data.original[(i*2)..(i*2)+2]));
+                private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
+            }
             private_inputs.push(private_input);
+
         }
     } else {
         start_public_input.push(F::<G1>::from(0));

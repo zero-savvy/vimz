@@ -141,4 +141,4 @@ template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized){
     step_out[1] <== next_resized_hash;
 }
 
-component main { public [step_in] } = ResizeHash(128, 64, 3, 2);
+component main { public [step_in] } = ResizeHash(384, 192, 2, 1);

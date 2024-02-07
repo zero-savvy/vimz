@@ -226,24 +226,42 @@ def resize_image(image_path, new_height:int, new_width: int):
         # Initialize the new image array
         new_img_array = np.zeros((new_height, new_width, channels), dtype=np.uint8)
 
-        # Perform bilinear interpolation
-        for i in range(new_height):
-            for j in range(new_width):
-                x_l = int(j * x_ratio)
-                x_h = int(j * x_ratio) + 1
-                y_l = int(i * y_ratio)
-                y_h = int(i * y_ratio) + 1
-                
-                a = img_array[y_l, x_l]
-                b = img_array[y_l, x_h]
-                c = img_array[y_h, x_l]
-                d = img_array[y_h, x_h]
+        if height == 720:
+            # Perform bilinear interpolation
+            for i in range(new_height):
+                for j in range(new_width):
+                    x_l = int(j * x_ratio)
+                    x_h = int(j * x_ratio) + 1
+                    y_l = int(i * y_ratio)
+                    y_h = int(i * y_ratio) + 1
+                    
+                    a = img_array[y_l, x_l]
+                    b = img_array[y_l, x_h]
+                    c = img_array[y_h, x_l]
+                    d = img_array[y_h, x_h]
 
-                weight = 2 if i % 2 == 0 else 1
-                weight = float(weight) / 3
-                summ = a * weight + b * weight \
-                    + c * (1 - weight) + d * (1 - weight)
-                new_img_array[i, j] = summ / 2
+                    weight = 2 if i % 2 == 0 else 1
+                    weight = float(weight) / 3
+                    summ = a * weight + b * weight \
+                        + c * (1 - weight) + d * (1 - weight)
+                    new_img_array[i, j] = summ / 2
+        else:
+            # Perform bilinear interpolation
+            for i in range(new_height):
+                for j in range(new_width):
+                    x_l = int(j * x_ratio)
+                    x_h = int(j * x_ratio) + 1
+                    y_l = int(i * y_ratio)
+                    y_h = int(i * y_ratio) + 1
+                    
+                    a = img_array[y_l, x_l]
+                    b = img_array[y_l, x_h]
+                    c = img_array[y_h, x_l]
+                    d = img_array[y_h, x_h]
+
+                    weight = float(1) / 2
+                    summ = a * weight + b * weight + c * weight + d * weight
+                    new_img_array[i, j] = summ / 2
 
         plot_images_side_by_side_auto_size(img_array, new_img_array)
 

@@ -25,12 +25,16 @@ fi
 
 # Iterate over files matching the pattern and run commands
 for file in "${file_list[@]}"; do
-    echo "$file"
+    # echo "$file"
     if [ -f "$file" ]; then
         echo " "
         echo -e "\033[1;34m==================================================\033[0m"
         echo -e "\033[1;34mProcessing file: $file\033[0m"
         echo -e "\033[1;34m==================================================\033[0m"
+
+        # Start timing
+        start_time=$(date +%s.%N)
+
         circom $file --r1cs --wasm --sym --c --prime vesta
         filename=$(basename -- "$file")
         filename_no_extension="${filename%.*}"
@@ -41,5 +45,8 @@ for file in "${file_list[@]}"; do
             echo -e "\033[1;32mRunning make in $cpp_directory\033[0m"
             make
         )
+        end_time=$(date +%s.%N)
+        elapsed_time=$(echo "$end_time - $start_time" | bc)
+        echo -e "\033[1;34mTime taken: $elapsed_time seconds\033[0m"
     fi
 done

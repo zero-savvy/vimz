@@ -176,8 +176,12 @@ fn fold_fold_fold(selected_function: String,
 
     
 
-
+    let start = Instant::now();
     let pp: PublicParams<G1, G2, _, _> = create_public_params(r1cs.clone());
+    println!(
+        "Creating keys from R1CS took {:?}",
+        start.elapsed()
+    );
 
     println!(
         "Number of constraints per step (primary circuit): {}",

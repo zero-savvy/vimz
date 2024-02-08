@@ -280,9 +280,8 @@ if image_path:
         "original": compressed_original_image,
     }
     print("Image compressed successfully.")
-    cmd = int(input("Enter your command (default[1]): 1) crop, 2) resize, 3) greyscale, 4) rotate, 5) flip, " 
-                "6) censor, 7) change color space, 8) brightness, 9) contrast, 10) sharpen, 11) blur, "
-                "12) translate: ") or "1")
+    cmd = int(input("Enter your command (default[1]): 1) crop, 2) resize, 3) greyscale, 4) brightness,"
+                    " 5) contrast, 6) sharpen, 7) blur: ") or "1")
     
     if cmd == 1:
         output_path = 'transformation_crop.json'  # Path to save the cropped image
@@ -308,18 +307,15 @@ if image_path:
 
     elif cmd == 2:
         output_path = 'transformation_resize.json'  # Path to save the resized image
-        new_size = int(input("Enter resize: 1) HD --> SD, 2) FHD --> HD, 3) 4K --> FHD: "))
+        new_size = int(input("Enter resize: 1) HD --> SD, 2) 4K --> FHD: "))
         if new_size == 1:
             w = 640
             h = 480
         elif new_size == 2:
-            w = 1280
-            h = 720
-        elif new_size == 3:
             w = 1920
             h = 1080
         else:
-            print("The entered command was wrong. It should an Integer from 1 to 3.")
+            print("The entered command was wrong. It should an Integer from 1 to 2.")
         compressed_transformed_image = resize_image(image_path, h, w)
         print("Applied RESIZE filter successfully.")
 
@@ -333,7 +329,7 @@ if image_path:
         out["transformed"] = compressed_transformed_image
 
 
-    elif cmd == 8:
+    elif cmd == 4:
         output_path = 'transformation_brightness.json'  # Path to save the cropped image
         desired_brightness = float(input("Enter desired brightness factor (1.00 = no effect):"))
         compressed_transformed_image = adjust_brightness(image_path, desired_brightness)
@@ -343,7 +339,7 @@ if image_path:
         out["factor"] = int(desired_brightness * 10)
 
 
-    elif cmd == 9:
+    elif cmd == 5:
         output_path = 'transformation_contrast.json'  # Path to save the cropped image
         desired_contrast = float(input("Enter desired contrast (1.00 = no effect):"))
         compressed_transformed_image = adjust_contrast(image_path, desired_contrast)
@@ -352,7 +348,7 @@ if image_path:
         out["transformed"] = compressed_transformed_image
         out["factor"] = int(desired_contrast*10)
 
-    elif cmd == 10:
+    elif cmd == 6:
         output_path = 'transformation_sharpen.json'  # Path to save the cropped image
         compressed_transformed_image, compressed_zeros = sharppen_image(image_path)
         print("Applied SHARPNESS filter successfully.")
@@ -360,7 +356,7 @@ if image_path:
         out["transformed"] = compressed_transformed_image
         out["original"] = compressed_zeros + out["original"] + compressed_zeros
 
-    elif cmd == 11:
+    elif cmd == 7:
         output_path = 'transformation_blur.json'  # Path to save the cropped image
         compressed_transformed_image, compressed_zeros = blur_image(image_path)
         print("Applied BLUR filter successfully.")
@@ -368,15 +364,8 @@ if image_path:
         out["transformed"] = compressed_transformed_image
         out["original"] = compressed_zeros + out["original"] + compressed_zeros
 
-    elif cmd == 12:
-        output_path = 'transformation_translate.json'  # Path to save the cropped image
-        compressed_transformed_image = convert_to_grayscale(image_path)
-        print("Applied TRANSLATE filter successfully.")
-        
-        out["transformed"] = compressed_transformed_image
-
     else:
-        print("The entered command was wrong. It should an Integer from 1 to 12.")
+        print("The entered command was wrong. It should an Integer from 1 to 7.")
         exit()
     
     with open(output_path, 'w') as fp:

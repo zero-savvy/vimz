@@ -12,7 +12,7 @@ The protocol supports image resolutions of up to 4K (3840 x 2160) and higher.
 ## Acknowledgement
 1. We thank [@iden3](https://github.com/iden3) for building the awesome [Circom](https://github.com/iden3/circom) language and provding the [CircomLib](https://github.com/iden3/circomlib).
 2. This work currently heavily relies on [Nova-Scotia](https://github.com/nalinbhardwaj/Nova-Scotia)'s compiler for transforming Circom circuits to the ones comptible with [Nova](https://github.com/microsoft/Nova).
-3. The very early version of the project (solely based on Circom without NOVA) got inspired by image transformation proofs from [@TrishaDatta](https://github.com/TrishaDatta)'s Circom circuits [repository](https://github.com/TrishaDatta/circom-circuits),<br>
+3. The very early version of the project (solely based on Circom without NOVA) was inspired by image transformation proofs from [@TrishaDatta](https://github.com/TrishaDatta)'s Circom circuits [repository](https://github.com/TrishaDatta/circom-circuits),<br>
 which were related to the [medium post](https://medium.com/@boneh/using-zk-proofs-to-fight-disinformation-17e7d57fe52f) By Trisha Datta and Dan Boneh.
 
 ## License

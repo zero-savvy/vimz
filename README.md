@@ -9,6 +9,18 @@
 VIMz is currently (Dec. 2023) the fastest and most efficient program to proof authenticity of transformed/editted images w.r.t. an original source. It is built on top of [NOVA](https://github.com/microsoft/Nova) recursive zkSNARKs with the front-end of [Nova-Scotia](https://github.com/nalinbhardwaj/Nova-Scotia) (using [Circom](https://github.com/iden3/circom) language for defining internal circuits).
 The protocol supports image resolutions of up to 4K (3840 x 2160) and higher.
 
+## Installation
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+source ~/.bashrc
+nvm install v16.20.0
+npm install -g snarkjs
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y
+sudo apt install gcc
+sudo apt install build-essential 
+sudo apt-get install -y nlohmann-json3-dev 
+sudo apt install libgmp3-dev 
+sudo apt-get -y install nasm
+
 ## Acknowledgement
 1. We thank [@iden3](https://github.com/iden3) for building the awesome [Circom](https://github.com/iden3/circom) language and provding the [CircomLib](https://github.com/iden3/circomlib).
 2. This work currently heavily relies on [Nova-Scotia](https://github.com/nalinbhardwaj/Nova-Scotia)'s compiler for transforming Circom circuits to the ones comptible with [Nova](https://github.com/microsoft/Nova).

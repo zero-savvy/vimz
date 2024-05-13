@@ -1,6 +1,6 @@
 pragma circom 2.0.0;
 
-include "convolution_step.circom";
+include "utils/convolution_step.circom";
 
 
 template Blur(width, kernel_size){

@@ -9,6 +9,9 @@
 VIMz is currently (Dec. 2023) the fastest and most efficient program to proof authenticity of transformed/editted images w.r.t. an original source. It is built on top of [NOVA](https://github.com/microsoft/Nova) recursive zkSNARKs with the front-end of [Nova-Scotia](https://github.com/nalinbhardwaj/Nova-Scotia) (using [Circom](https://github.com/iden3/circom) language for defining internal circuits).
 The protocol supports image resolutions of up to 4K (3840 x 2160) and higher.
 
+## Reference
+__Ppaper:__ __[2024]__ Dziembowski, Ebrahimi, Hassanizadeh, [VIMz: Verifiable Image Manipulation using Folding-based zkSNARKs](https://eprint.iacr.org/2024/1063)
+
 ## Installation
 ### I-Prerequisites
 

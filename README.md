@@ -87,7 +87,7 @@ vimz --function <FUNCTION>
 --witnessgenerator <BINARY/WASM FILE>
 ```
 
-## Bnwchmarks
+## Benchmarks
 We've built the tools necessary for benchmarking using the samples provided in the ```samples``` directory. To do this, 
 simply Go to the main directory of vimz repo and run any number of transformations as you prefer using the provided script:
 

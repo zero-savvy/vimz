@@ -33,7 +33,7 @@ __Ppaper:__ __[2024]__ Dziembowski, Ebrahimi, Hassanizadeh, [VIMz: Verifiable Im
 ``` npm install -g snarkjs ```
 
 #### I-c) For installing Rust:
-```curl --proto ’=https’ --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y```
+```curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y```
 
 #### I-d) Additional build-essential libraries and packages:
 ```sudo apt install gcc```

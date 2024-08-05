@@ -77,7 +77,17 @@ fn fold_fold_fold(selected_function: String,
     let mut private_inputs = Vec::new();
     let mut start_public_input: Vec<F::<G1>> = Vec::new();
 
-    if selected_function == "crop" {
+    if selected_function == "hash" {
+        // iteration_count = 480;
+        let input_data: ZKronoInputCrop = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+        start_public_input.push(F::<G1>::from(0));
+        for i in 0..iteration_count {
+            let mut private_input = HashMap::new();
+            // private_input.insert("adder".to_string(), json!(i+2));
+            private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
+            private_inputs.push(private_input);
+        }
+    } else if selected_function == "crop" {
         // iteration_count = 480;
         let input_data: ZKronoInputCrop = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
         start_public_input.push(F::<G1>::from(0));
@@ -89,8 +99,9 @@ fn fold_fold_fold(selected_function: String,
             private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
             private_inputs.push(private_input);
         }
-    } else if selected_function == "optimizedcrop" {
-        iteration_count = 480;
+    }
+    else if selected_function == "fixedcrop" {
+        // iteration_count = 480;
         let input_data: ZKronoInputCropOpt = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
         start_public_input.push(F::<G1>::from(input_data.hash));
         start_public_input.push(F::<G1>::from(0));
@@ -281,7 +292,7 @@ fn fold_fold_fold(selected_function: String,
 
 fn main() {
     let matches = App::new("VIMz")
-        .version("v1.1.0")
+        .version("v1.3.0")
         .author("Zero-Savvy")
         .about("Prove the truthfulness of your media! \n The naming rationale: Verifiable Image Manipulation based on ZKP. \n Pronounciation: /ˈwɪmzi/, just like whimsy :D")
         .arg(
@@ -328,7 +339,7 @@ fn main() {
             .value_name("FUNCTION")
             .help("The transformation function.")
             .takes_value(true)
-            .possible_values(&["crop", "optimizedcrop", "grayscale", "resize", "color_transform", "sharpness", "contrast", "blur", "brightness"])
+            .possible_values(&["crop", "fixedcrop", "grayscale", "resize", "color_transform", "sharpness", "contrast", "blur", "brightness", "hash"])
         )
         .arg(
             Arg::with_name("resolution")

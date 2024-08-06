@@ -362,11 +362,11 @@ fn main() {
 
     println!(" ________________________________________________________");
     println!("                                                         ");
-    println!(" ██     ██  ██  ███    ███  ████████   Verifiable   Image");
-    println!(" ██     ██  ██  ████  ████      ███    Manipulation based");
-    println!("  ██   ██   ██  ██ ████ ██     ██      on  Zeor-Knowledge");
+    println!(" ██     ██  ██  ███    ███  ████████   Verifiable  Image");
+    println!(" ██     ██  ██  ████  ████      ███    Manipulation from");
+    println!("  ██   ██   ██  ██ ████ ██     ██      Folded   zkSNARKs");
     println!("   ██ ██    ██  ██  ██  ██   ███                         ");
-    println!("    ███     ██  ██      ██  ████████████ v1.1.0 █████████");
+    println!("    ███     ██  ██      ██  ████████████ v1.3.0 ████████");
     println!(" ________________________________________________________");
     println!("| Input file: {}", input_filepath);
     println!("| Ouput file: {}", output_filepath);

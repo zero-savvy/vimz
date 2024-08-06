@@ -64,6 +64,9 @@ fn fold_fold_fold(selected_function: String,
     if resolution == "4K" {
         iteration_count = 2160;
     }
+    if resolution == "8K" {
+        iteration_count = 4320;
+    }
     let root = current_dir().unwrap();
 
     let circuit_file = root.join(circuit_filepath);
@@ -78,7 +81,6 @@ fn fold_fold_fold(selected_function: String,
     let mut start_public_input: Vec<F::<G1>> = Vec::new();
 
     if selected_function == "hash" {
-        // iteration_count = 480;
         let input_data: ZKronoInputCrop = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
         start_public_input.push(F::<G1>::from(0));
         for i in 0..iteration_count {
@@ -88,7 +90,6 @@ fn fold_fold_fold(selected_function: String,
             private_inputs.push(private_input);
         }
     } else if selected_function == "crop" {
-        // iteration_count = 480;
         let input_data: ZKronoInputCrop = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
         start_public_input.push(F::<G1>::from(0));
         start_public_input.push(F::<G1>::from(0));
@@ -101,7 +102,6 @@ fn fold_fold_fold(selected_function: String,
         }
     }
     else if selected_function == "fixedcrop" {
-        // iteration_count = 480;
         let input_data: ZKronoInputCropOpt = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
         start_public_input.push(F::<G1>::from(input_data.hash));
         start_public_input.push(F::<G1>::from(0));
@@ -349,7 +349,7 @@ fn main() {
             .value_name("RESOLUTION")
             .help("The resolution of the image.")
             .takes_value(true)
-            .possible_values(&["SD", "HD", "FHD", "4K"])
+            .possible_values(&["SD", "HD", "FHD", "4K", "8K"])
         )
         .get_matches();
 

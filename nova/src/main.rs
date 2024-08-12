@@ -138,7 +138,7 @@ fn fold_fold_fold(selected_function: String,
         start_public_input.push(F::<G1>::from(0));
         if selected_function == "contrast" {
             let input_data: ZKronoInputContrast = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
-            start_public_input.push(F::<G1>::from(input_data.factor));  // constrast factor
+            start_public_input.push(F::<G1>::from(input_data.factor));  // contrast factor
             for i in 0..iteration_count {
                 let mut private_input = HashMap::new();
                 // private_input.insert("adder".to_string(), json!(i+2));
@@ -294,7 +294,7 @@ fn main() {
     let matches = App::new("VIMz")
         .version("v1.3.0")
         .author("Zero-Savvy")
-        .about("Prove the truthfulness of your media! \n The naming rationale: Verifiable Image Manipulation based on ZKP. \n Pronounciation: /ˈwɪmzi/, just like whimsy :D")
+        .about("Prove the truthfulness of your media! \n The naming rationale: Verifiable Image Manipulation based on ZKP. \n Pronunciation: /ˈwɪmzi/, just like whimsy :D")
         .arg(
             Arg::with_name("input")
             .required(true)
@@ -369,7 +369,7 @@ fn main() {
     println!("    ███     ██  ██      ██  ████████████ v1.3.0 ████████");
     println!(" ________________________________________________________");
     println!("| Input file: {}", input_filepath);
-    println!("| Ouput file: {}", output_filepath);
+    println!("| Output file: {}", output_filepath);
     println!("| Selected function: {}", selected_function);
     println!("| Circuit file: {}", circuit_filepath);
     println!("| Witness generator: {}", witness_gen_filepath);

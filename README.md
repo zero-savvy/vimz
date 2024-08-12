@@ -74,6 +74,10 @@ go to the circuits directory:
 
 ```cd vimz/circuits```
 
+build node modules:
+
+```npm install```
+
 build ZK circuits using the provided script in this directory:
 
 ```./build-circuits.sh```

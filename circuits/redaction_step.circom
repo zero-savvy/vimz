@@ -7,51 +7,16 @@ include "utils/pixels.circom";
 include "utils/row_hasher.circom";
 
 
-template MultiplexerCrop(origSize, cropSize) {
-    signal input inp[origSize];
-    signal input sel;
-    signal output out[cropSize];
-
-    component dec = Decoder(origSize);
-    component ep[cropSize];
-	var selector[cropSize][origSize];
-
-    for (var h=0; h<cropSize; h++) {
-        ep[h] = EscalarProduct(origSize);
-    }
-
-    sel ==> dec.inp;
-
-    for (var h=0; h<cropSize; h++) {
-		for (var k=0; k<h; k++) {
-			selector[h][k] = 0;
-		}
-		for (var k=0; k<origSize - h; k++) {
-        	selector[h][k+h] = dec.out[k];
-		}
-    }
-
-	for (var h=0; h<cropSize; h++) {
-        for (var k=0; k<origSize; k++) {
-            inp[k] ==> ep[h].in1[k];
-            selector[h][k] ==> ep[h].in2[k];
-        }
-        ep[h].out ==> out[h];
-	}
-	dec.success === 1;
-}
-
-
 template RedactionHash(block_size){
     // public inputs
-    signal input step_in[2];
+    signal input step_in[2];   // inputs: previous_original_hash, previous_transformed_hash
     
     // private inputs
-    signal input block_orig [block_size];
-    signal input hide;
+    signal input block_orig [block_size];    // block data
+    signal input hide;         // hide_the_block (0: Yes, 1:No)
     
     //outputs
-    signal output step_out[2];
+    signal output step_out[2];     // outputs: next_original_hash, next_transformed_hash
     
     // signal decompressed_row_orig [block_size * 10];
 
@@ -76,19 +41,19 @@ template RedactionHash(block_size){
     orig_hasher.values[1] <== orig_row_hasher.hash;
     next_orig_hash = orig_hasher.hash;
 
-    // compute black block hash
+    // assign black block values
     for(var i=0; i< block_size; i++){
         black_row_hasher.img[i] <== 0;
     }
 
-    component selector_redact = Mux1();
-    selector_redact.c[0] <== orig_row_hasher.hash;    // hash of the original block
-    selector_redact.c[1] <== black_row_hasher.hash;         // redaction of the block
+    component select_redact = Mux1();
+    select_redact.c[0] <== orig_row_hasher.hash;    // hash of the original block
+    select_redact.c[1] <== black_row_hasher.hash;         // redaction of the block
 
-    selector_redact.s <== hide;
+    select_redact.s <== hide;       // selection signal
 
     trans_hasher.values[0] <== prev_redact_hash;
-    trans_hasher.values[1] <== selector_redact.out;
+    trans_hasher.values[1] <== select_redact.out;
     next_redact_hash = trans_hasher.hash;
 
     step_out[0] <== next_orig_hash;

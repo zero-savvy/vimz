@@ -63,20 +63,23 @@ def redact_image(image, block_size, selected_blocks):
 def save_image(image, path):
     image.save(path)
 
-def on_click(event, canvas, grid_size, image, block_size, selected_blocks):
+def on_click(event, canvas, grid_size, image, block_size, selected_blocks, redacted_mask):
     # Calculate the block position
     block_x = event.x // block_size
     block_y = event.y // block_size
     block_position = (block_x, block_y)
+    index = block_y * grid_size[0] + block_x
 
     if block_position in selected_blocks:
         # If the block is already selected, deselect it
         selected_blocks.remove(block_position)
-        redraw_canvas(canvas, image, grid_size, block_size, selected_blocks)
+        redacted_mask[index] = 0  # Mark this block as not redacted
+        # redraw_canvas(canvas, image, grid_size, block_size, selected_blocks)
     else:
         # If the block is not selected, select it
         selected_blocks.add(block_position)
-        redraw_canvas(canvas, image, grid_size, block_size, selected_blocks)
+        redacted_mask[index] = 1  # Mark this block as redacted
+        # redraw_canvas(canvas, image, grid_size, block_size, selected_blocks)
 
 def redraw_canvas(canvas, image, grid_size, block_size, selected_blocks):
     # Update the canvas to show the selected blocks
@@ -97,7 +100,7 @@ def draw_block(canvas, block_x, block_y, block_size, outline_color):
     # Draw a rectangle around the selected block
     canvas.create_rectangle(x1, y1, x2, y2, outline=outline_color, width=2)
 
-def redacttt(image_path):
+def redacttt(image_path, redacted_mask):
     root = tk.Tk()
     root.title("Image Redaction Tool")
 
@@ -114,7 +117,7 @@ def redacttt(image_path):
 
     selected_blocks = set()
 
-    canvas.bind("<Button-1>", lambda event: on_click(event, canvas, grid_size, image, block_size, selected_blocks))
+    canvas.bind("<Button-1>", lambda event: on_click(event, canvas, grid_size, image, block_size, selected_blocks, redacted_mask))
 
     def save_transformed_image():
         # Create a copy of the original image
@@ -133,12 +136,19 @@ def redacttt(image_path):
 if __name__ == "__main__":
     image_path = get_image_path()
     compressed_original_image = compress_image(image_path)
+    # Initialize the redacted mask
+    image = load_image(image_path)
+    if image:
+        grid_size = (image.width // 10, image.height // 10)
+        redacted_mask = [0] * (grid_size[0] * grid_size[1])
+
     out = {
         "original": compressed_original_image,
     }
-    redacttt(image_path)
+    redacttt(image_path, redacted_mask)
     compressed_transformed_image = compress_image("new_redacted_image.png")
     out["transformed"] = compressed_transformed_image
-    with open("redact_input", 'w') as fp:
+    out["redacted_mask"] = redacted_mask
+    with open("redact_output.txt", 'w') as fp:
         json.dump(out, fp, indent=4)
     print("Image data dumped successfully.")

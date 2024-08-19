@@ -1,15 +1,13 @@
-use std::{collections::HashMap, env::current_dir, time::Instant, fs::File, io::{Write, Read}};
-use clap::{App, Arg};
+use std::{collections::HashMap, env::current_dir, fs::File, io::{Read, Write}, time::Instant};
 
+use clap::{App, Arg};
 use nova_scotia::{
-    circom::reader::load_r1cs, create_public_params, create_recursive_circuit, FileLocation, F, S,
+    circom::reader::load_r1cs, create_public_params, create_recursive_circuit, F, FileLocation, S,
 };
 use nova_snark::{
-    provider,
-    traits::{circuit::StepCircuit, Group},
     CompressedSNARK, PublicParams,
 };
-use serde::{Serialize, Deserialize};
+use serde::Deserialize;
 use serde_json::json;
 
 #[derive(Deserialize)]
@@ -77,115 +75,19 @@ fn fold_fold_fold(selected_function: String,
     let mut input_file_json_string = String::new();
     input_file.read_to_string(&mut input_file_json_string).expect("Unable to read from the file");
     
-    let mut private_inputs = Vec::new();
-    let mut start_public_input: Vec<F::<G1>> = Vec::new();
+    // handling code for grayscale only: START =====================================================
 
-    if selected_function == "hash" {
-        let input_data: ZKronoInputCrop = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
-        start_public_input.push(F::<G1>::from(0));
-        for i in 0..iteration_count {
-            let mut private_input = HashMap::new();
-            // private_input.insert("adder".to_string(), json!(i+2));
-            private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
-            private_inputs.push(private_input);
-        }
-    } else if selected_function == "crop" {
-        let input_data: ZKronoInputCrop = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
-        start_public_input.push(F::<G1>::from(0));
-        start_public_input.push(F::<G1>::from(0));
-        start_public_input.push(F::<G1>::from(input_data.info));  // x|y|index
-        for i in 0..iteration_count {
-            let mut private_input = HashMap::new();
-            // private_input.insert("adder".to_string(), json!(i+2));
-            private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
-            private_inputs.push(private_input);
-        }
+    let mut private_inputs = vec![];
+    let start_public_input: Vec<F::<G1>> = vec![0.into(); 2];
+
+    let input_data: ZKronoInput = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+    for i in 0..iteration_count {
+        let mut private_input = HashMap::new();
+        private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
+        private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
+        private_inputs.push(private_input);
     }
-    else if selected_function == "fixedcrop" {
-        let input_data: ZKronoInputCropOpt = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
-        start_public_input.push(F::<G1>::from(input_data.hash));
-        start_public_input.push(F::<G1>::from(0));
-        start_public_input.push(F::<G1>::from(input_data.info));  // x|y|index
-        for i in 0..iteration_count {
-            let mut private_input = HashMap::new();
-            // private_input.insert("adder".to_string(), json!(i+2));
-            private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
-            private_inputs.push(private_input);
-        }
-    } else if selected_function == "resize" {
-        let input_data: ZKronoInput = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
-        iteration_count = 240;
-        if resolution == "4K" {
-            iteration_count = 1080;
-        }
-        start_public_input.push(F::<G1>::from(0));
-        start_public_input.push(F::<G1>::from(0));
-        for i in 0..iteration_count {
-            let mut private_input = HashMap::new();
-            // private_input.insert("adder".to_string(), json!(i+2));
-            if resolution == "HD" {
-                private_input.insert("row_orig".to_string(), json!(input_data.original[(i*3)..(i*3)+3]));
-                private_input.insert("row_tran".to_string(), json!(input_data.transformed[(i*2)..(i*2)+2]));
-            } else if resolution == "4K"{
-                private_input.insert("row_orig".to_string(), json!(input_data.original[(i*2)..(i*2)+2]));
-                private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
-            }
-            private_inputs.push(private_input);
-
-        }
-    } else {
-        start_public_input.push(F::<G1>::from(0));
-        start_public_input.push(F::<G1>::from(0));
-        if selected_function == "contrast" {
-            let input_data: ZKronoInputContrast = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
-            start_public_input.push(F::<G1>::from(input_data.factor));  // contrast factor
-            for i in 0..iteration_count {
-                let mut private_input = HashMap::new();
-                // private_input.insert("adder".to_string(), json!(i+2));
-                private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
-                private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
-                private_inputs.push(private_input);
-            }
-        } else if selected_function == "brightness" {
-            let input_data: ZKronoInputBrightness = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
-            start_public_input.push(F::<G1>::from(input_data.factor));  // brightness factor
-            for i in 0..iteration_count {
-                let mut private_input = HashMap::new();
-                // private_input.insert("adder".to_string(), json!(i+2));
-                private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
-                private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
-                private_inputs.push(private_input);
-            }
-        } else if selected_function == "blur" || selected_function == "sharpness"  {
-            let input_data: ZKronoInput = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
-            start_public_input.push(F::<G1>::from(0));  // row1 hash
-            start_public_input.push(F::<G1>::from(0));  // row2 hash
-            for i in 0..iteration_count {
-                let mut private_input = HashMap::new();
-                // private_input.insert("adder".to_string(), json!(i+2));
-                private_input.insert("row_orig".to_string(), json!(input_data.original[i..i+3]));
-                private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
-                private_inputs.push(private_input);
-            }
-        } else {
-            let input_data: ZKronoInput = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
-            for i in 0..iteration_count {
-                let mut private_input = HashMap::new();
-                // private_input.insert("adder".to_string(), json!(i+2));
-                private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
-                private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
-                private_inputs.push(private_input);
-            }
-        }
-        
-    }
-    
-    // let reader = BufReader::new(file);
-
-    // Deserialize the JSON data into the defined structure
-    // let data: Data = serde_json::from_reader(reader).expect("Failed to parse JSON");
-
-    
+    // handling code for grayscale only: END =======================================================
 
     let start = Instant::now();
     let pp: PublicParams<G1, G2, _, _> = create_public_params(r1cs.clone());

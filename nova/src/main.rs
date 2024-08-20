@@ -1,12 +1,6 @@
 use std::{collections::HashMap, env::current_dir, fs::File, io::{Read, Write}, time::Instant};
 
 use clap::{App, Arg};
-use nova_scotia::{
-    circom::reader::load_r1cs, create_public_params, create_recursive_circuit, F, FileLocation, S,
-};
-use nova_snark::{
-    CompressedSNARK, PublicParams,
-};
 use serde::Deserialize;
 use serde_json::json;
 
@@ -15,34 +9,6 @@ struct ZKronoInput {
     original: Vec<Vec<String>>,
     transformed: Vec<Vec<String>>,
 }
-
-#[derive(Deserialize)]
-struct ZKronoInputContrast {
-    original: Vec<Vec<String>>,
-    transformed: Vec<Vec<String>>,
-    factor: u64,
-}
-
-#[derive(Deserialize)]
-struct ZKronoInputBrightness {
-    original: Vec<Vec<String>>,
-    transformed: Vec<Vec<String>>,
-    factor: u64,
-}
-
-#[derive(Deserialize)]
-struct ZKronoInputCrop {
-    original: Vec<Vec<String>>,
-    info: u64,
-}
-
-#[derive(Deserialize)]
-struct ZKronoInputCropOpt {
-    original: Vec<Vec<String>>,
-    info: u64,
-    hash: u64,
-}
-
 
 fn fold_fold_fold(selected_function: String,
             circuit_filepath: String,
@@ -68,7 +34,7 @@ fn fold_fold_fold(selected_function: String,
     let root = current_dir().unwrap();
 
     let circuit_file = root.join(circuit_filepath);
-    let r1cs = load_r1cs::<G1, G2>(&FileLocation::PathBuf(circuit_file));
+    // let r1cs = load_r1cs::<G1, G2>(&FileLocation::PathBuf(circuit_file));
     let witness_generator_file = root.join(witness_gen_filepath);
 
     let mut input_file = File::open(input_file_path.clone()).expect("Failed to open the file");

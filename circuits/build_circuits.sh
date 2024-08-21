@@ -35,7 +35,7 @@ for file in "${file_list[@]}"; do
         # Start timing
         start_time=$(date +%s.%N)
 
-        circom $file --r1cs --wasm --sym --c --prime vesta
+        circom $file --r1cs --wasm --sym --c
         filename=$(basename -- "$file")
         filename_no_extension="${filename%.*}"
         cpp_directory="${filename_no_extension}_cpp"

@@ -1,8 +1,28 @@
-use std::{collections::HashMap, env::current_dir, fs::File, io::{Read, Write}, time::Instant};
+use std::{env::current_dir, fs::File, io::Read, time::Instant};
+use std::str::FromStr;
 
+use ark_bn254::{Bn254, constraints::GVar, Fr, G1Projective as G1};
+use ark_groth16::Groth16;
+use ark_grumpkin::{constraints::GVar as GVar2, Projective as G2};
 use clap::{App, Arg};
 use serde::Deserialize;
-use serde_json::json;
+use sonobe::{
+    frontend::{
+        FCircuit,
+        circom::CircomFCircuit,
+    },
+    folding::{
+        nova::decider_eth::Decider,
+        nova::{Nova, PreprocessorParam},
+    },
+    commitment::{
+        pedersen::Pedersen,
+        kzg::KZG,
+    },
+    Decider as _,
+    FoldingScheme,
+    transcript::poseidon::poseidon_canonical_config,
+};
 
 #[derive(Deserialize)]
 struct ZKronoInput {
@@ -11,14 +31,11 @@ struct ZKronoInput {
 }
 
 fn fold_fold_fold(selected_function: String,
-            circuit_filepath: String,
-            witness_gen_filepath: String,
-            output_file_path: String,
-            input_file_path: String,
-            resolution: String) {
-    type G1 = pasta_curves::pallas::Point;
-    type G2 = pasta_curves::vesta::Point;
-
+                  circuit_filepath: String,
+                  witness_gen_filepath: String,
+                  output_file_path: String,
+                  input_file_path: String,
+                  resolution: String) {
     println!(
         "Running NOVA with witness generator: {} and group: {}",
         witness_gen_filepath,
@@ -34,128 +51,85 @@ fn fold_fold_fold(selected_function: String,
     let root = current_dir().unwrap();
 
     let circuit_file = root.join(circuit_filepath);
-    // let r1cs = load_r1cs::<G1, G2>(&FileLocation::PathBuf(circuit_file));
     let witness_generator_file = root.join(witness_gen_filepath);
 
     let mut input_file = File::open(input_file_path.clone()).expect("Failed to open the file");
     let mut input_file_json_string = String::new();
     input_file.read_to_string(&mut input_file_json_string).expect("Unable to read from the file");
-    
+
     // handling code for grayscale only: START =====================================================
 
     let mut private_inputs = vec![];
-    let start_public_input: Vec<F::<G1>> = vec![0.into(); 2];
+    let start_public_input: Vec<Fr> = vec![0.into(); 2];
+
+    use num_traits::Num;
 
     let input_data: ZKronoInput = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
     for i in 0..iteration_count {
-        let mut private_input = HashMap::new();
-        private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
-        private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
-        private_inputs.push(private_input);
+        let inputs = vec![input_data.original[i].clone(), input_data.transformed[i].clone()].concat();
+        let inputs = inputs.iter().map(|x| {
+            let x = x.strip_prefix("0x").unwrap();
+            let decoded = num_bigint::BigUint::from_str_radix(x, 16).unwrap().to_str_radix(10);
+            Fr::from_str(&decoded).unwrap()
+        }).collect::<Vec<_>>();
+        private_inputs.push(inputs);
     }
     // handling code for grayscale only: END =======================================================
 
+    // SONOBE code =================================================================================
+    let f_circuit_params = (circuit_file, witness_generator_file, 2, 256);
+    let f_circuit = CircomFCircuit::<Fr>::new(f_circuit_params).unwrap();
+
+    pub type N = Nova<G1, GVar, G2, GVar2, CircomFCircuit<Fr>, KZG<'static, Bn254>, Pedersen<G2>, false>;
+    pub type D = Decider<
+        G1,
+        GVar,
+        G2,
+        GVar2,
+        CircomFCircuit<Fr>,
+        KZG<'static, Bn254>,
+        Pedersen<G2>,
+        Groth16<Bn254>,
+        N,
+    >;
+
+    let poseidon_config = poseidon_canonical_config::<Fr>();
+    let mut rng = rand::rngs::OsRng;
+
+    // prepare the Nova prover & verifier params
+    let nova_preprocess_params = PreprocessorParam::new(poseidon_config, f_circuit.clone());
+    let nova_params = N::preprocess(&mut rng, &nova_preprocess_params).unwrap();
+
+    // initialize the folding scheme engine, in our case we use Nova
+    let mut nova = N::init(&nova_params, f_circuit.clone(), start_public_input).unwrap();
+
+    // prepare the Decider prover & verifier params
+    let (decider_pp, decider_vp) = D::preprocess(&mut rng, &nova_params, nova.clone()).unwrap();
+
+    // run n steps of the folding iteration
+    for (i, external_inputs_at_step) in private_inputs.into_iter().enumerate() {
+        let start = Instant::now();
+        nova.prove_step(rng, external_inputs_at_step, None)
+            .unwrap();
+        println!("Nova::prove_step {}: {:?}", i, start.elapsed());
+    }
+
     let start = Instant::now();
-    let pp: PublicParams<G1, G2, _, _> = create_public_params(r1cs.clone());
-    println!(
-        "Creating keys from R1CS took {:?}",
-        start.elapsed()
-    );
+    let proof = D::prove(rng, decider_pp, nova.clone()).unwrap();
+    println!("generated Decider proof: {:?}", start.elapsed());
 
-    println!(
-        "Number of constraints per step (primary circuit): {}",
-        pp.num_constraints().0
-    );
-    println!(
-        "Number of constraints per step (secondary circuit): {}",
-        pp.num_constraints().1
-    );
-
-    println!(
-        "Number of variables per step (primary circuit): {}",
-        pp.num_variables().0
-    );
-    println!(
-        "Number of variables per step (secondary circuit): {}",
-        pp.num_variables().1
-    );
-
-    println!("Creating a RecursiveSNARK...");
-    let start = Instant::now();
-    let recursive_snark = create_recursive_circuit(
-        FileLocation::PathBuf(witness_generator_file),
-        r1cs,
-        private_inputs,
-        start_public_input.to_vec(),
-        &pp,
+    let verified = D::verify(
+        decider_vp.clone(),
+        nova.i,
+        nova.z_0.clone(),
+        nova.z_i.clone(),
+        &nova.U_i,
+        &nova.u_i,
+        &proof,
     )
-    .unwrap();
-    println!("RecursiveSNARK creation took {:?}", start.elapsed());
-
-    // TODO: empty?
-    let z0_secondary = [F::<G2>::from(0)];
-
-    // verify the recursive SNARK
-    println!("Verifying a RecursiveSNARK...");
-    let start = Instant::now();
-    let res = recursive_snark.verify(&pp, iteration_count, &start_public_input, &z0_secondary);
-    println!(
-        "RecursiveSNARK::verify: {:?}, took {:?}",
-        res,
-        start.elapsed()
-    );
-    assert!(res.is_ok());
-
-    // produce a compressed SNARK
-    println!("Generating a CompressedSNARK using Spartan with IPA-PC...");
-    let start = Instant::now();
-
-    let (pk, vk) = CompressedSNARK::<_, _, _, _, S<G1>, S<G2>>::setup(&pp).unwrap();
-    let res = CompressedSNARK::<_, _, _, _, S<G1>, S<G2>>::prove(&pp, &pk, &recursive_snark);
-    println!(
-        "CompressedSNARK::prove: {:?}, took {:?}",
-        res.is_ok(),
-        start.elapsed()
-    );
-    assert!(res.is_ok());
-    let compressed_snark = res.unwrap();
-
-    //--- dump data ---//
-    // Create some data to serialize as JSON
-    
-    // Serialize the data to a JSON string
-    let json_string = serde_json::to_string(&compressed_snark).unwrap();
-
-    // Open a file for writing
-    let mut file = File::create(output_file_path.clone()).expect("Unable to create the file");
-
-    // Write the JSON string to the file
-    file.write_all(json_string.as_bytes()).expect("Unable to write to the file");
-
-    println!("Data has been written to output.json");
-
-    println!("-------------- Load Data --------");
-    let mut file = File::open(output_file_path.clone()).expect("Unable to open the file");
-    let mut json_string = String::new();
-    file.read_to_string(&mut json_string).expect("Unable to read from the file");
-    
-    let compressed_snark2: CompressedSNARK<_, _, _, _, _, _> = serde_json::from_str(&json_string).expect("Deserialization failed");
-
-    // verify the compressed SNARK
-    println!("Verifying a CompressedSNARK...");
-    let start = Instant::now();
-    let res = compressed_snark2.verify(
-        &vk,
-        iteration_count,
-        start_public_input.to_vec(),
-        z0_secondary.to_vec(),
-    );
-    println!(
-        "CompressedSNARK::verify: {:?}, took {:?}",
-        res.is_ok(),
-        start.elapsed()
-    );
-    assert!(res.is_ok());
+        .unwrap();
+    assert!(verified);
+    println!("Decider proof verification: {}", verified);
 }
 
 fn main() {

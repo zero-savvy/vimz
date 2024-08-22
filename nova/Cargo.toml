@@ -16,7 +16,7 @@ ark-groth16 = { version = "0.4.0" }
 num-bigint = "0.4.3"
 num-traits = "0.2.15"
 rand = "0.8.5"
-sonobe = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "7097c001fc876578be2229d3590d506858bc0069", package = "folding-schemes" }
+sonobe = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "7097c001fc876578be2229d3590d506858bc0069", package = "folding-schemes", features = ["parallel"] }
 
 [patch.crates-io]
 ark-bn254 = { git = "https://github.com/arnaucube/ark-curves-cherry-picked", branch = "cherry-pick" }

@@ -7,7 +7,7 @@ edition = "2021"
 pasta_curves = { version = "0.5" }
 serde = { version = "1.0" }
 serde_json = { version = "1.0.85" }
-clap = { version = "4.5.16" }
+clap = { version = "4.5.16", features = ["derive"] }
 
 ark-bn254 = { version = "^0.4.0", features = ["r1cs"] }
 ark-grumpkin = { version = "0.4.0", features = ["r1cs"] }

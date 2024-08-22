@@ -1,27 +1,16 @@
-use std::{env::current_dir, fs::File, io::Read, time::Instant};
-use std::str::FromStr;
+use std::{env::current_dir, fs::File, io::Read, str::FromStr, time::Instant};
 
-use ark_bn254::{Bn254, constraints::GVar, Fr, G1Projective as G1};
+use ark_bn254::{constraints::GVar, Bn254, Fr, G1Projective as G1};
 use ark_groth16::Groth16;
 use ark_grumpkin::{constraints::GVar as GVar2, Projective as G2};
 use clap::{App, Arg};
 use serde::Deserialize;
 use sonobe::{
-    frontend::{
-        FCircuit,
-        circom::CircomFCircuit,
-    },
-    folding::{
-        nova::decider_eth::Decider,
-        nova::{Nova, PreprocessorParam},
-    },
-    commitment::{
-        pedersen::Pedersen,
-        kzg::KZG,
-    },
-    Decider as _,
-    FoldingScheme,
+    commitment::{kzg::KZG, pedersen::Pedersen},
+    folding::nova::{decider_eth::Decider, Nova, PreprocessorParam},
+    frontend::{circom::CircomFCircuit, FCircuit},
     transcript::poseidon::poseidon_canonical_config,
+    Decider as _, FoldingScheme,
 };
 
 #[derive(Deserialize)]
@@ -30,12 +19,14 @@ struct ZKronoInput {
     transformed: Vec<Vec<String>>,
 }
 
-fn fold_fold_fold(selected_function: String,
-                  circuit_filepath: String,
-                  witness_gen_filepath: String,
-                  output_file_path: String,
-                  input_file_path: String,
-                  resolution: String) {
+fn fold_fold_fold(
+    selected_function: String,
+    circuit_filepath: String,
+    witness_gen_filepath: String,
+    output_file_path: String,
+    input_file_path: String,
+    resolution: String,
+) {
     println!(
         "Running NOVA with witness generator: {} and group: {}",
         witness_gen_filepath,
@@ -55,7 +46,9 @@ fn fold_fold_fold(selected_function: String,
 
     let mut input_file = File::open(input_file_path.clone()).expect("Failed to open the file");
     let mut input_file_json_string = String::new();
-    input_file.read_to_string(&mut input_file_json_string).expect("Unable to read from the file");
+    input_file
+        .read_to_string(&mut input_file_json_string)
+        .expect("Unable to read from the file");
 
     // handling code for grayscale only: START =====================================================
 
@@ -64,14 +57,24 @@ fn fold_fold_fold(selected_function: String,
 
     use num_traits::Num;
 
-    let input_data: ZKronoInput = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+    let input_data: ZKronoInput =
+        serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
     for i in 0..iteration_count {
-        let inputs = vec![input_data.original[i].clone(), input_data.transformed[i].clone()].concat();
-        let inputs = inputs.iter().map(|x| {
-            let x = x.strip_prefix("0x").unwrap();
-            let decoded = num_bigint::BigUint::from_str_radix(x, 16).unwrap().to_str_radix(10);
-            Fr::from_str(&decoded).unwrap()
-        }).collect::<Vec<_>>();
+        let inputs = vec![
+            input_data.original[i].clone(),
+            input_data.transformed[i].clone(),
+        ]
+        .concat();
+        let inputs = inputs
+            .iter()
+            .map(|x| {
+                let x = x.strip_prefix("0x").unwrap();
+                let decoded = num_bigint::BigUint::from_str_radix(x, 16)
+                    .unwrap()
+                    .to_str_radix(10);
+                Fr::from_str(&decoded).unwrap()
+            })
+            .collect::<Vec<_>>();
         private_inputs.push(inputs);
     }
     // handling code for grayscale only: END =======================================================
@@ -80,7 +83,8 @@ fn fold_fold_fold(selected_function: String,
     let f_circuit_params = (circuit_file, witness_generator_file, 2, 256);
     let f_circuit = CircomFCircuit::<Fr>::new(f_circuit_params).unwrap();
 
-    pub type N = Nova<G1, GVar, G2, GVar2, CircomFCircuit<Fr>, KZG<'static, Bn254>, Pedersen<G2>, false>;
+    pub type N =
+        Nova<G1, GVar, G2, GVar2, CircomFCircuit<Fr>, KZG<'static, Bn254>, Pedersen<G2>, false>;
     pub type D = Decider<
         G1,
         GVar,
@@ -109,8 +113,7 @@ fn fold_fold_fold(selected_function: String,
     // run n steps of the folding iteration
     for (i, external_inputs_at_step) in private_inputs.into_iter().enumerate() {
         let start = Instant::now();
-        nova.prove_step(rng, external_inputs_at_step, None)
-            .unwrap();
+        nova.prove_step(rng, external_inputs_at_step, None).unwrap();
         println!("Nova::prove_step {}: {:?}", i, start.elapsed());
     }
 
@@ -127,7 +130,7 @@ fn fold_fold_fold(selected_function: String,
         &nova.u_i,
         &proof,
     )
-        .unwrap();
+    .unwrap();
     assert!(verified);
     println!("Decider proof verification: {}", verified);
 }
@@ -218,12 +221,12 @@ fn main() {
     println!("| Image resolution: {}", resolution);
     println!(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
 
-
-    fold_fold_fold(selected_function.to_string().clone(),
-                circuit_filepath.to_string().clone(),
-                witness_gen_filepath.to_string(),
-                output_filepath.to_string(),
-                input_filepath.to_string(),
-                resolution.to_string()
-            );
+    fold_fold_fold(
+        selected_function.to_string().clone(),
+        circuit_filepath.to_string().clone(),
+        witness_gen_filepath.to_string(),
+        output_filepath.to_string(),
+        input_filepath.to_string(),
+        resolution.to_string(),
+    );
 }

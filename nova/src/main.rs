@@ -17,7 +17,6 @@ use sonobe::{
 };
 
 use crate::config::Config;
-use crate::transformation::Resolution;
 
 #[derive(Deserialize)]
 struct ZKronoInput {
@@ -31,13 +30,7 @@ fn fold_fold_fold(config: &Config) {
         config.witness_generator,
         std::any::type_name::<G1>()
     );
-    let mut iteration_count = 720; // HD
-    if config.resolution == Resolution::_4K {
-        iteration_count = 2160;
-    }
-    if config.resolution == Resolution::_8K {
-        iteration_count = 4320;
-    }
+    let iteration_count = config.resolution.iteration_count();
     let root = current_dir().unwrap();
 
     let circuit_file = root.join(&config.circuit);
@@ -59,7 +52,7 @@ fn fold_fold_fold(config: &Config) {
     let input_data: ZKronoInput =
         serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
     for i in 0..iteration_count {
-        let inputs = vec![
+        let inputs = [
             input_data.original[i].clone(),
             input_data.transformed[i].clone(),
         ]

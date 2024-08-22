@@ -1,4 +1,5 @@
 mod config;
+mod transformation;
 
 use std::{env::current_dir, fs::File, io::Read, str::FromStr, time::Instant};
 
@@ -16,6 +17,7 @@ use sonobe::{
 };
 
 use crate::config::Config;
+use crate::transformation::Resolution;
 
 #[derive(Deserialize)]
 struct ZKronoInput {
@@ -30,10 +32,10 @@ fn fold_fold_fold(config: &Config) {
         std::any::type_name::<G1>()
     );
     let mut iteration_count = 720; // HD
-    if config.resolution == "4K" {
+    if config.resolution == Resolution::_4K {
         iteration_count = 2160;
     }
-    if config.resolution == "8K" {
+    if config.resolution == Resolution::_8K {
         iteration_count = 4320;
     }
     let root = current_dir().unwrap();

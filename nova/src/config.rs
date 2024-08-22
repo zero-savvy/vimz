@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use clap::Parser;
+use crate::transformation::{Resolution, Transformation};
 
 #[derive(Parser)]
 #[command(
@@ -27,12 +28,12 @@ pub struct Config {
     pub witness_generator: PathBuf,
 
     /// The transformation function.
-    #[clap(short, long)]
-    pub function: String,
+    #[clap(short, long, value_enum)]
+    pub function: Transformation,
 
     /// The resolution of the image.
-    #[clap(short, long)]
-    pub resolution: String,
+    #[clap(short, long, value_enum)]
+    pub resolution: Resolution,
 }
 
 impl Config {
@@ -47,10 +48,10 @@ impl Config {
         println!(" ________________________________________________________");
         println!("| Input file: {:?}", self.input);
         println!("| Output file: {:?}", self.output);
-        println!("| Selected function: {}", self.function);
+        println!("| Selected function: {:?}", self.function);
         println!("| Circuit file: {:?}", self.circuit);
         println!("| Witness generator: {:?}", self.witness_generator);
-        println!("| Image resolution: {}", self.resolution);
+        println!("| Image resolution: {:?}", self.resolution);
         println!(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
     }
 }

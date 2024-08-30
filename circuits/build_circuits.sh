@@ -4,7 +4,7 @@
 target_directory="."
 
 # Set the pattern of files you want to process
-file_pattern="*.circom"
+file_pattern="grayscale_step.circom"
 
 shopt -s nullglob
 

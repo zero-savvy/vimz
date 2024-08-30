@@ -1,12 +1,13 @@
 mod config;
 mod transformation;
 
-use std::{env::current_dir, fs::File, io::Read, str::FromStr, time::Instant};
+use std::{env::current_dir, fs::File, io::Read, path::Path, str::FromStr, time::Instant};
 
 use ark_bn254::{constraints::GVar, Bn254, Fr, G1Projective as G1};
 use ark_groth16::Groth16;
 use ark_grumpkin::{constraints::GVar as GVar2, Projective as G2};
 use clap::Parser;
+use num_traits::Num;
 use serde::Deserialize;
 use sonobe::{
     commitment::{kzg::KZG, pedersen::Pedersen},
@@ -24,37 +25,39 @@ struct ZKronoInput {
     transformed: Vec<Vec<String>>,
 }
 
+impl ZKronoInput {
+    fn from_file(path: &Path) -> Self {
+        let mut input_file = File::open(path).expect("Failed to open the file");
+        let mut input_file_json_string = String::new();
+        input_file
+            .read_to_string(&mut input_file_json_string)
+            .expect("Unable to read from the file");
+        serde_json::from_str(&input_file_json_string).expect("Deserialization failed")
+    }
+}
+
 fn fold_fold_fold(config: &Config) {
     println!(
         "Running NOVA with witness generator: {:?} and group: {}",
         config.witness_generator,
         std::any::type_name::<G1>()
     );
-    let iteration_count = config.resolution.iteration_count();
-    let root = current_dir().unwrap();
 
+    let root = current_dir().unwrap();
     let circuit_file = root.join(&config.circuit);
     let witness_generator_file = root.join(&config.witness_generator);
-
-    let mut input_file = File::open(&config.input).expect("Failed to open the file");
-    let mut input_file_json_string = String::new();
-    input_file
-        .read_to_string(&mut input_file_json_string)
-        .expect("Unable to read from the file");
 
     // handling code for grayscale only: START =====================================================
 
     let mut private_inputs = vec![];
     let start_public_input: Vec<Fr> = vec![0.into(); 2];
 
-    use num_traits::Num;
-
-    let input_data: ZKronoInput =
-        serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
-    for i in 0..iteration_count {
+    let start = Instant::now();
+    let input_data = ZKronoInput::from_file(&config.input);
+    for i in 0..config.resolution.iteration_count() {
         let inputs = [
-            input_data.original[i].clone(),
-            input_data.transformed[i].clone(),
+            input_data.original[i][..4].to_vec(),
+            input_data.transformed[i][..4].to_vec(),
         ]
         .concat();
         let inputs = inputs
@@ -71,8 +74,10 @@ fn fold_fold_fold(config: &Config) {
     }
     // handling code for grayscale only: END =======================================================
 
+    println!("Prepared private inputs in {:?}", start.elapsed());
+
     // SONOBE code =================================================================================
-    let f_circuit_params = (circuit_file, witness_generator_file, 2, 256);
+    let f_circuit_params = (circuit_file, witness_generator_file, 2, 8);
     let f_circuit = CircomFCircuit::<Fr>::new(f_circuit_params).unwrap();
 
     pub type N =
@@ -93,14 +98,20 @@ fn fold_fold_fold(config: &Config) {
     let mut rng = rand::rngs::OsRng;
 
     // prepare the Nova prover & verifier params
+    let start = Instant::now();
     let nova_preprocess_params = PreprocessorParam::new(poseidon_config, f_circuit.clone());
     let nova_params = N::preprocess(&mut rng, &nova_preprocess_params).unwrap();
+    println!("Nova::preprocess: {:?}", start.elapsed());
 
     // initialize the folding scheme engine, in our case we use Nova
+    let start = Instant::now();
     let mut nova = N::init(&nova_params, f_circuit.clone(), start_public_input).unwrap();
+    println!("Nova::init: {:?}", start.elapsed());
 
     // prepare the Decider prover & verifier params
+    let start = Instant::now();
     let (decider_pp, decider_vp) = D::preprocess(&mut rng, &nova_params, nova.clone()).unwrap();
+    println!("Decider::preprocess: {:?}", start.elapsed());
 
     // run n steps of the folding iteration
     for (i, external_inputs_at_step) in private_inputs.into_iter().enumerate() {

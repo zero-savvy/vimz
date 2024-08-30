@@ -81,13 +81,13 @@ template GrayScaleHash(width){
     step_out[1] <== gray_hasher.hash; // next_grey_hash
 
     // grayscale code here ...
-    component checker = GrayScale(width);
-    checker.original <== row_orig;
-    checker.transformed <== row_tran;
+    // component checker = GrayScale(width);
+    // checker.original <== row_orig;
+    // checker.transformed <== row_tran;
 
 }
 
-component main { public [step_in] } = GrayScaleHash(128);
+component main { public [step_in] } = GrayScaleHash(4);
 
 
 

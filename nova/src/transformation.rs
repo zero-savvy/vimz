@@ -29,12 +29,13 @@ pub enum Resolution {
 
 impl Resolution {
     pub fn iteration_count(&self) -> usize {
-        match self {
-            Resolution::SD => 480,
-            Resolution::HD => 720,
-            Resolution::FHD => 1080,
-            Resolution::_4K => 2160,
-            Resolution::_8K => 4320,
-        }
+        return 5;
+        // match self {
+        //     Resolution::SD => 480,
+        //     Resolution::HD => 720,
+        //     Resolution::FHD => 1080,
+        //     Resolution::_4K => 2160,
+        //     Resolution::_8K => 4320,
+        // }
     }
 }

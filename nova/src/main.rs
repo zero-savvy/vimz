@@ -3,6 +3,7 @@ mod transformation;
 
 use std::{
     env::current_dir,
+    fs,
     fs::File,
     io::{Read, Write},
     path::Path,
@@ -11,14 +12,17 @@ use std::{
 };
 
 use ark_bn254::{constraints::GVar, Bn254, Fr, G1Projective as G1};
-use ark_groth16::Groth16;
+use ark_groth16::{Groth16, ProvingKey};
 use ark_grumpkin::{constraints::GVar as GVar2, Projective as G2};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Compress};
 use clap::Parser;
 use num_traits::Num;
 use serde::Deserialize;
 use sonobe::{
-    commitment::{kzg::KZG, pedersen::Pedersen},
+    commitment::{
+        kzg::{ProverKey, KZG},
+        pedersen::Pedersen,
+    },
     folding::nova::{decider_eth::Decider, Nova, PreprocessorParam},
     frontend::{circom::CircomFCircuit, FCircuit},
     transcript::poseidon::poseidon_canonical_config,
@@ -117,25 +121,17 @@ fn fold_fold_fold(config: &Config) {
     println!("Nova::init: {:?}", start.elapsed());
 
     // prepare the Decider prover & verifier params
-    let (decider_pp, decider_vp) = if let Ok(mut ppfile) = File::open("decider.pp") {
+    let start = Instant::now();
+    let (decider_pp, decider_vp) = if let Ok(mut ppbytes) = fs::read("decider_pp") {
         println!("Reading Decider pp and vp from file");
-        let mut bytes = vec![];
-        ppfile
-            .read(&mut bytes)
-            .expect("Failed to read from pp file");
-        let decider_pp = CanonicalDeserialize::deserialize_uncompressed(&bytes[..])
+        let decider_pp = <(ProvingKey<Bn254>, ProverKey<_>)>::deserialize_uncompressed(&*ppbytes)
             .expect("Failed to deserialize pp");
 
-        let mut vpfile = File::open("decider.vp").expect("Failed to open vp file");
-        let mut bytes = vec![];
-        vpfile
-            .read(&mut bytes)
-            .expect("Failed to read from vp file");
-        let decider_vp = CanonicalDeserialize::deserialize_uncompressed(&bytes[..])
+        let mut bytes = fs::read("decider_vp").expect("Failed to read from vp file");
+        let decider_vp = CanonicalDeserialize::deserialize_uncompressed(&*bytes)
             .expect("Failed to deserialize vp");
         (decider_pp, decider_vp)
     } else {
-        let start = Instant::now();
         let (decider_pp, decider_vp) = D::preprocess(&mut rng, &nova_params, nova.clone()).unwrap();
 
         let mut bytes = vec![0; decider_pp.serialized_size(Compress::No)];
@@ -152,10 +148,10 @@ fn fold_fold_fold(config: &Config) {
         let mut file = File::create("decider_vp").expect("Failed to create file");
         file.write_all(&bytes).expect("Failed to write to file");
 
-        println!("Decider::preprocess: {:?}", start.elapsed());
 
         (decider_pp, decider_vp)
     };
+    println!("Decider::preprocess: {:?}", start.elapsed());
 
     // run n steps of the folding iteration
     for (i, external_inputs_at_step) in private_inputs.into_iter().enumerate() {

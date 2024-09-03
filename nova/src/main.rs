@@ -1,16 +1,8 @@
-use std::{
-    env::current_dir,
-    fs::File,
-    io::{Read, Write},
-    path::Path,
-    str::FromStr,
-    time::Instant,
-};
+use std::{env::current_dir, fs::File, io::Read, path::Path, str::FromStr, time::Instant};
 
 use ark_bn254::{constraints::GVar, Bn254, Fr, G1Projective as G1};
 use ark_groth16::Groth16;
 use ark_grumpkin::{constraints::GVar as GVar2, Projective as G2};
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use clap::Parser;
 use num_traits::Num;
 use serde::Deserialize;

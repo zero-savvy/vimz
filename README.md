@@ -121,7 +121,7 @@ simply Go to the main directory of vimz repo and run any number of transformatio
 ```
 ./benchmark.sh contrast blur
      or
-./benchmark.sh resize blur shapness
+./benchmark.sh resize blur sharpness
 ```
 
 > [!NOTE]
@@ -137,7 +137,7 @@ simply Go to the main directory of vimz repo and run any number of transformatio
 ## Acknowledgement
 
 1. We thank [@iden3](https://github.com/iden3) for building the awesome [Circom](https://github.com/iden3/circom) language and providing the [CircomLib](https://github.com/iden3/circomlib).
-2. This work currently heavily relies on [Nova-Scotia](https://github.com/nalinbhardwaj/Nova-Scotia)'s compiler for transforming Circom circuits to the ones comptible with [Nova](https://github.com/microsoft/Nova).
+2. This work currently heavily relies on [Nova-Scotia](https://github.com/nalinbhardwaj/Nova-Scotia)'s compiler for transforming Circom circuits to the ones compatible with [Nova](https://github.com/microsoft/Nova).
 3. The very early version of the project (solely based on Circom without NOVA) was inspired by image transformation proofs from [@TrishaDatta](https://github.com/TrishaDatta)'s Circom circuits [repository](https://github.com/TrishaDatta/circom-circuits),<br>
    which were related to the [medium post](https://medium.com/@boneh/using-zk-proofs-to-fight-disinformation-17e7d57fe52f) By Trisha Datta and Dan Boneh.
 

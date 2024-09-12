@@ -17,9 +17,14 @@ ark-groth16 = { version = "0.4.0", features = ["parallel"] }
 num-bigint = { version = "0.4.3" }
 num-traits = { version = "0.2.15" }
 rand = { version = "0.8.5" }
-sonobe = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "7097c001fc876578be2229d3590d506858bc0069", package = "folding-schemes", features = ["parallel"] }
+sonobe = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "7097c001fc876578be2229d3590d506858bc0069", package = "folding-schemes" }
 
 [patch.crates-io]
 ark-bn254 = { git = "https://github.com/arnaucube/ark-curves-cherry-picked", branch = "cherry-pick" }
 ark-grumpkin = { git = "https://github.com/arnaucube/ark-curves-cherry-picked", branch = "cherry-pick" }
-ark-r1cs-std = { git = "https://github.com/winderica/r1cs-std", branch="cherry-pick" }
+ark-r1cs-std = { git = "https://github.com/winderica/r1cs-std", branch = "cherry-pick" }
+
+[features]
+light-test = [
+    "sonobe/light-test",
+]

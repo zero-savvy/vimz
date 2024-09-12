@@ -10,7 +10,7 @@ The protocol supports image resolutions of up to 4K (3840 x 2160) and higher.
 
 ## Reference
 
-**Ppaper:** **[2024]** Dziembowski, Ebrahimi, Hassanizadeh, [VIMz: Verifiable Image Manipulation using Folding-based zkSNARKs](https://eprint.iacr.org/2024/1063)
+**Paper:** **[2024]** Dziembowski, Ebrahimi, Hassanizadeh, [VIMz: Verifiable Image Manipulation using Folding-based zkSNARKs](https://eprint.iacr.org/2024/1063)
 
 ## Installation
 

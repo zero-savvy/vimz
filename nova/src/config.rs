@@ -55,4 +55,6 @@ impl Config {
         println!("| Image resolution: {:?}", self.resolution);
         println!(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
     }
+
+
 }

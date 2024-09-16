@@ -1,10 +1,12 @@
 #!/bin/bash
 
+set -eou pipefail
+
 # Set the directory where you want to search for files
 target_directory="."
 
 # Set the pattern of files you want to process
-file_pattern="grayscale_step.circom"
+file_pattern="*.circom"
 
 shopt -s nullglob
 

@@ -11,7 +11,7 @@ template Blur(width, kernel_size){
     // signal input prev_orig_hash;
     // signal input prev_conv_hash;
     
-    signal output step_out[kernel_size+1];
+    signal output ivc_output[kernel_size+1];
     // signal output next_orig_hash_1;
     // signal output next_orig_hash_2;
     // signal output next_orig_hash;
@@ -20,8 +20,8 @@ template Blur(width, kernel_size){
     // private inputs
     signal input external_inputs [kernel_size * width + width];
 
-    signal input row_orig [kernel_size][width];
-    signal input row_tran [width];
+    signal row_orig [kernel_size][width];
+    signal row_tran [width];
 
     for (var i = 0; i < width; i++) {
         for (var j = 0; j < kernel_size; j++) {

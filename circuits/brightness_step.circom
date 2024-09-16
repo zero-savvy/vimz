@@ -9,7 +9,7 @@ template BrightnessChecker(n) {
     signal input orig[n][3];
     signal input bright[n][3];
     signal input bf;
-    // signal input btightness_factor;
+    // signal input brightness_factor;
 
     signal output n_check;
 
@@ -105,7 +105,7 @@ template BrightnessHash(width){
     signal output ivc_output[3];
     // signal output next_orig_hash;
     // signal output next_gray_hash;
-    // btightness factor
+    // brightness factor
     
     // Private inputs
     signal input external_inputs [2 * width];
@@ -134,12 +134,11 @@ template BrightnessHash(width){
     ivc_output[1] <== brightness_hasher.hash; // next_grey_hash
 
     ivc_output[2] <== ivc_input[2];
-    
+
     component checker = Brightness(width);
     checker.original <== row_orig;
     checker.transformed <== row_tran;
     checker.bf <== ivc_input[2];
-
 }
 
 component main { public [ivc_input] } = BrightnessHash(128);

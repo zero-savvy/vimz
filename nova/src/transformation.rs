@@ -1,4 +1,8 @@
+use ark_bn254::Fr;
 use clap::ValueEnum;
+use num_traits::Zero;
+
+use crate::input::ZKronoInput;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug, ValueEnum)]
 pub enum Transformation {
@@ -12,6 +16,23 @@ pub enum Transformation {
     Blur,
     Brightness,
     Hash,
+}
+
+impl Transformation {
+    pub fn ivc_initial_state(&self, input: &ZKronoInput) -> Vec<Fr> {
+        match self {
+            Transformation::Grayscale => vec![Fr::zero(); 2],
+            Transformation::Brightness => vec![Fr::zero(), Fr::zero(), Fr::from(input.factor)],
+            _ => unimplemented!(),
+        }
+    }
+
+    pub fn step_input_width(&self) -> usize {
+        match self {
+            Transformation::Grayscale | Transformation::Brightness => 256,
+            _ => unimplemented!(),
+        }
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug, ValueEnum)]

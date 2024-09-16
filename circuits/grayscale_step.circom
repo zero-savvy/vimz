@@ -94,7 +94,4 @@ template GrayScaleHash(width){
 
 }
 
-component main { public [ivc_input] } = GrayScaleHash(4);
-
-
-
+component main { public [ivc_input] } = GrayScaleHash(128);

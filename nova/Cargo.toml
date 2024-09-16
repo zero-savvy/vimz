@@ -4,19 +4,16 @@ version = "1.3.0"
 edition = "2021"
 
 [dependencies]
-ark-serialize = "0.4.0"
-pasta_curves = { version = "0.5" }
-serde = { version = "1.0" }
-serde_json = { version = "1.0.85" }
-clap = { version = "4.5.16", features = ["derive"] }
-
 ark-bn254 = { version = "^0.4.0", features = ["r1cs"] }
 ark-grumpkin = { version = "0.4.0", features = ["r1cs"] }
 ark-groth16 = { version = "0.4.0", features = ["parallel"] }
-
+clap = { version = "4.5.16", features = ["derive"] }
 num-bigint = { version = "0.4.3" }
 num-traits = { version = "0.2.15" }
 rand = { version = "0.8.5" }
+serde = { version = "1.0" }
+serde_json = { version = "1.0.85" }
+
 sonobe = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "7097c001fc876578be2229d3590d506858bc0069", package = "folding-schemes" }
 
 [patch.crates-io]

@@ -5,30 +5,44 @@ use num_traits::Num;
 use serde::Deserialize;
 
 #[derive(Deserialize)]
-pub struct ZKronoInput {
-    pub original: Vec<Vec<String>>,
-    pub transformed: Vec<Vec<String>>,
+pub struct ZKronoInput<ValueType = Fr> {
+    pub original: Vec<Vec<ValueType>>,
+    pub transformed: Vec<Vec<ValueType>>,
+    #[serde(default)]
+    pub factor: u64,
 }
 
-impl ZKronoInput {
+impl ZKronoInput<Fr> {
     pub fn from_file(path: &Path) -> Self {
-        let mut input_file = File::open(path).expect("Failed to open the file");
-        let mut input_file_json_string = String::new();
-        input_file
-            .read_to_string(&mut input_file_json_string)
+        let mut input_file_json = String::new();
+        File::open(path)
+            .expect("Failed to open the file")
+            .read_to_string(&mut input_file_json)
             .expect("Unable to read from the file");
-        serde_json::from_str(&input_file_json_string).expect("Deserialization failed")
+
+        let self_string: ZKronoInput<String> =
+            serde_json::from_str(&input_file_json).expect("Deserialization failed");
+
+        Self {
+            original: self_string
+                .original
+                .iter()
+                .map(|x| string_seq_to_fr_seq(x))
+                .collect(),
+            transformed: self_string
+                .transformed
+                .iter()
+                .map(|x| string_seq_to_fr_seq(x))
+                .collect(),
+            factor: self_string.factor,
+        }
     }
 
     pub fn into_circom_input(self) -> Vec<Vec<Fr>> {
         self.original
-            .iter()
-            .zip(self.transformed.iter())
-            .map(|(original, transformed)| {
-                let original = string_seq_to_fr_seq(&original[..4]);
-                let transformed = string_seq_to_fr_seq(&transformed[..4]);
-                [original, transformed].concat()
-            })
+            .into_iter()
+            .zip(self.transformed.into_iter())
+            .map(|(original, transformed)| [original, transformed].concat())
             .collect()
     }
 }

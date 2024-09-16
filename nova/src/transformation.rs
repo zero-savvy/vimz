@@ -4,6 +4,7 @@ use num_traits::Zero;
 
 use crate::input::ZKronoInput;
 
+/// Supported transformations.
 #[derive(Copy, Clone, PartialEq, Eq, Debug, ValueEnum)]
 pub enum Transformation {
     Crop,
@@ -19,6 +20,7 @@ pub enum Transformation {
 }
 
 impl Transformation {
+    /// Returns the initial state of the IVC for the given transformation, based on the input.
     pub fn ivc_initial_state(&self, input: &ZKronoInput) -> Vec<Fr> {
         match self {
             Transformation::Grayscale => vec![Fr::zero(); 2],
@@ -28,16 +30,21 @@ impl Transformation {
         }
     }
 
+    /// Returns the width of the input for a single step for the given transformation.
     pub fn step_input_width(&self) -> usize {
         match self {
+            // two rows of 128 entries
             Transformation::Grayscale | Transformation::Brightness => 256,
+            // three rows of 128 entries for the kernel input and one for the result
             Transformation::Blur => 512,
             _ => unimplemented!(),
         }
     }
 
+    /// Prepares the input for the given transformation.
     pub fn prepare_input(&self, input: ZKronoInput) -> Vec<Vec<Fr>> {
         match self {
+            // Concatenate the original and transformed row.
             Transformation::Grayscale | Transformation::Brightness => input
                 .original
                 .into_iter()
@@ -45,6 +52,7 @@ impl Transformation {
                 .map(|(original, transformed)| [original, transformed].concat())
                 .collect(),
 
+            // Concatenate the original rows that are taken for the kernel, and the transformed row.
             Transformation::Blur => {
                 let mut prepared = vec![];
                 for (i, transformed) in input.transformed.into_iter().enumerate() {
@@ -59,6 +67,7 @@ impl Transformation {
     }
 }
 
+/// Supported resolutions.
 #[derive(Copy, Clone, PartialEq, Eq, Debug, ValueEnum)]
 #[value(rename_all = "UPPER")]
 #[allow(clippy::upper_case_acronyms)]
@@ -73,6 +82,8 @@ pub enum Resolution {
 }
 
 impl Resolution {
+    /// Returns the number of iterations for the given resolution (i.e. the number of rows in the
+    /// image).
     pub fn iteration_count(&self) -> usize {
         match self {
             Resolution::SD => 480,

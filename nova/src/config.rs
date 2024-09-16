@@ -13,18 +13,26 @@ use crate::transformation::{Resolution, Transformation};
 )]
 pub struct Config {
     /// The JSON file containing the original and the transformed image data to verify.
+    ///
+    /// The path is assumed to be relative to the current working directory.
     #[clap(short, long)]
     pub input: PathBuf,
 
     ///This file will contain the final Proof to be verified by others.
+    ///
+    /// The path is assumed to be relative to the current working directory.
     #[clap(short, long)]
     pub output: PathBuf,
 
     /// The R1CS file of the compiled Circom circuit.
+    ///
+    /// The path is assumed to be relative to the current working directory.
     #[clap(short, long)]
     pub circuit: PathBuf,
 
     /// Witness generator file of the circuit.
+    ///
+    /// The path is assumed to be relative to the current working directory.
     #[clap(short, long)]
     pub witness_generator: PathBuf,
 
@@ -55,6 +63,4 @@ impl Config {
         println!("| Image resolution: {:?}", self.resolution);
         println!(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
     }
-
-
 }

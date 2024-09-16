@@ -4,15 +4,22 @@ use ark_bn254::Fr;
 use num_traits::Num;
 use serde::Deserialize;
 
+/// Universal input structure for all supported transformations.
 #[derive(Deserialize)]
 pub struct ZKronoInput<ValueType = Fr> {
+    /// The original image, row by row (with pixels compression).
     pub original: Vec<Vec<ValueType>>,
+    /// The transformed image, row by row (with pixels compression).
     pub transformed: Vec<Vec<ValueType>>,
+    /// An optional factor for tuning the transformation.
+    ///
+    /// For most transformations, this is just 0.
     #[serde(default)]
     pub factor: u64,
 }
 
 impl ZKronoInput<Fr> {
+    /// Parse `path` into a `ZKronoInput` structure. Convert the hex strings into `Fr` elements.
     pub fn from_file(path: &Path) -> Self {
         let mut input_file_json = String::new();
         File::open(path)
@@ -39,6 +46,7 @@ impl ZKronoInput<Fr> {
     }
 }
 
+/// Convert a sequence of hex strings into a sequence of `Fr` elements.
 fn string_seq_to_fr_seq(seq: &[String]) -> Vec<Fr> {
     seq.iter()
         .map(|x| {

@@ -14,8 +14,10 @@ use sonobe::{
 
 use crate::time::measure;
 
+/// Folding scheme used.
 pub type Folding =
     Nova<G1, GVar, G2, GVar2, CircomFCircuit<Fr>, KZG<'static, Bn254>, Pedersen<G2>, false>;
+/// Compressed proof producer.
 pub type Decider = DeciderEth<
     G1,
     GVar,
@@ -27,6 +29,7 @@ pub type Decider = DeciderEth<
     Groth16<Bn254>,
     Folding,
 >;
+
 type DeciderProverParam =
     <Decider as DeciderTrait<G1, G2, CircomFCircuit<Fr>, Folding>>::ProverParam;
 type DeciderVerifierParam =

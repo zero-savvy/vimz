@@ -15,24 +15,12 @@ mod input;
 mod time;
 mod transformation;
 
-fn get_private_inputs(config: &Config) -> ZKronoInput {
-    let private_inputs = measure("Prepare private inputs", || {
-        ZKronoInput::from_file(&config.input)
-    });
-    for input in [&private_inputs.original, &private_inputs.transformed] {
-        assert_eq!(
-            input.len(),
-            config.resolution.iteration_count(),
-            "Invalid input length - does not match resolution iteration count"
-        )
-    }
-    private_inputs
-}
-
 fn fold_fold_fold(config: &Config) {
     let mut rng = rand::rngs::OsRng;
 
-    let private_inputs = get_private_inputs(&config);
+    let private_inputs = measure("Prepare private inputs", || {
+        ZKronoInput::from_file(&config.input)
+    });
 
     let initial_state = config.function.ivc_initial_state(&private_inputs);
     let (mut folding, decider_pp, decider_vp) = prepare_folding(
@@ -44,7 +32,9 @@ fn fold_fold_fold(config: &Config) {
         &mut rng,
     );
 
-    for (i, external_inputs_at_step) in private_inputs.into_circom_input()[..5].iter().enumerate() {
+    let prepared_input = config.function.prepare_input(private_inputs);
+    assert_eq!(prepared_input.len(), config.resolution.iteration_count());
+    for (i, external_inputs_at_step) in prepared_input[..5].iter().enumerate() {
         measure(&format!("Nova::prove_step {i}"), || {
             folding
                 .prove_step(rng, external_inputs_at_step.clone(), None)

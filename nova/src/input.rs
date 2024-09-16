@@ -37,14 +37,6 @@ impl ZKronoInput<Fr> {
             factor: self_string.factor,
         }
     }
-
-    pub fn into_circom_input(self) -> Vec<Vec<Fr>> {
-        self.original
-            .into_iter()
-            .zip(self.transformed.into_iter())
-            .map(|(original, transformed)| [original, transformed].concat())
-            .collect()
-    }
 }
 
 fn string_seq_to_fr_seq(seq: &[String]) -> Vec<Fr> {

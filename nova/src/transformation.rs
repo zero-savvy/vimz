@@ -23,6 +23,7 @@ impl Transformation {
         match self {
             Transformation::Grayscale => vec![Fr::zero(); 2],
             Transformation::Brightness => vec![Fr::zero(), Fr::zero(), Fr::from(input.factor)],
+            Transformation::Blur => vec![Fr::zero(); 4],
             _ => unimplemented!(),
         }
     }
@@ -30,6 +31,29 @@ impl Transformation {
     pub fn step_input_width(&self) -> usize {
         match self {
             Transformation::Grayscale | Transformation::Brightness => 256,
+            Transformation::Blur => 512,
+            _ => unimplemented!(),
+        }
+    }
+
+    pub fn prepare_input(&self, input: ZKronoInput) -> Vec<Vec<Fr>> {
+        match self {
+            Transformation::Grayscale | Transformation::Brightness => input
+                .original
+                .into_iter()
+                .zip(input.transformed)
+                .map(|(original, transformed)| [original, transformed].concat())
+                .collect(),
+
+            Transformation::Blur => {
+                let mut prepared = vec![];
+                for (i, transformed) in input.transformed.into_iter().enumerate() {
+                    let mut row = input.original[i..i + 3].to_vec();
+                    row.push(transformed);
+                    prepared.push(row.concat());
+                }
+                prepared
+            }
             _ => unimplemented!(),
         }
     }

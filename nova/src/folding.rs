@@ -107,7 +107,7 @@ pub fn verify_final_proof(
         folding.z_i.clone(),
         &folding.U_i,
         &folding.u_i,
-        &proof,
+        proof,
     )
     .expect("Failed to verify proof")
 }

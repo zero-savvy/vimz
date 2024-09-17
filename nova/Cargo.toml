@@ -15,6 +15,7 @@ serde = { version = "1.0" }
 serde_json = { version = "1.0.85" }
 
 sonobe = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "7097c001fc876578be2229d3590d506858bc0069", package = "folding-schemes" }
+sonobe-solidity = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "7097c001fc876578be2229d3590d506858bc0069", package = "solidity-verifiers" }
 
 [patch.crates-io]
 ark-bn254 = { git = "https://github.com/arnaucube/ark-curves-cherry-picked", branch = "cherry-pick" }

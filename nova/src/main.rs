@@ -8,12 +8,14 @@ use crate::{
     input::ZKronoInput,
     time::measure,
 };
+use crate::solidity::verify_on_chain;
 
 mod config;
 mod folding;
 mod input;
 mod time;
 mod transformation;
+mod solidity;
 
 fn fold_fold_fold(config: &Config) {
     let mut rng = rand::rngs::OsRng;
@@ -46,7 +48,9 @@ fn fold_fold_fold(config: &Config) {
         Decider::prove(rng, decider_pp, folding.clone()).expect("Failed to generate proof")
     });
 
-    assert!(verify_final_proof(&proof, &folding, decider_vp));
+    assert!(verify_final_proof(&proof, &folding, decider_vp.clone()));
+
+    verify_on_chain(&folding.F.clone(), decider_vp, folding, proof);
 }
 
 fn main() {

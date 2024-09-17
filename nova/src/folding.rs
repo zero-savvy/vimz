@@ -30,11 +30,11 @@ pub type Decider = DeciderEth<
     Folding,
 >;
 
-type DeciderProverParam =
+pub type DeciderProverParam =
     <Decider as DeciderTrait<G1, G2, CircomFCircuit<Fr>, Folding>>::ProverParam;
-type DeciderVerifierParam =
+pub type DeciderVerifierParam =
     <Decider as DeciderTrait<G1, G2, CircomFCircuit<Fr>, Folding>>::VerifierParam;
-type DeciderProof = <Decider as DeciderTrait<G1, G2, CircomFCircuit<Fr>, Folding>>::Proof;
+pub type DeciderProof = <Decider as DeciderTrait<G1, G2, CircomFCircuit<Fr>, Folding>>::Proof;
 
 /// Prepare the Nova folding scheme with the given files, parameters and rng. Initialize it with
 /// the given initial state.

@@ -85,7 +85,7 @@ build node modules:
 
 build ZK circuits using the provided script in this directory:
 
-`./build-circuits.sh`
+`./build_circuits.sh`
 
 ## How to Use
 

@@ -77,6 +77,31 @@ def compress(image_in):
         output_array.append(row)
     return output_array
 
+def compress_block(image_in, block_size=10):
+    array_in = np.array(image_in)  # Keep it as a NumPy array
+    output_array = []
+    
+    rows, cols = array_in.shape[:2]  # Get the number of rows and columns in the image
+
+    for i in range(0, rows, block_size):  # Step through rows in block_size increments
+        for j in range(0, cols, block_size):  # Step through columns in block_size increments
+            hexValue = ''
+            # Extract a block of size block_size x block_size
+            block = array_in[i:i + block_size, j:j + block_size]
+            for bi in range(i, block.shape[0]):  # Iterate through rows in the block
+                for bj in range(j, block.shape[1]):  # Iterate through columns in the block
+                    pixel = block[bi, bj]
+                    if np.isscalar(pixel):
+                        hexValue = hex(int(pixel))[2:].zfill(6) + hexValue
+                    else:
+                        for k in range(3):  # Assuming RGB values
+                            hexValue = hex(int(pixel[k]))[2:].zfill(2) + hexValue
+                    output_array.append("0x" + hexValue)
+    
+    return output_array
+
+
+
 
 def conv2d(array, kernel, weight=1):
     # Get the dimensions of the input array and kernel

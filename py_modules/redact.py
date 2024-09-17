@@ -1,38 +1,8 @@
-import json
+import os
 from PIL import Image, ImageDraw, ImageTk
 import tkinter as tk
 from tkinter import filedialog
 import numpy as np
-
-def get_image_path():
-    root = tk.Tk()
-    root.withdraw()
-    file_path = filedialog.askopenfilename()
-    return file_path
-
-def compress_image(image_path):
-    with Image.open(image_path) as image:
-        return compress(image)
-
-def compress(image_in):
-    array_in = np.array(image_in).tolist()
-    output_array = []
-    # print(len(array_in), len(array_in[0]), len(array_in[0][0]))
-
-    for i in range(0, len(array_in)):
-        row = []
-        hexValue = ''
-        for j in range(0, len(array_in[i])):
-            if np.isscalar(array_in[i][j]):
-                hexValue = hex(int(array_in[i][j]))[2:].zfill(6) + hexValue
-            else:
-                for k in range(0, 3):
-                    hexValue = hex(int(array_in[i][j][k]))[2:].zfill(2) + hexValue
-            if j % 10 == 9:
-                row.append("0x" + hexValue)
-                hexValue = ''
-        output_array.append(row)
-    return output_array
 
 def load_image():
     file_path = filedialog.askopenfilename()
@@ -71,6 +41,8 @@ def redact_image(image, block_size, selected_blocks):
         x2, y2 = x1 + block_size, y1 + block_size
         draw.rectangle([x1, y1, x2, y2], fill="black")
     return image
+
+
 
 def redacttt():
     root = tk.Tk()
@@ -120,88 +92,101 @@ def split_image(image_path, block_size=10):
     
     return blocks
 
-def save_blocks(blocks):
-
-    output_array = []
-    # print(len(array_in), len(array_in[0]), len(array_in[0][0]))
-
-    for i, block in enumerate(blocks):
-        row = []
-        hexValue = ''
-        for j in range(0, block.width):
-            for k in range(0, block.height):
-                if np.isscalar(block[j][k]):
-                    hexValue = hex(int(block[j][k]))[2:].zfill(6) + hexValue
-                else:
-                    for l in range(0, 3):
-                        hexValue = hex(int(block[j][k][l]))[2:].zfill(2) + hexValue
-                row.append("0x" + hexValue)
-                hexValue = ''
-        output_array.append(row)
+def save_blocks(blocks, output_dir='blocks'):
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
     
+    # Save each block as an image
+    for i, block in enumerate(blocks):
+        block.save(f"{output_dir}/block_{i}.png")
+
+def show_blocks(blocks):
+    print("................ len_blocks: ", len(blocks))
+    for index in range(len(blocks)):
+
+        root = tk.Tk()
+        root.title("Image Blocks")
+
+        block = blocks[index]
+        photo = ImageTk.PhotoImage(block)
+
+        # Create a new window to display the block
+        block_window = tk.Toplevel(root)
+        block_window.title(f"Block {index}")
+        
+        # Create a canvas to show the block
+        canvas = tk.Canvas(block_window, width=block.width, height=block.height)
+        canvas.pack()
+
+        # Display the block
+        # canvas.image = photo
+        canvas.create_image(0, 0, anchor=tk.NW, image=photo)
+
+        # Keep a reference to the image to prevent it from being garbage-collected
+        canvas.image = photo
+        root.mainloop()
+
+def compress_image(image_path):
+    with Image.open(image_path) as image:
+        return compress(image)
+
+def compress(image_in):
+    array_in = np.array(image_in)
+    rows, cols = array_in.shape[:2]
+    output_array = []
+    block_size = 10
+    for i in range(0, rows, block_size):
+        for j in range(0, cols, block_size):
+            block = []
+            hexValue = ''
+            counter = 0
+            # for on each block
+            for k in range(block_size):
+                for l in range (block_size):
+                    if i + k < rows and j + l < cols:  # Ensure we're within the image boundaries
+                        pixel = array_in[i + k, j + l]
+                        if np.isscalar(pixel):
+                            hexValue = hex(int(pixel))[2:].zfill(6) + hexValue
+                        else:
+                            for m in range(3):  # Process RGB values
+                                hexValue = hex(int(pixel[m]))[2:].zfill(2) + hexValue
+                        counter += 1
+                        if counter % 10 == 0:
+                            block.append("0x" + hexValue)
+                            hexValue = ''
+                            counter = 0
+            output_array.append(block)
     return output_array
 
-# def show_blocks(blocks):
-#     print("................ len_blocks: ", len(blocks))
-#     for index in range(len(blocks)):
-#         print(blocks[index])
 
-#         root = tk.Tk()
-#         root.title("Image Blocks")
-
-#         block = blocks[index]
-#         photo = ImageTk.PhotoImage(block)
-
-#         # Create a new window to display the block
-#         block_window = tk.Toplevel(root)
-#         block_window.title(f"Block {index}")
-        
-#         # Create a canvas to show the block
-#         canvas = tk.Canvas(block_window, width=block.width, height=block.height)
-#         canvas.pack()
-
-#         # Display the block
-#         # canvas.image = photo
-#         canvas.create_image(0, 0, anchor=tk.NW, image=photo)
-
-#         # Keep a reference to the image to prevent it from being garbage-collected
-#         canvas.image = photo
-#         root.mainloop()
-
-
-
-
-def save_in_blocks():
-    # Open a file dialog to select the image
+def get_image_path():
     root = tk.Tk()
-    root.withdraw()  # Hide the root window
-    image_path = filedialog.askopenfilename()
-    if not image_path:
-        print("No image selected")
-        return
+    root.withdraw()
+    file_path = filedialog.askopenfilename()
+    return file_path
 
-    # Partition, save, and display the image blocks
-    blocks = split_image(image_path, block_size=10)
-    compressed_transformed_image = save_blocks(blocks)
-    return compressed_transformed_image
+# def save_in_blocks():
+#     # Open a file dialog to select the image
+#     root = tk.Tk()
+#     root.withdraw()  # Hide the root window
+#     image_path = filedialog.askopenfilename()
+#     if not image_path:
+#         print("No image selected")
+#         return
 
+#     # Partition, save, and display the image blocks
+#     blocks = split_image(image_path, block_size=10)
+#     save_blocks(blocks)
 
-
-
-    # show_blocks(blocks)
+#     # show_blocks(blocks)
 
 
 
 if __name__ == "__main__":
     image_path = get_image_path()
-    if image_path:
-        compressed_original_image = compress_image(image_path)
-        out = {
-            "original": compressed_original_image,
-        }
-        redacttt()
-        compressed_transformed_image = save_in_blocks()
-        out["transformed"] = compressed_transformed_image
-        with open("redacted_image.txt", 'w') as fp:
-            json.dump(out, fp, indent=4)
-        print("Image data dumped successfully.")
+    compressed_original_image = compress_image(image_path)
+    out = {
+        "original": compressed_original_image,
+    }
+    redacttt()
+    # compressed_transformed_image = compress_image(image)

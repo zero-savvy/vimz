@@ -62,7 +62,7 @@ fn fold_fold_fold(selected_function: String,
     );
     let mut iteration_count = 720; // HD
     if resolution == "4K" {
-        iteration_count = 2160;
+        iteration_count = 1365;
     }
     if resolution == "8K" {
         iteration_count = 4320;
@@ -172,8 +172,8 @@ fn fold_fold_fold(selected_function: String,
             for i in 0..iteration_count {
                 let mut private_input = HashMap::new();
                 // private_input.insert("adder".to_string(), json!(i+2));
-                private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
-                private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
+                private_input.insert("row_orig".to_string(), json!(input_data.original[i][0..205]));
+                private_input.insert("row_tran".to_string(), json!(input_data.transformed[i][0..205]));
                 private_inputs.push(private_input);
             }
         }

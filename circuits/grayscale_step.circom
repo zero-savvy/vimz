@@ -87,7 +87,7 @@ template GrayScaleHash(width){
 
 }
 
-component main { public [step_in] } = GrayScaleHash(128);
+component main { public [step_in] } = GrayScaleHash(205);
 
 
 

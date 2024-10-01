@@ -1,9 +1,9 @@
 pragma circom 2.0.0;
 
-include "utils/convolution_step.circom";
+include "../src/blur_step.circom";
 
 
-template Blur(width, kernel_size){
+template SonobeBlur(width, kernel_size){
     // public inputs and outputs
     signal input ivc_input[kernel_size+1];
     // signal input prev_orig_hash_0;
@@ -29,6 +29,13 @@ template Blur(width, kernel_size){
         }
         row_tran[i] <== external_inputs[i + kernel_size * width];
     }
+
+    blur_circuit = Blur(width, kernel_size);
+    blur_circuit.step_in <== ivc_input;
+    blur_circuit.row_orig <== row_orig;
+    blur_circuit.row_tran <== row_tran;
+    blur_circuit.step_out ==> ivc_output;
+
 
     component integrity_checker = IntegrityCheck(width, kernel_size);
     integrity_checker.step_in <== ivc_input;

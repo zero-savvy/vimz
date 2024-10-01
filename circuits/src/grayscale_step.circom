@@ -54,38 +54,31 @@ template GrayScale(width){
 }
 
 template GrayScaleHash(width){
-    signal input ivc_input[2];
+    signal input step_in[2];
     // signal input prev_orig_hash;
     // signal input prev_gray_hash;
-    signal output ivc_output[2];
+    signal output step_out[2];
     // signal output next_orig_hash;
     // signal output next_gray_hash;
     
     // Private inputs
-    signal input external_inputs [2 * width];
-
-    signal row_orig [width];
-    signal row_tran [width];
-
-    for (var i = 0; i < width; i++) {
-        row_orig[i] <== external_inputs[i];
-        row_tran[i] <== external_inputs[i + width];
-    }
-
+    signal input row_orig [width];
+    signal input row_tran [width];
+    
     component orig_row_hasher = RowHasher(width);
     component gray_row_hasher = RowHasher(width);
     component orig_hasher = Hasher(2);
     component gray_hasher = Hasher(2);
 
     orig_row_hasher.img <== row_orig;
-    orig_hasher.values[0] <== ivc_input[0]; // prev_orig_hash
+    orig_hasher.values[0] <== step_in[0]; // prev_orig_hash
     orig_hasher.values[1] <== orig_row_hasher.hash;
-    ivc_output[0] <== orig_hasher.hash; // next_orig_hash
+    step_out[0] <== orig_hasher.hash; // next_orig_hash
 
     gray_row_hasher.img <== row_tran;
-    gray_hasher.values[0] <== ivc_input[1]; // prev_gray_hash
+    gray_hasher.values[0] <== step_in[1]; // prev_gray_hash
     gray_hasher.values[1] <== gray_row_hasher.hash;
-    ivc_output[1] <== gray_hasher.hash; // next_grey_hash
+    step_out[1] <== gray_hasher.hash; // next_grey_hash
 
     // grayscale code here ...
     component checker = GrayScale(width);
@@ -94,4 +87,4 @@ template GrayScaleHash(width){
 
 }
 
-component main { public [ivc_input] } = GrayScaleHash(128);
+// component main { public [step_in] } = GrayScaleHash(128);

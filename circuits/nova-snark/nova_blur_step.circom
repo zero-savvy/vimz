@@ -3,7 +3,7 @@ pragma circom 2.0.0;
 include "../src/blur_step.circom";
 
 
-template Blur(width, kernel_size){
+template NovaBlur(width, kernel_size){
     // public inputs and outputs
     signal input step_in[kernel_size+1];
     // signal input prev_orig_hash_0;
@@ -21,7 +21,7 @@ template Blur(width, kernel_size){
     signal input row_orig [kernel_size][width];
     signal input row_tran [width];
 
-    blur_circuit = Blur(width, kernel_size);
+    component blur_circuit = Blur(width, kernel_size);
     blur_circuit.step_in <== step_in;
     blur_circuit.row_orig <== row_orig;
     blur_circuit.row_tran <== row_tran;
@@ -29,4 +29,4 @@ template Blur(width, kernel_size){
 
 }
 
-component main { public [step_in] } = Blur(128, 3);
+component main { public [step_in] } = NovaBlur(128, 3);

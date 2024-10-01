@@ -98,25 +98,18 @@ template Brightness(width){
 }
 
 template BrightnessHash(width){
-    signal input ivc_input[3];
+    signal input step_in[3];
     // signal input prev_orig_hash;
     // signal input prev_gray_hash;
     // brightness factor
-    signal output ivc_output[3];
+    signal output step_out[3];
     // signal output next_orig_hash;
     // signal output next_gray_hash;
-    // brightness factor
+    // btightness factor
     
     // Private inputs
-    signal input external_inputs [2 * width];
-
-    signal row_orig [width];
-    signal row_tran [width];
-
-    for (var i = 0; i < width; i++) {
-        row_orig[i] <== external_inputs[i];
-        row_tran[i] <== external_inputs[i + width];
-    }
+    signal input row_orig [width];
+    signal input row_tran [width];
     
     component orig_row_hasher = RowHasher(width);
     component brightness_row_hasher = RowHasher(width);
@@ -124,21 +117,21 @@ template BrightnessHash(width){
     component brightness_hasher = Hasher(2);
 
     orig_row_hasher.img <== row_orig;
-    orig_hasher.values[0] <== ivc_input[0]; // prev_orig_hash
+    orig_hasher.values[0] <== step_in[0]; // prev_orig_hash
     orig_hasher.values[1] <== orig_row_hasher.hash;
-    ivc_output[0] <== orig_hasher.hash; // next_orig_hash
+    step_out[0] <== orig_hasher.hash; // next_orig_hash
 
     brightness_row_hasher.img <== row_tran;
-    brightness_hasher.values[0] <== ivc_input[1]; // prev_gray_hash
+    brightness_hasher.values[0] <== step_in[1]; // prev_gray_hash
     brightness_hasher.values[1] <== brightness_row_hasher.hash;
-    ivc_output[1] <== brightness_hasher.hash; // next_grey_hash
+    step_out[1] <== brightness_hasher.hash; // next_grey_hash
 
-    ivc_output[2] <== ivc_input[2];
-
+    step_out[2] <== step_in[2];
+    
     component checker = Brightness(width);
     checker.original <== row_orig;
     checker.transformed <== row_tran;
-    checker.bf <== ivc_input[2];
+    checker.bf <== step_in[2];
 }
 
-component main { public [ivc_input] } = BrightnessHash(128);
+// component main { public [ivc_input] } = BrightnessHash(128);

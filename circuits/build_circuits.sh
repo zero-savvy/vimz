@@ -2,17 +2,32 @@
 
 set -eou pipefail
 
-# Set the directory where you want to search for files
-target_directory="."
+# Check if an argument (subfolder) is provided
+if [ "$#" -lt 1 ]; then
+    echo "Error: You must provide a subfolder name."
+    exit 1
+fi
+
+# Assign the first argument as the subfolder name
+subfolder="$1"
+
+# Check if the provided subfolder exists
+if [ ! -d "$subfolder" ]; then
+    echo "Error: Subfolder '$subfolder' not found."
+    exit 1
+fi
+
+# Navigate to the subfolder
+cd "$subfolder" || exit
 
 # Set the pattern of files you want to process
 file_pattern="*.circom"
 
 shopt -s nullglob
 
-# If an argument is provided, use it as the specific file
-if [ "$#" -eq 1 ]; then
-    user_provided_file="$1"
+# If a second argument is provided, use it as the specific file
+if [ "$#" -eq 2 ]; then
+    user_provided_file="$2"
     # Check if the provided file exists
     if [ -f "$user_provided_file" ]; then
         file_list=("$user_provided_file")
@@ -21,8 +36,8 @@ if [ "$#" -eq 1 ]; then
         exit 1
     fi
 else
-    # If no argument is provided, use pattern-matching
-    file_list=($target_directory/$file_pattern)
+    # If no specific file is provided, use pattern-matching
+    file_list=($file_pattern)
 fi
 
 # Iterate over files matching the pattern and run commands

@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use clap::Parser;
 
 use crate::transformation::{Resolution, Transformation};
+use crate::backend::Backend;
 
 #[derive(Parser)]
 #[command(
@@ -43,6 +44,10 @@ pub struct Config {
     /// The resolution of the image.
     #[clap(short, long, value_enum)]
     pub resolution: Resolution,
+
+    /// The backend proof system.
+    #[clap(short, long, value_enum)]
+    pub backend: Backend,
 }
 
 impl Config {
@@ -55,6 +60,7 @@ impl Config {
         println!("   ██ ██    ██  ██  ██  ██   ███                         ");
         println!("    ███     ██  ██      ██  ████████████ v1.3.0 ████████");
         println!(" ________________________________________________________");
+        println!("| Selected Backend: {:?}", self.backend);
         println!("| Input file: {:?}", self.input);
         println!("| Output file: {:?}", self.output);
         println!("| Selected function: {:?}", self.function);

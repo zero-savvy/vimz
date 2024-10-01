@@ -1,6 +1,8 @@
+use backend::Backend;
 use clap::Parser;
 use folding::prepare_folding;
 use sonobe::{Decider as _, FoldingScheme};
+use nova_snark::nova_snark_backend;
 
 use crate::{
     config::Config,
@@ -10,14 +12,16 @@ use crate::{
 };
 use crate::solidity::verify_on_chain;
 
+mod backend;
 mod config;
 mod folding;
 mod input;
 mod time;
 mod transformation;
 mod solidity;
+mod nova_snark;
 
-fn fold_fold_fold(config: &Config) {
+fn sonobe_backend(config: &Config) {
     let mut rng = rand::rngs::OsRng;
 
     let private_inputs = measure("Prepare private inputs", || {
@@ -51,6 +55,20 @@ fn fold_fold_fold(config: &Config) {
     assert!(verify_final_proof(&proof, &folding, decider_vp.clone()));
 
     verify_on_chain(&folding.F.clone(), decider_vp, folding, proof);
+}
+
+fn fold_fold_fold(config: &Config) {
+
+    match config.backend {
+        Backend::NovaSnark => {
+            // Call function A here
+            nova_snark_backend(config);
+        }
+        Backend::Sonobe => {
+            // Call function B here
+            sonobe_backend(config);
+        }
+    }
 }
 
 fn main() {

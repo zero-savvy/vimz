@@ -30,23 +30,12 @@ template SonobeBlur(width, kernel_size){
         row_tran[i] <== external_inputs[i + kernel_size * width];
     }
 
-    blur_circuit = Blur(width, kernel_size);
+    component blur_circuit = Blur(width, kernel_size);
     blur_circuit.step_in <== ivc_input;
     blur_circuit.row_orig <== row_orig;
     blur_circuit.row_tran <== row_tran;
     blur_circuit.step_out ==> ivc_output;
 
-
-    component integrity_checker = IntegrityCheck(width, kernel_size);
-    integrity_checker.step_in <== ivc_input;
-    integrity_checker.row_orig <== row_orig;
-    integrity_checker.row_conv <== row_tran;
-    ivc_output <== integrity_checker.step_out;
-
-    component conv_checker = BlurCheck(width, kernel_size);
-    conv_checker.row_orig <== row_orig;
-    conv_checker.row_conv <== row_tran;
-    // conv_checker.kernel <== decompressor_kernel.out;
 }
 
-component main { public [ivc_input] } = Blur(128, 3);
+component main { public [ivc_input] } = SonobeBlur(128, 3);

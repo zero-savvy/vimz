@@ -11,23 +11,26 @@ help: # Show help for each of the Makefile recipes.
 .PHONY: blur
 blur: # Run VIMz with the blur transformation.
 	@cargo run --release $(FEATURES) -- \
-		-f blur -w ../circuits/blur_step_js/blur_step.wasm \
-		-o /home/piomiko/Desktop/vimz/blur_hd.json \
+		-f blur -w ../circuits/$(backend)/$(backend)_blur_step_js/$(backend)_blur_step.wasm \
+		-o ../blur_hd.json \
 		-i ../samples/JSON/HD/transformation_blur.json \
-		-c ../circuits/blur_step.r1cs -r HD
+		-c ../circuits/$(backend)/$(backend)_blur_step.r1cs -r HD \
+		-b $(backend)
 
 .PHONY: brightness
 brightness: # Run VIMz with the brightness transformation.
 	@cargo run --release $(FEATURES) -- \
-		-f brightness -w ../circuits/brightness_step_js/brightness_step.wasm \
-		-o /home/piomiko/Desktop/vimz/brightness_hd.json \
+		-f brightness -w ../circuits/$(backend)/$(backend)_brightness_step_js/$(backend)_brightness_step.wasm \
+		-o ../brightness_hd.json \
 		-i ../samples/JSON/HD/transformation_brightness.json \
-		-c ../circuits/brightness_step.r1cs -r HD
+		-c ../circuits/$(backend)/$(backend)_brightness_step.r1cs -r HD \
+		-b $(backend)
 
 .PHONY: grayscale
 grayscale: # Run VIMz with the grayscale transformation.
 	@cargo run --release $(FEATURES) -- \
-		-f grayscale -w ../circuits/grayscale_step_js/grayscale_step.wasm \
-		-o /home/piomiko/Desktop/vimz/grayscale_hd.json \
+		-f grayscale -w ../circuits/$(backend)/$(backend)_grayscale_step_js/$(backend)_grayscale_step.wasm \
+		-o ../grayscale_hd.json \
 		-i ../samples/JSON/HD/transformation_grayscale.json \
-		-c ../circuits/grayscale_step.r1cs -r HD
+		-c ../circuits/$(backend)/$(backend)_grayscale_step.r1cs -r HD \
+		-b $(backend)

@@ -1,10 +1,6 @@
 *.jpg
 */venv/
-circuits/*_cpp/
-circuits/*_js/
-circuits/*.r1cs
-circuits/*.sym
-circuits/*/*/*_cpp/
-circuits/*/*/*_js/
-circuits/*/*/*.r1cs
-circuits/*/*/*.sym
+circuits/**/*_cpp/
+circuits/**/*_js/
+circuits/**/*.r1cs
+circuits/**/*.sym

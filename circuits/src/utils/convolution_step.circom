@@ -2,10 +2,10 @@ pragma circom 2.0.0;
 
 include "row_hasher.circom";
 include "pixels.circom";
-include "../node_modules/circomlib/circuits/bitify.circom";
-include "../node_modules/circomlib/circuits/comparators.circom";
-include "../node_modules/circomlib/circuits/multiplexer.circom";
-include "../node_modules/circomlib/circuits/mux1.circom";
+include "../../node_modules/circomlib/circuits/bitify.circom";
+include "../../node_modules/circomlib/circuits/comparators.circom";
+include "../../node_modules/circomlib/circuits/multiplexer.circom";
+include "../../node_modules/circomlib/circuits/mux1.circom";
 
 
 template ConvolveBlur(decompressedWidth) {

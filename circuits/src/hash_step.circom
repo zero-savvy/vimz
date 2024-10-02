@@ -1,8 +1,8 @@
 pragma circom 2.0.0;
 
-include "node_modules/circomlib/circuits/multiplexer.circom";
-include "node_modules/circomlib/circuits/mux1.circom";
-include "node_modules/circomlib/circuits/comparators.circom";
+include "../node_modules/circomlib/circuits/multiplexer.circom";
+include "../node_modules/circomlib/circuits/mux1.circom";
+include "../node_modules/circomlib/circuits/comparators.circom";
 include "utils/pixels.circom";
 include "utils/row_hasher.circom";
 

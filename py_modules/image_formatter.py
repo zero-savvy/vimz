@@ -322,7 +322,7 @@ if image_path:
         out["transformed"] = compressed_transformed_image
 
     elif cmd == 3:
-        output_path = '../samples/JSON/HD/transformation_grayscale.json'  # Path to save the cropped image
+        output_path = 'transformation_grayscale.json'  # Path to save the cropped image
         compressed_transformed_image = convert_to_grayscale(image_path)
         print("Applied GRAYSCALE filter successfully.")
 

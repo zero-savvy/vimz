@@ -58,7 +58,7 @@ impl Config {
         println!(" ██     ██  ██  ████  ████      ███    Manipulation from");
         println!("  ██   ██   ██  ██ ████ ██     ██      Folded   zkSNARKs");
         println!("   ██ ██    ██  ██  ██  ██   ███                         ");
-        println!("    ███     ██  ██      ██  ████████████ v1.3.0 ████████");
+        println!("    ███     ██  ██      ██  ████████████ v1.4.0 ████████");
         println!(" ________________________________________________________");
         println!("| Selected Backend: {:?}", self.backend);
         println!("| Input file: {:?}", self.input);

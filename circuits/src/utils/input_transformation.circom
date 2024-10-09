@@ -21,6 +21,18 @@ template SimpleInput(width) {
     }
 }
 
+// Splits a combined input array into two separate rows of signals, where the first row is a 2D array.
+//
+// Parameters:
+// - `width`: Number of elements in each of the output rows (`row_orig` and `row_tran`).
+// - `kernel_size`: Number of rows in the 2D array.
+//
+// Signals:
+// - `input full_input[kernel_size * width + width]`: Combined input array of size `kernel_size * width + width`,
+//   containing values for both `row_orig` and `row_tran`.
+// - `output row_orig[kernel_size][width]`: The first `kernel_size * width` elements of `full_input`,
+//   reshaped into a 2D array.
+// - `output row_tran[width]`: The last `width` elements of `full_input`.
 template KernelInput(width, kernel_size) {
     signal input  full_input [kernel_size * width + width];
     signal output row_orig   [kernel_size][width];

@@ -2,8 +2,10 @@ use std::path::PathBuf;
 
 use clap::Parser;
 
-use crate::transformation::{Resolution, Transformation};
-use crate::backend::Backend;
+use crate::{
+    backend::Backend,
+    transformation::{Resolution, Transformation},
+};
 
 #[derive(Parser)]
 #[command(

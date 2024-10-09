@@ -1,16 +1,22 @@
-use std::{collections::HashMap, env::current_dir, time::Instant, fs::File, io::{Write, Read}};
-
+use std::{
+    collections::HashMap,
+    env::current_dir,
+    fs::File,
+    io::{Read, Write},
+    time::Instant,
+};
 
 use nova_scotia::{
     circom::reader::load_r1cs, create_public_params, create_recursive_circuit, FileLocation, F, S,
 };
-use nova_snark::{
-    CompressedSNARK, PublicParams,
-};
+use nova_snark::{CompressedSNARK, PublicParams};
 use serde::Deserialize;
 use serde_json::json;
 
-use crate::{config::Config, transformation::{Resolution, Transformation}};
+use crate::{
+    config::Config,
+    transformation::{Resolution, Transformation},
+};
 
 #[derive(Deserialize)]
 struct ZKronoInput {
@@ -45,15 +51,13 @@ struct ZKronoInputCropOpt {
     hash: u64,
 }
 
-
 pub fn nova_snark_backend(config: &Config) {
-    
     let selected_function = config.function;
     let circuit_filepath = &config.circuit;
     let witness_gen_filepath = &config.witness_generator;
     let output_file_path = &config.output;
     let input_file_path = &config.input;
-    let resolution = config.resolution; 
+    let resolution = config.resolution;
     type G1 = nova_snark::provider::bn256_grumpkin::bn256::Point;
     type G2 = nova_snark::provider::bn256_grumpkin::grumpkin::Point;
 
@@ -77,13 +81,16 @@ pub fn nova_snark_backend(config: &Config) {
 
     let mut input_file = File::open(input_file_path.clone()).expect("Failed to open the file");
     let mut input_file_json_string = String::new();
-    input_file.read_to_string(&mut input_file_json_string).expect("Unable to read from the file");
-    
+    input_file
+        .read_to_string(&mut input_file_json_string)
+        .expect("Unable to read from the file");
+
     let mut private_inputs = Vec::new();
-    let mut start_public_input: Vec<F::<G1>> = Vec::new();
+    let mut start_public_input: Vec<F<G1>> = Vec::new();
 
     if selected_function == Transformation::Hash {
-        let input_data: ZKronoInputCrop = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+        let input_data: ZKronoInputCrop =
+            serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
         start_public_input.push(F::<G1>::from(0));
         for i in 0..iteration_count {
             let mut private_input = HashMap::new();
@@ -92,22 +99,23 @@ pub fn nova_snark_backend(config: &Config) {
             private_inputs.push(private_input);
         }
     } else if selected_function == Transformation::Crop {
-        let input_data: ZKronoInputCrop = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+        let input_data: ZKronoInputCrop =
+            serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
         start_public_input.push(F::<G1>::from(0));
         start_public_input.push(F::<G1>::from(0));
-        start_public_input.push(F::<G1>::from(input_data.info));  // x|y|index
+        start_public_input.push(F::<G1>::from(input_data.info)); // x|y|index
         for i in 0..iteration_count {
             let mut private_input = HashMap::new();
             // private_input.insert("adder".to_string(), json!(i+2));
             private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
             private_inputs.push(private_input);
         }
-    }
-    else if selected_function == Transformation::FixedCrop {
-        let input_data: ZKronoInputCropOpt = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+    } else if selected_function == Transformation::FixedCrop {
+        let input_data: ZKronoInputCropOpt =
+            serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
         start_public_input.push(F::<G1>::from(input_data.hash));
         start_public_input.push(F::<G1>::from(0));
-        start_public_input.push(F::<G1>::from(input_data.info));  // x|y|index
+        start_public_input.push(F::<G1>::from(input_data.info)); // x|y|index
         for i in 0..iteration_count {
             let mut private_input = HashMap::new();
             // private_input.insert("adder".to_string(), json!(i+2));
@@ -115,7 +123,8 @@ pub fn nova_snark_backend(config: &Config) {
             private_inputs.push(private_input);
         }
     } else if selected_function == Transformation::Resize {
-        let input_data: ZKronoInput = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+        let input_data: ZKronoInput =
+            serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
         iteration_count = 240;
         if resolution == Resolution::_4K {
             iteration_count = 1080;
@@ -126,21 +135,30 @@ pub fn nova_snark_backend(config: &Config) {
             let mut private_input = HashMap::new();
             // private_input.insert("adder".to_string(), json!(i+2));
             if resolution == Resolution::HD {
-                private_input.insert("row_orig".to_string(), json!(input_data.original[(i*3)..(i*3)+3]));
-                private_input.insert("row_tran".to_string(), json!(input_data.transformed[(i*2)..(i*2)+2]));
-            } else if resolution == Resolution::_4K{
-                private_input.insert("row_orig".to_string(), json!(input_data.original[(i*2)..(i*2)+2]));
+                private_input.insert(
+                    "row_orig".to_string(),
+                    json!(input_data.original[(i * 3)..(i * 3) + 3]),
+                );
+                private_input.insert(
+                    "row_tran".to_string(),
+                    json!(input_data.transformed[(i * 2)..(i * 2) + 2]),
+                );
+            } else if resolution == Resolution::_4K {
+                private_input.insert(
+                    "row_orig".to_string(),
+                    json!(input_data.original[(i * 2)..(i * 2) + 2]),
+                );
                 private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
             }
             private_inputs.push(private_input);
-
         }
     } else {
         start_public_input.push(F::<G1>::from(0));
         start_public_input.push(F::<G1>::from(0));
         if selected_function == Transformation::Contrast {
-            let input_data: ZKronoInputContrast = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
-            start_public_input.push(F::<G1>::from(input_data.factor));  // contrast factor
+            let input_data: ZKronoInputContrast =
+                serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+            start_public_input.push(F::<G1>::from(input_data.factor)); // contrast factor
             for i in 0..iteration_count {
                 let mut private_input = HashMap::new();
                 // private_input.insert("adder".to_string(), json!(i+2));
@@ -149,8 +167,9 @@ pub fn nova_snark_backend(config: &Config) {
                 private_inputs.push(private_input);
             }
         } else if selected_function == Transformation::Brightness {
-            let input_data: ZKronoInputBrightness = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
-            start_public_input.push(F::<G1>::from(input_data.factor));  // brightness factor
+            let input_data: ZKronoInputBrightness =
+                serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+            start_public_input.push(F::<G1>::from(input_data.factor)); // brightness factor
             for i in 0..iteration_count {
                 let mut private_input = HashMap::new();
                 // private_input.insert("adder".to_string(), json!(i+2));
@@ -158,19 +177,23 @@ pub fn nova_snark_backend(config: &Config) {
                 private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
                 private_inputs.push(private_input);
             }
-        } else if selected_function == Transformation::Blur || selected_function == Transformation::Sharpness  {
-            let input_data: ZKronoInput = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
-            start_public_input.push(F::<G1>::from(0));  // row1 hash
-            start_public_input.push(F::<G1>::from(0));  // row2 hash
+        } else if selected_function == Transformation::Blur
+            || selected_function == Transformation::Sharpness
+        {
+            let input_data: ZKronoInput =
+                serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+            start_public_input.push(F::<G1>::from(0)); // row1 hash
+            start_public_input.push(F::<G1>::from(0)); // row2 hash
             for i in 0..iteration_count {
                 let mut private_input = HashMap::new();
                 // private_input.insert("adder".to_string(), json!(i+2));
-                private_input.insert("row_orig".to_string(), json!(input_data.original[i..i+3]));
+                private_input.insert("row_orig".to_string(), json!(input_data.original[i..i + 3]));
                 private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
                 private_inputs.push(private_input);
             }
         } else {
-            let input_data: ZKronoInput = serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
+            let input_data: ZKronoInput =
+                serde_json::from_str(&input_file_json_string).expect("Deserialization failed");
             for i in 0..iteration_count {
                 let mut private_input = HashMap::new();
                 // private_input.insert("adder".to_string(), json!(i+2));
@@ -179,22 +202,16 @@ pub fn nova_snark_backend(config: &Config) {
                 private_inputs.push(private_input);
             }
         }
-        
     }
-    
+
     // let reader = BufReader::new(file);
 
     // Deserialize the JSON data into the defined structure
     // let data: Data = serde_json::from_reader(reader).expect("Failed to parse JSON");
 
-    
-
     let start = Instant::now();
     let pp: PublicParams<G1, G2, _, _> = create_public_params(r1cs.clone());
-    println!(
-        "Creating keys from R1CS took {:?}",
-        start.elapsed()
-    );
+    println!("Creating keys from R1CS took {:?}", start.elapsed());
 
     println!(
         "Number of constraints per step (primary circuit): {}",
@@ -256,7 +273,7 @@ pub fn nova_snark_backend(config: &Config) {
 
     //--- dump data ---//
     // Create some data to serialize as JSON
-    
+
     // Serialize the data to a JSON string
     let json_string = serde_json::to_string(&compressed_snark).unwrap();
 
@@ -264,16 +281,19 @@ pub fn nova_snark_backend(config: &Config) {
     let mut file = File::create(output_file_path.clone()).expect("Unable to create the file");
 
     // Write the JSON string to the file
-    file.write_all(json_string.as_bytes()).expect("Unable to write to the file");
+    file.write_all(json_string.as_bytes())
+        .expect("Unable to write to the file");
 
     println!("Data has been written to output.json");
 
     println!("-------------- Load Data --------");
     let mut file = File::open(output_file_path.clone()).expect("Unable to open the file");
     let mut json_string = String::new();
-    file.read_to_string(&mut json_string).expect("Unable to read from the file");
-    
-    let compressed_snark2: CompressedSNARK<_, _, _, _, _, _> = serde_json::from_str(&json_string).expect("Deserialization failed");
+    file.read_to_string(&mut json_string)
+        .expect("Unable to read from the file");
+
+    let compressed_snark2: CompressedSNARK<_, _, _, _, _, _> =
+        serde_json::from_str(&json_string).expect("Deserialization failed");
 
     // verify the compressed SNARK
     println!("Verifying a CompressedSNARK...");

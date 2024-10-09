@@ -1,25 +1,25 @@
 use backend::Backend;
 use clap::Parser;
 use folding::prepare_folding;
-use sonobe::{Decider as _, FoldingScheme};
 use nova_snark::nova_snark_backend;
+use sonobe::{Decider as _, FoldingScheme};
 
 use crate::{
     config::Config,
     folding::{verify_final_proof, Decider},
     input::ZKronoInput,
+    solidity::verify_on_chain,
     time::measure,
 };
-use crate::solidity::verify_on_chain;
 
 mod backend;
 mod config;
 mod folding;
 mod input;
+mod nova_snark;
+mod solidity;
 mod time;
 mod transformation;
-mod solidity;
-mod nova_snark;
 
 fn sonobe_backend(config: &Config) {
     let mut rng = rand::rngs::OsRng;
@@ -58,7 +58,6 @@ fn sonobe_backend(config: &Config) {
 }
 
 fn fold_fold_fold(config: &Config) {
-
     match config.backend {
         Backend::NovaSnark => {
             // Call function A here

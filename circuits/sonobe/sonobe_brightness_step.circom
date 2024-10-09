@@ -1,34 +1,18 @@
-pragma circom 2.0.0;
+pragma circom 2.1.0;
 
 include "../src/brightness_step.circom";
+include "../src/utils/input_transformation.circom";
 
-
+// Sonobe wrapper over `BrightnessHash` circuit.
 template SonobeBrightnessHash(width){
-    signal input ivc_input[3];
-    // signal input prev_orig_hash;
-    // signal input prev_gray_hash;
-    // brightness factor
+    signal input  external_inputs[2 * width];
+    signal input  ivc_input[3];
     signal output ivc_output[3];
-    // signal output next_orig_hash;
-    // signal output next_gray_hash;
-    // brightness factor
-    
-    // Private inputs
-    signal input external_inputs [2 * width];
 
-    signal row_orig [width];
-    signal row_tran [width];
+    signal row_orig[width], row_tran[width];
+    (row_orig, row_tran) <== SimpleInput(width)(external_inputs);
 
-    for (var i = 0; i < width; i++) {
-        row_orig[i] <== external_inputs[i];
-        row_tran[i] <== external_inputs[i + width];
-    }
-    
-    component brightness_circuit = BrightnessHash(width);
-    brightness_circuit.step_in <== ivc_input;
-    brightness_circuit.row_orig <== row_orig;
-    brightness_circuit.row_tran <== row_tran;
-    brightness_circuit.step_out ==> ivc_output;
+    ivc_output <== BrightnessHash(width)(ivc_input, row_orig, row_tran);
 }
 
 component main { public [ivc_input] } = SonobeBrightnessHash(128);

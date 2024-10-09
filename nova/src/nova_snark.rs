@@ -54,8 +54,8 @@ pub fn nova_snark_backend(config: &Config) {
     let output_file_path = &config.output;
     let input_file_path = &config.input;
     let resolution = config.resolution; 
-    type G1 = pasta_curves::pallas::Point;
-    type G2 = pasta_curves::vesta::Point;
+    type G1 = nova_snark::provider::bn256_grumpkin::bn256::Point;
+    type G2 = nova_snark::provider::bn256_grumpkin::grumpkin::Point;
 
     println!(
         "Running NOVA with witness generator: {} and group: {}",

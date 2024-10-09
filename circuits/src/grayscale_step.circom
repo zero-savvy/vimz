@@ -2,7 +2,7 @@ pragma circom 2.0.0;
 
 include "utils/row_hasher.circom";
 include "utils/pixels.circom";
-include "node_modules/circomlib/circuits/bitify.circom";
+include "../node_modules/circomlib/circuits/bitify.circom";
 
 
 template GrayscaleChecker(n) {
@@ -87,7 +87,4 @@ template GrayScaleHash(width){
 
 }
 
-component main { public [step_in] } = GrayScaleHash(128);
-
-
-
+// component main { public [step_in] } = GrayScaleHash(128);

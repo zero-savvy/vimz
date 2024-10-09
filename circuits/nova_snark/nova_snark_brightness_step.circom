@@ -1,27 +1,16 @@
-pragma circom 2.0.0;
+pragma circom 2.1.0;
 
 include "../src/brightness_step.circom";
 
-
+// NovaSnark wrapper over `BrightnessHash` circuit.
 template NovaBrightnessHash(width){
-    signal input step_in[3];
-    // signal input prev_orig_hash;
-    // signal input prev_gray_hash;
-    // brightness factor
+    // ---- Running IVC state ----
+    signal input  step_in[3];
     signal output step_out[3];
-    // signal output next_orig_hash;
-    // signal output next_gray_hash;
-    // btightness factor
-    
-    // Private inputs
-    signal input row_orig [width];
-    signal input row_tran [width];
-    
-    component brightness_circuit = BrightnessHash(width);
-    brightness_circuit.step_in <== step_in;
-    brightness_circuit.row_orig <== row_orig;
-    brightness_circuit.row_tran <== row_tran;
-    brightness_circuit.step_out ==> step_out;
+    // ---- Step inputs ----
+    signal input  row_orig[width], row_tran[width];
+    // ---- Step computation ----
+    step_out <== BrightnessHash(width)(step_in, row_orig, row_tran);
 }
 
 component main { public [step_in] } = NovaBrightnessHash(128);

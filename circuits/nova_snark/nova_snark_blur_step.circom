@@ -1,32 +1,16 @@
-pragma circom 2.0.0;
+pragma circom 2.1.0;
 
 include "../src/blur_step.circom";
 
-
+// NovaSnark wrapper over `Blur` circuit.
 template NovaBlur(width, kernel_size){
-    // public inputs and outputs
-    signal input step_in[kernel_size+1];
-    // signal input prev_orig_hash_0;
-    // signal input prev_orig_hash_1;
-    // signal input prev_orig_hash;
-    // signal input prev_conv_hash;
-    
-    signal output step_out[kernel_size+1];
-    // signal output next_orig_hash_1;
-    // signal output next_orig_hash_2;
-    // signal output next_orig_hash;
-    // signal output next_conv_hash;
-    
-    // private inputs
-    signal input row_orig [kernel_size][width];
-    signal input row_tran [width];
-
-    component blur_circuit = Blur(width, kernel_size);
-    blur_circuit.step_in <== step_in;
-    blur_circuit.row_orig <== row_orig;
-    blur_circuit.row_tran <== row_tran;
-    blur_circuit.step_out ==> step_out;
-
+    // ---- Running IVC state ----
+    signal input  step_in[4];
+    signal output step_out[4];
+    // ---- Step inputs ----
+    signal input row_orig[kernel_size][width], row_tran[width];
+    // ---- Step computation ----
+    step_out <== Blur(width, kernel_size)(step_in, row_orig, row_tran);
 }
 
 component main { public [step_in] } = NovaBlur(128, 3);

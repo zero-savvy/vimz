@@ -1,12 +1,12 @@
-use std::{fs::File, io::Read, path::Path, str::FromStr};
+use std::{fs, path::Path, str::FromStr};
 
 use ark_bn254::Fr;
 use num_traits::Num;
 use serde::Deserialize;
 
-/// Universal input structure for all supported transformations.
+/// Universal input structure for all supported transformations in the Sonobe circuits.
 #[derive(Deserialize)]
-pub struct ZKronoInput<ValueType = Fr> {
+pub struct SonobeInput<ValueType = Fr> {
     /// The original image, row by row (with pixels compression).
     pub original: Vec<Vec<ValueType>>,
     /// The transformed image, row by row (with pixels compression).
@@ -18,32 +18,24 @@ pub struct ZKronoInput<ValueType = Fr> {
     pub factor: u64,
 }
 
-impl ZKronoInput<Fr> {
-    /// Parse `path` into a `ZKronoInput` structure. Convert the hex strings into `Fr` elements.
+impl SonobeInput<Fr> {
+    /// Parse `path` into a `SonobeInput` structure. Convert the hex strings into `Fr` elements.
     pub fn from_file(path: &Path) -> Self {
-        let mut input_file_json = String::new();
-        File::open(path)
-            .expect("Failed to open the file")
-            .read_to_string(&mut input_file_json)
-            .expect("Unable to read from the file");
-
-        let self_string: ZKronoInput<String> =
-            serde_json::from_str(&input_file_json).expect("Deserialization failed");
+        let file_content = fs::read_to_string(path).expect("Failed to read file");
+        let self_string: SonobeInput<String> =
+            serde_json::from_str(&file_content).expect("Deserialization failed");
 
         Self {
-            original: self_string
-                .original
-                .iter()
-                .map(|x| string_seq_to_fr_seq(x))
-                .collect(),
-            transformed: self_string
-                .transformed
-                .iter()
-                .map(|x| string_seq_to_fr_seq(x))
-                .collect(),
+            original: string_2d_seq_to_fr_2d_seq(&self_string.original),
+            transformed: string_2d_seq_to_fr_2d_seq(&self_string.transformed),
             factor: self_string.factor,
         }
     }
+}
+
+/// Convert a sequence of sequences of hex strings into a sequence of sequences of `Fr` elements.
+fn string_2d_seq_to_fr_2d_seq(seq: &[Vec<String>]) -> Vec<Vec<Fr>> {
+    seq.iter().map(|x| string_seq_to_fr_seq(x)).collect()
 }
 
 /// Convert a sequence of hex strings into a sequence of `Fr` elements.

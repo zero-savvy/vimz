@@ -7,17 +7,17 @@ use sonobe::{Decider as _, FoldingScheme};
 use crate::{
     config::Config,
     folding::{verify_final_proof, Decider},
-    input::ZKronoInput,
     solidity::verify_on_chain,
     time::measure,
 };
+use crate::sonobe_backend::input::SonobeInput;
 
 mod backend;
 mod config;
 mod folding;
-mod input;
 mod nova_snark;
 mod solidity;
+mod sonobe_backend;
 mod time;
 mod transformation;
 
@@ -25,7 +25,7 @@ fn sonobe_backend(config: &Config) {
     let mut rng = rand::rngs::OsRng;
 
     let private_inputs = measure("Prepare private inputs", || {
-        ZKronoInput::from_file(&config.input)
+        SonobeInput::from_file(&config.input)
     });
 
     let initial_state = config.function.ivc_initial_state(&private_inputs);

@@ -1,8 +1,7 @@
 use ark_bn254::Fr;
 use clap::ValueEnum;
 use num_traits::Zero;
-
-use crate::input::ZKronoInput;
+use crate::sonobe_backend::input::SonobeInput;
 
 /// Supported transformations.
 #[derive(Copy, Clone, PartialEq, Eq, Debug, ValueEnum)]
@@ -21,7 +20,7 @@ pub enum Transformation {
 
 impl Transformation {
     /// Returns the initial state of the IVC for the given transformation, based on the input.
-    pub fn ivc_initial_state(&self, input: &ZKronoInput) -> Vec<Fr> {
+    pub fn ivc_initial_state(&self, input: &SonobeInput) -> Vec<Fr> {
         match self {
             Transformation::Grayscale => vec![Fr::zero(); 2],
             Transformation::Brightness => vec![Fr::zero(), Fr::zero(), Fr::from(input.factor)],
@@ -42,7 +41,7 @@ impl Transformation {
     }
 
     /// Prepares the input for the given transformation.
-    pub fn prepare_input(&self, input: ZKronoInput) -> Vec<Vec<Fr>> {
+    pub fn prepare_input(&self, input: SonobeInput) -> Vec<Vec<Fr>> {
         match self {
             // Concatenate the original and transformed row.
             Transformation::Grayscale | Transformation::Brightness => input

@@ -2,6 +2,7 @@ use clap::Parser;
 use config::{Backend, Config};
 
 mod config;
+mod input;
 mod nova_snark_backend;
 mod sonobe_backend;
 mod time;

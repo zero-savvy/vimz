@@ -1,24 +1,24 @@
+use ark_bn254::Fr;
 use sonobe::{Decider as _, FoldingScheme};
 
 use crate::{
     config::Config,
+    input::VIMzInput,
     sonobe_backend::{
         folding::{prepare_folding, verify_final_proof, Decider},
-        input::SonobeInput,
         solidity::verify_on_chain,
     },
     time::measure,
 };
 
 mod folding;
-pub mod input;
 mod solidity;
 
 pub fn run(config: &Config) {
     let mut rng = rand::rngs::OsRng;
 
     let private_inputs = measure("Prepare private inputs", || {
-        SonobeInput::from_file(&config.input)
+        VIMzInput::<Fr>::from_file(&config.input)
     });
 
     let initial_state = config.function.ivc_initial_state(&private_inputs);

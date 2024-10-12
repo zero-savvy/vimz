@@ -95,4 +95,15 @@ impl Resolution {
             Resolution::_8K => 4320,
         }
     }
+
+    /// Returns the lower resolution (step by one).
+    pub fn lower(&self) -> Resolution {
+        match self {
+            Resolution::SD => panic!("Cannot lower resolution from SD"),
+            Resolution::HD => Resolution::SD,
+            Resolution::FHD => Resolution::HD,
+            Resolution::_4K => Resolution::FHD,
+            Resolution::_8K => Resolution::_4K,
+        }
+    }
 }

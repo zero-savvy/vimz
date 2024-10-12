@@ -33,13 +33,7 @@ pub fn run(config: &Config) {
         witness_gen_filepath.display(),
         std::any::type_name::<G1>()
     );
-    let mut iteration_count = 720; // HD
-    if resolution == Resolution::_4K {
-        iteration_count = 2160;
-    }
-    if resolution == Resolution::_8K {
-        iteration_count = 4320;
-    }
+
     let root = current_dir().unwrap();
 
     let circuit_file = root.join(circuit_filepath);
@@ -52,9 +46,8 @@ pub fn run(config: &Config) {
 
     if selected_function == Transformation::Hash {
         start_public_input.push(F::<G1>::from(0));
-        for i in 0..iteration_count {
+        for i in 0..resolution.iteration_count() {
             let mut private_input = HashMap::new();
-            // private_input.insert("adder".to_string(), json!(i+2));
             private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
             private_inputs.push(private_input);
         }
@@ -62,7 +55,7 @@ pub fn run(config: &Config) {
         start_public_input.push(F::<G1>::from(0));
         start_public_input.push(F::<G1>::from(0));
         start_public_input.push(F::<G1>::from(input_data.info())); // x|y|index
-        for i in 0..iteration_count {
+        for i in 0..resolution.iteration_count() {
             let mut private_input = HashMap::new();
             private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
             private_inputs.push(private_input);
@@ -71,22 +64,16 @@ pub fn run(config: &Config) {
         start_public_input.push(F::<G1>::from(input_data.hash()));
         start_public_input.push(F::<G1>::from(0));
         start_public_input.push(F::<G1>::from(input_data.info())); // x|y|index
-        for i in 0..iteration_count {
+        for i in 0..resolution.iteration_count() {
             let mut private_input = HashMap::new();
-            // private_input.insert("adder".to_string(), json!(i+2));
             private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
             private_inputs.push(private_input);
         }
     } else if selected_function == Transformation::Resize {
-        iteration_count = 240;
-        if resolution == Resolution::_4K {
-            iteration_count = 1080;
-        }
         start_public_input.push(F::<G1>::from(0));
         start_public_input.push(F::<G1>::from(0));
-        for i in 0..iteration_count {
+        for i in 0..resolution.lower().iteration_count() {
             let mut private_input = HashMap::new();
-            // private_input.insert("adder".to_string(), json!(i+2));
             if resolution == Resolution::HD {
                 private_input.insert(
                     "row_orig".to_string(),
@@ -110,18 +97,16 @@ pub fn run(config: &Config) {
         start_public_input.push(F::<G1>::from(0));
         if selected_function == Transformation::Contrast {
             start_public_input.push(F::<G1>::from(input_data.factor())); // contrast factor
-            for i in 0..iteration_count {
+            for i in 0..resolution.iteration_count() {
                 let mut private_input = HashMap::new();
-                // private_input.insert("adder".to_string(), json!(i+2));
                 private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
                 private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
                 private_inputs.push(private_input);
             }
         } else if selected_function == Transformation::Brightness {
             start_public_input.push(F::<G1>::from(input_data.factor())); // brightness factor
-            for i in 0..iteration_count {
+            for i in 0..resolution.iteration_count() {
                 let mut private_input = HashMap::new();
-                // private_input.insert("adder".to_string(), json!(i+2));
                 private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
                 private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
                 private_inputs.push(private_input);
@@ -131,17 +116,15 @@ pub fn run(config: &Config) {
         {
             start_public_input.push(F::<G1>::from(0)); // row1 hash
             start_public_input.push(F::<G1>::from(0)); // row2 hash
-            for i in 0..iteration_count {
+            for i in 0..resolution.iteration_count() {
                 let mut private_input = HashMap::new();
-                // private_input.insert("adder".to_string(), json!(i+2));
                 private_input.insert("row_orig".to_string(), json!(input_data.original[i..i + 3]));
                 private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
                 private_inputs.push(private_input);
             }
         } else {
-            for i in 0..iteration_count {
+            for i in 0..resolution.iteration_count() {
                 let mut private_input = HashMap::new();
-                // private_input.insert("adder".to_string(), json!(i+2));
                 private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
                 private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
                 private_inputs.push(private_input);
@@ -189,7 +172,12 @@ pub fn run(config: &Config) {
     // verify the recursive SNARK
     println!("Verifying a RecursiveSNARK...");
     let start = Instant::now();
-    let res = recursive_snark.verify(&pp, iteration_count, &start_public_input, &z0_secondary);
+    let res = recursive_snark.verify(
+        &pp,
+        resolution.iteration_count(),
+        &start_public_input,
+        &z0_secondary,
+    );
     println!(
         "RecursiveSNARK::verify: {:?}, took {:?}",
         res,
@@ -240,7 +228,7 @@ pub fn run(config: &Config) {
     let start = Instant::now();
     let res = compressed_snark2.verify(
         &vk,
-        iteration_count,
+        resolution.iteration_count(),
         start_public_input.to_vec(),
         z0_secondary.to_vec(),
     );

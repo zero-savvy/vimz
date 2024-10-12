@@ -51,7 +51,7 @@ struct ZKronoInputCropOpt {
     hash: u64,
 }
 
-pub fn nova_snark_backend(config: &Config) {
+pub fn run(config: &Config) {
     let selected_function = config.function;
     let circuit_filepath = &config.circuit;
     let witness_gen_filepath = &config.witness_generator;

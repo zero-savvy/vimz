@@ -14,31 +14,19 @@ use crate::{config::Config, input::VIMzInput, nova_snark_backend::input::prepare
 
 mod input;
 
+type G1 = nova_snark::provider::bn256_grumpkin::bn256::Point;
+type G2 = nova_snark::provider::bn256_grumpkin::grumpkin::Point;
+
 pub fn run(config: &Config) {
-    let selected_function = config.function;
-    let circuit_filepath = &config.circuit;
-    let witness_gen_filepath = &config.witness_generator;
-    let output_file_path = &config.output;
-    let input_file_path = &config.input;
-    let resolution = config.resolution;
-    type G1 = nova_snark::provider::bn256_grumpkin::bn256::Point;
-    type G2 = nova_snark::provider::bn256_grumpkin::grumpkin::Point;
-
-    println!(
-        "Running NOVA with witness generator: {} and group: {}",
-        witness_gen_filepath.display(),
-        std::any::type_name::<G1>()
-    );
-
     let root = current_dir().unwrap();
 
-    let circuit_file = root.join(circuit_filepath);
+    let circuit_file = root.join(&config.circuit);
     let r1cs = load_r1cs::<G1, G2>(&FileLocation::PathBuf(circuit_file));
-    let witness_generator_file = root.join(witness_gen_filepath);
+    let witness_generator_file = root.join(&config.witness_generator);
 
-    let input_data = VIMzInput::<String>::from_file(input_file_path);
-    let private_inputs = prepare_input(selected_function, &input_data, resolution);
-    let start_public_input = selected_function.ivc_initial_state(&input_data.extra);
+    let input_data = VIMzInput::<String>::from_file(&config.input);
+    let private_inputs = prepare_input(config.function, &input_data, config.resolution);
+    let start_public_input = config.function.ivc_initial_state(&input_data.extra);
 
     let start = Instant::now();
     let pp: PublicParams<G1, G2, _, _> = create_public_params(r1cs.clone());
@@ -82,7 +70,7 @@ pub fn run(config: &Config) {
     let start = Instant::now();
     let res = recursive_snark.verify(
         &pp,
-        resolution.iteration_count(),
+        config.resolution.iteration_count(),
         &start_public_input,
         &z0_secondary,
     );
@@ -114,7 +102,7 @@ pub fn run(config: &Config) {
     let json_string = serde_json::to_string(&compressed_snark).unwrap();
 
     // Open a file for writing
-    let mut file = File::create(output_file_path.clone()).expect("Unable to create the file");
+    let mut file = File::create(config.output.clone()).expect("Unable to create the file");
 
     // Write the JSON string to the file
     file.write_all(json_string.as_bytes())
@@ -123,7 +111,7 @@ pub fn run(config: &Config) {
     println!("Data has been written to output.json");
 
     println!("-------------- Load Data --------");
-    let mut file = File::open(output_file_path.clone()).expect("Unable to open the file");
+    let mut file = File::open(&config.output).expect("Unable to open the file");
     let mut json_string = String::new();
     file.read_to_string(&mut json_string)
         .expect("Unable to read from the file");
@@ -136,7 +124,7 @@ pub fn run(config: &Config) {
     let start = Instant::now();
     let res = compressed_snark2.verify(
         &vk,
-        resolution.iteration_count(),
+        config.resolution.iteration_count(),
         start_public_input.to_vec(),
         z0_secondary.to_vec(),
     );

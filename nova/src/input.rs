@@ -24,6 +24,9 @@ pub struct VIMzInput<ValueType = Fr> {
     /// The original image, row by row (with pixels compression).
     pub original: Vec<Vec<ValueType>>,
     /// The transformed image, row by row (with pixels compression).
+    ///
+    /// For some transformations, the transformed image is not provided and thus empty.
+    #[serde(default)]
     pub transformed: Vec<Vec<ValueType>>,
     #[serde(flatten)]
     /// Extra information for the transformation.
@@ -91,4 +94,38 @@ fn string_seq_to_fr_seq(seq: &[String]) -> Vec<Fr> {
             Fr::from_str(&decoded).unwrap()
         })
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use ark_bn254::Fr;
+
+    use crate::input::{Extra, VIMzInput};
+
+    fn filepath(transformation: &str) -> PathBuf {
+        PathBuf::from(format!(
+            "../samples/JSON/HD/transformation_{transformation}.json"
+        ))
+    }
+
+    macro_rules! test_input {
+        ($transformation:ident, $extra:pat) => {
+            #[test]
+            fn $transformation() {
+                let input = VIMzInput::<Fr>::from_file(&filepath(stringify!($transformation)));
+                assert!(matches!(input.extra, $extra));
+            }
+        };
+    }
+
+    test_input!(blur, Extra::None {});
+    test_input!(brightness, Extra::Factor { .. });
+    test_input!(contrast, Extra::Factor { .. });
+    test_input!(crop, Extra::Info { .. });
+    test_input!(crop_op, Extra::Info { .. });
+    test_input!(grayscale, Extra::None {});
+    test_input!(resize, Extra::None {});
+    test_input!(sharpness, Extra::None {});
 }

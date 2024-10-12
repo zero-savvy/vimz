@@ -1,7 +1,6 @@
-use ark_bn254::Fr;
 use clap::ValueEnum;
 
-use crate::input::{Extra, VIMzInput};
+use crate::input::Extra;
 
 /// Supported transformations.
 #[derive(Copy, Clone, PartialEq, Eq, Debug, ValueEnum)]
@@ -34,42 +33,6 @@ impl Transformation {
             ],
             Transformation::Grayscale | Transformation::Resize => vec![zero; 2],
             Transformation::Hash => vec![zero],
-        }
-    }
-
-    /// Returns the width of the input for a single step for the given transformation.
-    pub fn step_input_width(&self) -> usize {
-        match self {
-            // two rows of 128 entries
-            Transformation::Grayscale | Transformation::Brightness => 256,
-            // three rows of 128 entries for the kernel input and one for the result
-            Transformation::Blur => 512,
-            _ => unimplemented!(),
-        }
-    }
-
-    /// Prepares the input for the given transformation.
-    pub fn prepare_input(&self, input: VIMzInput<Fr>) -> Vec<Vec<Fr>> {
-        match self {
-            // Concatenate the original and transformed row.
-            Transformation::Grayscale | Transformation::Brightness => input
-                .original
-                .into_iter()
-                .zip(input.transformed)
-                .map(|(original, transformed)| [original, transformed].concat())
-                .collect(),
-
-            // Concatenate the original rows that are taken for the kernel, and the transformed row.
-            Transformation::Blur => {
-                let mut prepared = vec![];
-                for (i, transformed) in input.transformed.into_iter().enumerate() {
-                    let mut row = input.original[i..i + 3].to_vec();
-                    row.push(transformed);
-                    prepared.push(row.concat());
-                }
-                prepared
-            }
-            _ => unimplemented!(),
         }
     }
 }
@@ -109,6 +72,17 @@ impl Resolution {
             Resolution::FHD => Resolution::HD,
             Resolution::_4K => Resolution::FHD,
             Resolution::_8K => Resolution::_4K,
+        }
+    }
+
+    /// Returns the ratio of the current resolution to the lower resolution.
+    pub fn ratio_to_lower(&self) -> (usize, usize) {
+        match self {
+            Resolution::SD => panic!("Cannot lower resolution from SD"),
+            Resolution::HD => (3, 2),
+            Resolution::FHD => (3, 2),
+            Resolution::_4K => (2, 1),
+            Resolution::_8K => (2, 1),
         }
     }
 }

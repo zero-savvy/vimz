@@ -6,12 +6,14 @@ use crate::{
     input::VIMzInput,
     sonobe_backend::{
         folding::{prepare_folding, verify_final_proof, Decider},
+        input::{prepare_input, step_input_width},
         solidity::verify_on_chain,
     },
     time::measure,
 };
 
 mod folding;
+mod input;
 mod solidity;
 
 pub fn run(config: &Config) {
@@ -26,12 +28,12 @@ pub fn run(config: &Config) {
         &config.circuit,
         &config.witness_generator,
         initial_state.len(),
-        config.function.step_input_width(),
+        step_input_width(config.function),
         initial_state,
         &mut rng,
     );
 
-    let prepared_input = config.function.prepare_input(private_inputs);
+    let prepared_input = prepare_input(config.function, private_inputs);
     assert_eq!(prepared_input.len(), config.resolution.iteration_count());
     for (i, external_inputs_at_step) in prepared_input[..5].iter().enumerate() {
         measure(&format!("Nova::prove_step {i}"), || {

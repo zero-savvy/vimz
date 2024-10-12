@@ -1,5 +1,4 @@
 use std::{
-    collections::HashMap,
     env::current_dir,
     fs::File,
     io::{Read, Write},
@@ -10,13 +9,10 @@ use nova_scotia::{
     circom::reader::load_r1cs, create_public_params, create_recursive_circuit, FileLocation, F, S,
 };
 use nova_snark::{CompressedSNARK, PublicParams};
-use serde_json::json;
 
-use crate::{
-    config::Config,
-    input::VIMzInput,
-    transformation::{Resolution, Transformation},
-};
+use crate::{config::Config, input::VIMzInput, nova_snark_backend::input::prepare_input};
+
+mod input;
 
 pub fn run(config: &Config) {
     let selected_function = config.function;
@@ -39,83 +35,10 @@ pub fn run(config: &Config) {
     let circuit_file = root.join(circuit_filepath);
     let r1cs = load_r1cs::<G1, G2>(&FileLocation::PathBuf(circuit_file));
     let witness_generator_file = root.join(witness_gen_filepath);
+
     let input_data = VIMzInput::<String>::from_file(input_file_path);
-
-    let mut private_inputs = Vec::new();
+    let private_inputs = prepare_input(selected_function, &input_data, resolution);
     let start_public_input = selected_function.ivc_initial_state(&input_data.extra);
-
-    if selected_function == Transformation::Hash {
-        for i in 0..resolution.iteration_count() {
-            let mut private_input = HashMap::new();
-            private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
-            private_inputs.push(private_input);
-        }
-    } else if selected_function == Transformation::Crop {
-        for i in 0..resolution.iteration_count() {
-            let mut private_input = HashMap::new();
-            private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
-            private_inputs.push(private_input);
-        }
-    } else if selected_function == Transformation::FixedCrop {
-        for i in 0..resolution.iteration_count() {
-            let mut private_input = HashMap::new();
-            private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
-            private_inputs.push(private_input);
-        }
-    } else if selected_function == Transformation::Resize {
-        for i in 0..resolution.lower().iteration_count() {
-            let mut private_input = HashMap::new();
-            if resolution == Resolution::HD {
-                private_input.insert(
-                    "row_orig".to_string(),
-                    json!(input_data.original[(i * 3)..(i * 3) + 3]),
-                );
-                private_input.insert(
-                    "row_tran".to_string(),
-                    json!(input_data.transformed[(i * 2)..(i * 2) + 2]),
-                );
-            } else if resolution == Resolution::_4K {
-                private_input.insert(
-                    "row_orig".to_string(),
-                    json!(input_data.original[(i * 2)..(i * 2) + 2]),
-                );
-                private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
-            }
-            private_inputs.push(private_input);
-        }
-    } else {
-        if selected_function == Transformation::Contrast {
-            for i in 0..resolution.iteration_count() {
-                let mut private_input = HashMap::new();
-                private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
-                private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
-                private_inputs.push(private_input);
-            }
-        } else if selected_function == Transformation::Brightness {
-            for i in 0..resolution.iteration_count() {
-                let mut private_input = HashMap::new();
-                private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
-                private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
-                private_inputs.push(private_input);
-            }
-        } else if selected_function == Transformation::Blur
-            || selected_function == Transformation::Sharpness
-        {
-            for i in 0..resolution.iteration_count() {
-                let mut private_input = HashMap::new();
-                private_input.insert("row_orig".to_string(), json!(input_data.original[i..i + 3]));
-                private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
-                private_inputs.push(private_input);
-            }
-        } else {
-            for i in 0..resolution.iteration_count() {
-                let mut private_input = HashMap::new();
-                private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
-                private_input.insert("row_tran".to_string(), json!(input_data.transformed[i]));
-                private_inputs.push(private_input);
-            }
-        }
-    }
 
     let start = Instant::now();
     let pp: PublicParams<G1, G2, _, _> = create_public_params(r1cs.clone());

@@ -1,11 +1,15 @@
 use std::path::PathBuf;
 
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 
-use crate::{
-    backend::Backend,
-    transformation::{Resolution, Transformation},
-};
+use crate::transformation::{Resolution, Transformation};
+
+/// Supported backends.
+#[derive(Copy, Clone, PartialEq, Eq, Debug, ValueEnum)]
+pub enum Backend {
+    Sonobe,
+    NovaSnark,
+}
 
 #[derive(Parser)]
 #[command(

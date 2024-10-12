@@ -1,6 +1,7 @@
 use ark_bn254::Fr;
 use clap::ValueEnum;
 use num_traits::Zero;
+
 use crate::sonobe_backend::input::SonobeInput;
 
 /// Supported transformations.

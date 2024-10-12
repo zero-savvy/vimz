@@ -21,7 +21,7 @@ pub fn run(config: &Config) {
         VIMzInput::<Fr>::from_file(&config.input)
     });
 
-    let initial_state = config.function.ivc_initial_state(&private_inputs);
+    let initial_state = config.function.ivc_initial_state(&private_inputs.extra);
     let (mut folding, decider_pp, decider_vp) = prepare_folding(
         &config.circuit,
         &config.witness_generator,

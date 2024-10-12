@@ -18,9 +18,33 @@ pub enum Extra {
     None {},
 }
 
+impl Extra {
+    pub fn factor(&self) -> u64 {
+        match self {
+            Extra::Factor { factor } => *factor,
+            _ => unreachable!("No factor provided"),
+        }
+    }
+
+    pub fn info(&self) -> u64 {
+        match self {
+            Extra::Info { info } => *info,
+            Extra::InfoHash { info, .. } => *info,
+            _ => unreachable!("No info provided"),
+        }
+    }
+
+    pub fn hash(&self) -> u64 {
+        match self {
+            Extra::InfoHash { hash, .. } => *hash,
+            _ => unreachable!("No hash provided"),
+        }
+    }
+}
+
 /// Universal input structure for all supported transformations in the VIMz circuits.
 #[derive(Deserialize)]
-pub struct VIMzInput<ValueType = Fr> {
+pub struct VIMzInput<ValueType> {
     /// The original image, row by row (with pixels compression).
     pub original: Vec<Vec<ValueType>>,
     /// The transformed image, row by row (with pixels compression).
@@ -31,30 +55,6 @@ pub struct VIMzInput<ValueType = Fr> {
     #[serde(flatten)]
     /// Extra information for the transformation.
     pub extra: Extra,
-}
-
-impl<ValueType> VIMzInput<ValueType> {
-    pub fn factor(&self) -> u64 {
-        match self.extra {
-            Extra::Factor { factor } => factor,
-            _ => unreachable!("No factor provided"),
-        }
-    }
-
-    pub fn info(&self) -> u64 {
-        match self.extra {
-            Extra::Info { info } => info,
-            Extra::InfoHash { info, .. } => info,
-            _ => unreachable!("No info provided"),
-        }
-    }
-
-    pub fn hash(&self) -> u64 {
-        match self.extra {
-            Extra::InfoHash { hash, .. } => hash,
-            _ => unreachable!("No hash provided"),
-        }
-    }
 }
 
 impl VIMzInput<String> {

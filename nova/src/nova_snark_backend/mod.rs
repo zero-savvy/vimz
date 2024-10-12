@@ -42,36 +42,27 @@ pub fn run(config: &Config) {
     let input_data = VIMzInput::<String>::from_file(input_file_path);
 
     let mut private_inputs = Vec::new();
-    let mut start_public_input: Vec<F<G1>> = Vec::new();
+    let start_public_input = selected_function.ivc_initial_state(&input_data.extra);
 
     if selected_function == Transformation::Hash {
-        start_public_input.push(F::<G1>::from(0));
         for i in 0..resolution.iteration_count() {
             let mut private_input = HashMap::new();
             private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
             private_inputs.push(private_input);
         }
     } else if selected_function == Transformation::Crop {
-        start_public_input.push(F::<G1>::from(0));
-        start_public_input.push(F::<G1>::from(0));
-        start_public_input.push(F::<G1>::from(input_data.info())); // x|y|index
         for i in 0..resolution.iteration_count() {
             let mut private_input = HashMap::new();
             private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
             private_inputs.push(private_input);
         }
     } else if selected_function == Transformation::FixedCrop {
-        start_public_input.push(F::<G1>::from(input_data.hash()));
-        start_public_input.push(F::<G1>::from(0));
-        start_public_input.push(F::<G1>::from(input_data.info())); // x|y|index
         for i in 0..resolution.iteration_count() {
             let mut private_input = HashMap::new();
             private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
             private_inputs.push(private_input);
         }
     } else if selected_function == Transformation::Resize {
-        start_public_input.push(F::<G1>::from(0));
-        start_public_input.push(F::<G1>::from(0));
         for i in 0..resolution.lower().iteration_count() {
             let mut private_input = HashMap::new();
             if resolution == Resolution::HD {
@@ -93,10 +84,7 @@ pub fn run(config: &Config) {
             private_inputs.push(private_input);
         }
     } else {
-        start_public_input.push(F::<G1>::from(0));
-        start_public_input.push(F::<G1>::from(0));
         if selected_function == Transformation::Contrast {
-            start_public_input.push(F::<G1>::from(input_data.factor())); // contrast factor
             for i in 0..resolution.iteration_count() {
                 let mut private_input = HashMap::new();
                 private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
@@ -104,7 +92,6 @@ pub fn run(config: &Config) {
                 private_inputs.push(private_input);
             }
         } else if selected_function == Transformation::Brightness {
-            start_public_input.push(F::<G1>::from(input_data.factor())); // brightness factor
             for i in 0..resolution.iteration_count() {
                 let mut private_input = HashMap::new();
                 private_input.insert("row_orig".to_string(), json!(input_data.original[i]));
@@ -114,8 +101,6 @@ pub fn run(config: &Config) {
         } else if selected_function == Transformation::Blur
             || selected_function == Transformation::Sharpness
         {
-            start_public_input.push(F::<G1>::from(0)); // row1 hash
-            start_public_input.push(F::<G1>::from(0)); // row2 hash
             for i in 0..resolution.iteration_count() {
                 let mut private_input = HashMap::new();
                 private_input.insert("row_orig".to_string(), json!(input_data.original[i..i + 3]));

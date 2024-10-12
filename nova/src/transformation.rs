@@ -1,34 +1,39 @@
 use ark_bn254::Fr;
 use clap::ValueEnum;
-use num_traits::Zero;
 
-use crate::input::VIMzInput;
+use crate::input::{Extra, VIMzInput};
 
 /// Supported transformations.
 #[derive(Copy, Clone, PartialEq, Eq, Debug, ValueEnum)]
 pub enum Transformation {
+    Blur,
+    Brightness,
+    Contrast,
     Crop,
     FixedCrop,
     Grayscale,
-    Resize,
-    ColorTransform,
-    Sharpness,
-    Contrast,
-    Blur,
-    Brightness,
     Hash,
+    Resize,
+    Sharpness,
 }
 
 impl Transformation {
     /// Returns the initial state of the IVC for the given transformation, based on the input.
-    pub fn ivc_initial_state(&self, input: &VIMzInput<Fr>) -> Vec<Fr> {
+    pub fn ivc_initial_state<ValueOut: From<u64> + Copy>(&self, input: &Extra) -> Vec<ValueOut> {
+        let zero = ValueOut::from(0);
+        let zzv = |v| vec![zero, zero, ValueOut::from(v)];
+
         match self {
-            Transformation::Grayscale => vec![Fr::zero(); 2],
-            Transformation::Brightness => {
-                vec![Fr::zero(), Fr::zero(), Fr::from(input.factor())]
-            }
-            Transformation::Blur => vec![Fr::zero(); 4],
-            _ => unimplemented!(),
+            Transformation::Blur | Transformation::Sharpness => vec![zero; 4],
+            Transformation::Brightness | Transformation::Contrast => zzv(input.factor()),
+            Transformation::Crop => zzv(input.info()),
+            Transformation::FixedCrop => vec![
+                ValueOut::from(input.hash()),
+                zero,
+                ValueOut::from(input.info()),
+            ],
+            Transformation::Grayscale | Transformation::Resize => vec![zero; 2],
+            Transformation::Hash => vec![zero],
         }
     }
 

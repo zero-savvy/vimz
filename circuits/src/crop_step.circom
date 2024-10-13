@@ -1,8 +1,8 @@
 pragma circom 2.0.0;
 
-include "node_modules/circomlib/circuits/multiplexer.circom";
-include "node_modules/circomlib/circuits/mux1.circom";
-include "node_modules/circomlib/circuits/comparators.circom";
+include "../node_modules/circomlib/circuits/multiplexer.circom";
+include "../node_modules/circomlib/circuits/mux1.circom";
+include "../node_modules/circomlib/circuits/comparators.circom";
 include "utils/pixels.circom";
 include "utils/row_hasher.circom";
 
@@ -42,7 +42,7 @@ template MultiplexerCrop(origSize, cropSize) {
 }
 
 
-template CropHash(widthOrig, widthCrop, heightCrop, x, y){
+template CropHash(widthOrig, widthCrop, heightCrop){
     // public inputs
     signal input step_in[3];
     
@@ -52,16 +52,25 @@ template CropHash(widthOrig, widthCrop, heightCrop, x, y){
     //outputs
     signal output step_out[3];
     
-    var decompressed_row_orig [widthOrig * 10];
+    signal decompressed_row_orig [widthOrig * 10];
 
     // Decode input Signals
     var prev_orig_hash = step_in[0];
     var prev_crop_hash = step_in[1];
-    var row_index = step_in[2];
+    var compressed_info = step_in[2];
+
+    component info_decomp = CropInfoDecompressor();
+    info_decomp.in <== compressed_info;
+    var row_index = info_decomp.row_index;
+    var crop_start_x = info_decomp.x;
+    var crop_start_y = info_decomp.y;
 
     // encoding signals
     var next_orig_hash;
     var next_crop_hash;
+    var next_row_index;
+    var same_crop_start_x;
+    var same_crop_start_y;
 
     component orig_row_hasher = RowHasher(widthOrig);
     component trans_row_hasher = RowHasher(widthCrop);
@@ -83,19 +92,18 @@ template CropHash(widthOrig, widthCrop, heightCrop, x, y){
         decompressor[i] = DecompressorCrop();
         decompressor[i].in <== row_orig[i];
         for (var j=0; j<10; j++) {
-            decompressed_row_orig[i*10+j] = decompressor[i].out[j];
+            decompressed_row_orig[i*10+j] <== decompressor[i].out[j];
         }
     }
 
-    var uncompressed_crop[widthCrop * 10];
-    for (var i=0; i<widthCrop * 10; i++) { 
-        uncompressed_crop[i] = decompressed_row_orig[x+i];
-    }
+    component mux_crop = MultiplexerCrop(widthOrig * 10, widthCrop * 10);
+    mux_crop.inp <== decompressed_row_orig;
+    mux_crop.sel <== crop_start_x;
     component cropped_data[widthCrop];
     for (var i=0; i<widthCrop; i++) {
         cropped_data[i] = CompressorCrop();
         for (var j=0; j<10; j++) {
-            cropped_data[i].in[j] <== uncompressed_crop[i*10+j];
+            cropped_data[i].in[j] <== mux_crop.out[i*10+j];
         }
     } 
 
@@ -112,20 +120,25 @@ template CropHash(widthOrig, widthCrop, heightCrop, x, y){
     // if the row is within the cropped area
     component gte = GreaterEqThan(12);
     gte.in[0] <== row_index;
-    gte.in[1] <== y;
+    gte.in[1] <== crop_start_y;
     component lt = LessThan(12);
     lt.in[0] <== row_index;
-    lt.in[1] <== y + heightCrop;
+    lt.in[1] <== crop_start_y + heightCrop;
 
     selector.s <== gte.out * lt.out;
 
     next_crop_hash = selector.out;
 
+    same_crop_start_x = crop_start_x;
+    same_crop_start_y = crop_start_y;
+
+    
+
     step_out[0] <== next_orig_hash;
     step_out[1] <== next_crop_hash;
-    step_out[2] <== row_index + 1;
+    step_out[2] <== compressed_info + 1;
 
     
 }
 
-component main { public [step_in] } = CropHash(128, 64, 480, 236, 105);
+component main { public [step_in] } = CropHash(128, 64, 480);

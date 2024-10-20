@@ -11,7 +11,10 @@ use sonobe_solidity::{
 };
 
 use crate::{
-    sonobe_backend::folding::{DeciderProof, DeciderVerifierParam, Folding},
+    sonobe_backend::{
+        decider::{DeciderProof, DeciderVerifierParam},
+        folding::Folding,
+    },
     time::measure,
 };
 

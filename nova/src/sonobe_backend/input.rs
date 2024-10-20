@@ -1,20 +1,21 @@
 use ark_bn254::Fr;
 
-use crate::{input::VIMzInput, transformation::Transformation};
+use crate::{config::Config, input::VIMzInput, transformation::Transformation};
 
-/// Returns the width of the input for a single step for the given transformation.
-pub fn step_input_width(transformation: Transformation) -> usize {
-    match transformation {
-        // three rows of 128 entries for the kernel input and one for the result
-        Transformation::Blur => 512,
-        // two rows of 128 entries
-        Transformation::Brightness | Transformation::Grayscale => 256,
-        _ => unimplemented!(),
-    }
+/// Read the input data specified in the configuration and prepare it for the folding scheme.
+///
+/// Returns the input data for each step and the initial state.
+pub fn prepare_input(config: &Config) -> (Vec<Vec<Fr>>, Vec<Fr>) {
+    let input = VIMzInput::<Fr>::from_file(&config.input);
+    let initial_state = config.function.ivc_initial_state(&input.extra);
+    let ivc_step_inputs = prepare_input_for_transformation(config.function, input);
+    (ivc_step_inputs, initial_state)
 }
 
-/// Prepares the input for the given transformation.
-pub fn prepare_input(transformation: Transformation, input: VIMzInput<Fr>) -> Vec<Vec<Fr>> {
+fn prepare_input_for_transformation(
+    transformation: Transformation,
+    input: VIMzInput<Fr>,
+) -> Vec<Vec<Fr>> {
     match transformation {
         // Concatenate the original and transformed row.
         Transformation::Grayscale | Transformation::Brightness => input

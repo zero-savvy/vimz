@@ -1,17 +1,18 @@
-use ark_bn254::Fr;
+use decider::prepare_decider;
 use sonobe::{Decider as _, FoldingScheme};
 
 use crate::{
     config::Config,
-    input::VIMzInput,
     sonobe_backend::{
-        folding::{prepare_folding, verify_final_proof, Decider},
-        input::{prepare_input, step_input_width},
+        decider::{verify_final_proof, Decider},
+        folding::prepare_folding,
+        input::prepare_input,
         solidity::verify_on_chain,
     },
     time::measure,
 };
 
+mod decider;
 mod folding;
 mod input;
 mod solidity;
@@ -19,34 +20,30 @@ mod solidity;
 pub fn run(config: &Config) {
     let mut rng = rand::rngs::OsRng;
 
-    let private_inputs = measure("Prepare private inputs", || {
-        VIMzInput::<Fr>::from_file(&config.input)
-    });
+    // ============================== Prepare input and folding ====================================
 
-    let initial_state = config.function.ivc_initial_state(&private_inputs.extra);
-    let (mut folding, decider_pp, decider_vp) = prepare_folding(
-        &config.circuit,
-        &config.witness_generator,
-        step_input_width(config.function),
-        initial_state,
-        &mut rng,
-    );
+    let (ivc_step_inputs, initial_state) = measure("Prepare input", || prepare_input(config));
+    let (mut folding, folding_params) = prepare_folding(config, initial_state, &mut rng);
 
-    let prepared_input = prepare_input(config.function, private_inputs);
-    assert_eq!(prepared_input.len(), config.resolution.iteration_count());
-    for (i, external_inputs_at_step) in prepared_input[..5].iter().enumerate() {
+    // ============================== Fold the input ===============================================
+
+    for (i, ivc_step_input) in ivc_step_inputs.into_iter().enumerate().take(5) {
         measure(&format!("Nova::prove_step {i}"), || {
             folding
-                .prove_step(rng, external_inputs_at_step.clone(), None)
+                .prove_step(rng, ivc_step_input, None)
                 .expect("Failed to prove step")
         });
     }
 
+    // ============================== Prepare decider and compress the proof =======================
+
+    let (decider_pp, decider_vp) = prepare_decider(folding.clone(), folding_params, &mut rng);
     let proof = measure("Generated decider proof", || {
         Decider::prove(rng, decider_pp, folding.clone()).expect("Failed to generate proof")
     });
 
-    assert!(verify_final_proof(&proof, &folding, decider_vp.clone()));
+    // ============================== Verify the final proof =======================================
 
+    verify_final_proof(&proof, &folding, decider_vp.clone());
     verify_on_chain(&folding.F.clone(), decider_vp, folding, proof);
 }

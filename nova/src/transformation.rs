@@ -35,6 +35,17 @@ impl Transformation {
             Transformation::Hash => vec![zero],
         }
     }
+
+    /// Returns the amount of the input field elements for a single step for the given transformation.
+    pub fn step_input_width(&self) -> usize {
+        match self {
+            // Three rows of 128 entries for the kernel input and one for the result.
+            Transformation::Blur => 512,
+            // Two rows of 128 entries.
+            Transformation::Brightness | Transformation::Grayscale => 256,
+            _ => unimplemented!(),
+        }
+    }
 }
 
 /// Supported resolutions.

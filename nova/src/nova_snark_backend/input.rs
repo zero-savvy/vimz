@@ -15,12 +15,13 @@ pub type PreparedInputs = (Vec<HashMap<String, Value>>, Vec<F<G1>>, Vec<F<G2>>);
 /// Read the input data specified in the configuration and prepare it for the folding scheme.
 ///
 /// Returns the input data for each step and the initial state.
+#[tracing::instrument(name = "Prepare input", skip_all)]
 pub fn prepare_input(config: &Config) -> PreparedInputs {
     let input = VIMzInput::<String>::from_file(&config.input_file());
     let initial_state = config.function.ivc_initial_state(&input.extra);
     let ivc_step_inputs =
         prepare_input_for_transformation(config.function, &input, config.resolution);
-    (ivc_step_inputs, initial_state, vec![F::<G2>::zero()])
+    (ivc_step_inputs[..5].to_vec(), initial_state, vec![F::<G2>::zero()])
 }
 
 pub fn prepare_input_for_transformation(

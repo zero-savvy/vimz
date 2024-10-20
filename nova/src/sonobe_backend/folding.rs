@@ -1,5 +1,3 @@
-use std::env::current_dir;
-
 use ark_bn254::{constraints::GVar, Bn254, Fr, G1Projective as G1};
 use ark_grumpkin::{constraints::GVar as GVar2, Projective as G2};
 use rand::{CryptoRng, RngCore};
@@ -46,13 +44,9 @@ pub fn prepare_folding(
 
 /// Create a new `CircomFCircuit` for the given configuration.
 fn create_circuit(config: &Config, ivc_state_width: usize) -> CircomFCircuit<Fr> {
-    let root = current_dir().expect("Failed to get current directory");
-    let circuit_file = root.join(&config.circuit);
-    let witness_generator_file = root.join(&config.witness_generator);
-
     let f_circuit_params = (
-        circuit_file,
-        witness_generator_file,
+        config.circuit_file(),
+        config.witness_generator_file(),
         ivc_state_width,
         config.function.step_input_width(),
     );

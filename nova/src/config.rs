@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{env::current_dir, path::PathBuf};
 
 use clap::{Parser, ValueEnum};
 
@@ -23,25 +23,25 @@ pub struct Config {
     ///
     /// The path is assumed to be relative to the current working directory.
     #[clap(short, long)]
-    pub input: PathBuf,
+    input: PathBuf,
 
     ///This file will contain the final Proof to be verified by others.
     ///
     /// The path is assumed to be relative to the current working directory.
     #[clap(short, long)]
-    pub output: PathBuf,
+    output: PathBuf,
 
     /// The R1CS file of the compiled Circom circuit.
     ///
     /// The path is assumed to be relative to the current working directory.
     #[clap(short, long)]
-    pub circuit: PathBuf,
+    circuit: PathBuf,
 
     /// Witness generator file of the circuit.
     ///
     /// The path is assumed to be relative to the current working directory.
     #[clap(short, long)]
-    pub witness_generator: PathBuf,
+    witness_generator: PathBuf,
 
     /// The transformation function.
     #[clap(short, long, value_enum)]
@@ -54,6 +54,28 @@ pub struct Config {
     /// The backend proof system.
     #[clap(short, long, value_enum)]
     pub backend: Backend,
+}
+
+impl Config {
+    fn root_dir() -> PathBuf {
+        current_dir().expect("Failed to get the current working directory")
+    }
+
+    pub fn input_file(&self) -> PathBuf {
+        Self::root_dir().join(&self.input)
+    }
+
+    pub fn output_file(&self) -> PathBuf {
+        Self::root_dir().join(&self.output)
+    }
+
+    pub fn circuit_file(&self) -> PathBuf {
+        Self::root_dir().join(&self.circuit)
+    }
+
+    pub fn witness_generator_file(&self) -> PathBuf {
+        Self::root_dir().join(&self.witness_generator)
+    }
 }
 
 impl Config {

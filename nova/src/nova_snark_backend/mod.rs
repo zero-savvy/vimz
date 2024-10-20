@@ -1,5 +1,4 @@
 use std::{
-    env::current_dir,
     fs::File,
     io::{Read, Write},
     time::Instant,
@@ -18,13 +17,8 @@ type G1 = nova_snark::provider::bn256_grumpkin::bn256::Point;
 type G2 = nova_snark::provider::bn256_grumpkin::grumpkin::Point;
 
 pub fn run(config: &Config) {
-    let root = current_dir().unwrap();
-
-    let circuit_file = root.join(&config.circuit);
-    let r1cs = load_r1cs::<G1, G2>(&FileLocation::PathBuf(circuit_file));
-    let witness_generator_file = root.join(&config.witness_generator);
-
-    let input_data = VIMzInput::<String>::from_file(&config.input);
+    let r1cs = load_r1cs::<G1, G2>(&FileLocation::PathBuf(config.circuit_file()));
+    let input_data = VIMzInput::<String>::from_file(&config.input_file());
     let private_inputs = prepare_input(config.function, &input_data, config.resolution);
     let start_public_input = config.function.ivc_initial_state(&input_data.extra);
 
@@ -53,7 +47,7 @@ pub fn run(config: &Config) {
     println!("Creating a RecursiveSNARK...");
     let start = Instant::now();
     let recursive_snark = create_recursive_circuit(
-        FileLocation::PathBuf(witness_generator_file),
+        FileLocation::PathBuf(config.witness_generator_file()),
         r1cs,
         private_inputs,
         start_public_input.to_vec(),
@@ -102,7 +96,7 @@ pub fn run(config: &Config) {
     let json_string = serde_json::to_string(&compressed_snark).unwrap();
 
     // Open a file for writing
-    let mut file = File::create(config.output.clone()).expect("Unable to create the file");
+    let mut file = File::create(config.output_file()).expect("Unable to create the file");
 
     // Write the JSON string to the file
     file.write_all(json_string.as_bytes())
@@ -111,7 +105,7 @@ pub fn run(config: &Config) {
     println!("Data has been written to output.json");
 
     println!("-------------- Load Data --------");
-    let mut file = File::open(&config.output).expect("Unable to open the file");
+    let mut file = File::open(config.output_file()).expect("Unable to open the file");
     let mut json_string = String::new();
     file.read_to_string(&mut json_string)
         .expect("Unable to read from the file");

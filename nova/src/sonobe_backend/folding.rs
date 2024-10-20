@@ -55,7 +55,7 @@ fn create_circuit(config: &Config, ivc_state_width: usize) -> CircomFCircuit<Fr>
 
 /// Fold all the `ivc_steps_inputs` into `folding`.
 pub fn fold_input(folding: &mut Folding, ivc_step_inputs: Vec<Vec<Fr>>, rng: &mut impl RngCore) {
-    for (i, ivc_step_input) in ivc_step_inputs.into_iter().enumerate().take(5) {
+    for (i, ivc_step_input) in ivc_step_inputs.into_iter().enumerate() {
         measure(&format!("Nova::prove_step {i}"), || {
             folding
                 .prove_step(&mut *rng, ivc_step_input, None)

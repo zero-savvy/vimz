@@ -1,12 +1,11 @@
+use decider::prepare_decider;
 use rand::{prelude::StdRng, SeedableRng};
 use sonobe::Decider as _;
-
-use decider::prepare_decider;
 
 use crate::{
     config::Config,
     sonobe_backend::{
-        decider::{Decider, verify_final_proof},
+        decider::{verify_final_proof, Decider},
         folding::{fold_input, prepare_folding, verify_folding},
         input::prepare_input,
         solidity::verify_on_chain,

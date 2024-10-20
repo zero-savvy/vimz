@@ -9,7 +9,7 @@ pub fn prepare_input(config: &Config) -> (Vec<Vec<Fr>>, Vec<Fr>) {
     let input = VIMzInput::<Fr>::from_file(&config.input_file());
     let initial_state = config.function.ivc_initial_state(&input.extra);
     let ivc_step_inputs = prepare_input_for_transformation(config.function, input);
-    (ivc_step_inputs, initial_state)
+    (ivc_step_inputs[..5].to_vec(), initial_state)
 }
 
 fn prepare_input_for_transformation(

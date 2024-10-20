@@ -1,4 +1,4 @@
-use nova_scotia::{F, S};
+use nova_scotia::S;
 use nova_snark::CompressedSNARK;
 
 use crate::{
@@ -15,8 +15,6 @@ mod input;
 
 type G1 = nova_snark::provider::bn256_grumpkin::bn256::Point;
 type G2 = nova_snark::provider::bn256_grumpkin::grumpkin::Point;
-
-type Fr = F<G1>;
 
 pub fn run(config: &Config) {
     // ========================== Prepare input and folding ========================================

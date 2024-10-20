@@ -52,3 +52,33 @@ fn create_circuit(config: &Config, ivc_state_width: usize) -> CircomFCircuit<Fr>
     );
     CircomFCircuit::<Fr>::new(f_circuit_params).expect("Failed to create circuit")
 }
+
+/// Fold all the `ivc_steps_inputs` into `folding`.
+pub fn fold_input(folding: &mut Folding, ivc_step_inputs: Vec<Vec<Fr>>, rng: &mut impl RngCore) {
+    for (i, ivc_step_input) in ivc_step_inputs.into_iter().enumerate().take(5) {
+        measure(&format!("Nova::prove_step {i}"), || {
+            folding
+                .prove_step(&mut *rng, ivc_step_input, None)
+                .expect("Failed to prove step")
+        });
+    }
+}
+
+pub fn verify_folding(
+    folding: &Folding,
+    folding_params: &FoldingParams,
+    initial_state: Vec<Fr>,
+    num_steps: u32,
+) {
+    let (running_instance, incoming_instance, cyclefold_instance) = folding.instances();
+    Folding::verify(
+        folding_params.1.clone(),
+        initial_state,
+        folding.state(),
+        Fr::from(num_steps),
+        running_instance,
+        incoming_instance,
+        cyclefold_instance,
+    )
+    .expect("Failed to verify folded proof");
+}

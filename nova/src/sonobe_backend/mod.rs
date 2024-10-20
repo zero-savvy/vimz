@@ -1,12 +1,13 @@
-use decider::prepare_decider;
 use rand::{prelude::StdRng, SeedableRng};
-use sonobe::{Decider as _, FoldingScheme};
+use sonobe::Decider as _;
+
+use decider::prepare_decider;
 
 use crate::{
     config::Config,
     sonobe_backend::{
-        decider::{verify_final_proof, Decider},
-        folding::prepare_folding,
+        decider::{Decider, verify_final_proof},
+        folding::{fold_input, prepare_folding, verify_folding},
         input::prepare_input,
         solidity::verify_on_chain,
     },
@@ -24,17 +25,13 @@ pub fn run(config: &Config) {
     // ========================== Prepare input and folding ========================================
 
     let (ivc_step_inputs, initial_state) = measure("Prepare input", || prepare_input(config));
-    let (mut folding, folding_params) = prepare_folding(config, initial_state, &mut rng);
+    let num_steps = ivc_step_inputs.len() as u32;
+    let (mut folding, folding_params) = prepare_folding(config, initial_state.clone(), &mut rng);
 
-    // ========================== Fold the input ===================================================
+    // ========================== Fold the input and verify the folding proof ======================
 
-    for (i, ivc_step_input) in ivc_step_inputs.into_iter().enumerate().take(5) {
-        measure(&format!("Nova::prove_step {i}"), || {
-            folding
-                .prove_step(&mut rng, ivc_step_input, None)
-                .expect("Failed to prove step")
-        });
-    }
+    fold_input(&mut folding, ivc_step_inputs, &mut rng);
+    verify_folding(&folding, &folding_params, initial_state, num_steps);
 
     // ========================== Prepare decider and compress the proof ===========================
 

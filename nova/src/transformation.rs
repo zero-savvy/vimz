@@ -86,3 +86,19 @@ impl Resolution {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn ratio_is_consistent_with_iteration_count() {
+        use super::Resolution::*;
+
+        for res in [HD, FHD, _4K, _8K] {
+            let (num, den) = res.ratio_to_lower();
+            assert_eq!(
+                res.iteration_count() * den,
+                res.lower().iteration_count() * num
+            );
+        }
+    }
+}

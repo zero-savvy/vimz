@@ -5,6 +5,7 @@ use crate::{config::Config, input::VIMzInput, transformation::Transformation};
 /// Read the input data specified in the configuration and prepare it for the folding scheme.
 ///
 /// Returns the input data for each step and the initial state.
+#[tracing::instrument(name = "Prepare input", skip_all)]
 pub fn prepare_input(config: &Config) -> (Vec<Vec<Fr>>, Vec<Fr>) {
     let input = VIMzInput::<Fr>::from_file(&config.input_file());
     let initial_state = config.function.ivc_initial_state(&input.extra);

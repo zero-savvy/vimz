@@ -8,7 +8,6 @@ mod input;
 mod logging;
 mod nova_snark_backend;
 mod sonobe_backend;
-mod time;
 mod transformation;
 
 fn main() {

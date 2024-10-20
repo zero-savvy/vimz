@@ -9,13 +9,11 @@ use sonobe_solidity::{
     utils::get_function_selector_for_nova_cyclefold_verifier,
     NovaCycleFoldVerifierKey,
 };
+use tracing::{info, info_span};
 
-use crate::{
-    sonobe_backend::{
-        decider::{DeciderProof, DeciderVerifierParam},
-        folding::Folding,
-    },
-    time::measure,
+use crate::sonobe_backend::{
+    decider::{DeciderProof, DeciderVerifierParam},
+    folding::Folding,
 };
 
 /// Verifies the given Nova folding and proof on-chain.
@@ -25,17 +23,15 @@ pub fn verify_on_chain(
     nova: Folding,
     proof: DeciderProof,
 ) {
-    let nova_cyclefold_verifier_bytecode = measure("Generate verifier contract", || {
-        generate_solidity_verifier(f_circuit, decider_vp)
-    });
-    let calldata = measure("Prepare calldata", || {
-        prepare_contract_calldata(nova, proof)
-    });
+    let nova_cyclefold_verifier_bytecode = info_span!("Generate verifier contract")
+        .in_scope(|| generate_solidity_verifier(f_circuit, decider_vp));
+    let calldata =
+        info_span!("Prepare contract calldata").in_scope(|| prepare_contract_calldata(nova, proof));
 
     let mut evm = Evm::default();
     let verifier_address = evm.create(nova_cyclefold_verifier_bytecode);
     let (gas, output) = evm.call(verifier_address, calldata.clone());
-    println!("Gas used: {gas}");
+    info!("Gas used: {gas}");
     assert_eq!(*output.last().unwrap(), 1);
 }
 

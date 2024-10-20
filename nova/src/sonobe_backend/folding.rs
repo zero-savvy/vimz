@@ -1,15 +1,16 @@
-use ark_bn254::{constraints::GVar, Bn254, Fr, G1Projective as G1};
+use ark_bn254::{Bn254, constraints::GVar, Fr, G1Projective as G1};
 use ark_grumpkin::{constraints::GVar as GVar2, Projective as G2};
 use rand::{CryptoRng, RngCore};
 use sonobe::{
     commitment::{kzg::KZG, pedersen::Pedersen},
     folding::nova::{Nova, PreprocessorParam},
+    FoldingScheme,
     frontend::{circom::CircomFCircuit, FCircuit},
     transcript::poseidon::poseidon_canonical_config,
-    FoldingScheme,
 };
+use tracing::info_span;
 
-use crate::{config::Config, time::measure};
+use crate::config::Config;
 
 /// The folding scheme used.
 pub type Folding =
@@ -26,16 +27,14 @@ pub fn prepare_folding(
     initial_state: Vec<Fr>,
     rng: &mut (impl RngCore + CryptoRng),
 ) -> (Folding, FoldingParams) {
-    let f_circuit = measure("Prepare circuit", || {
-        create_circuit(config, initial_state.len())
-    });
+    let f_circuit = create_circuit(config, initial_state.len());
 
-    let nova_params = measure("Nova preprocess", || {
+    let nova_params = info_span!("Preprocess Nova").in_scope(|| {
         let nova_preprocess_params =
             PreprocessorParam::new(poseidon_canonical_config::<Fr>(), f_circuit.clone());
         Folding::preprocess(&mut *rng, &nova_preprocess_params).expect("Failed to preprocess Nova")
     });
-    let nova = measure("Nova init", || {
+    let nova = info_span!("Init Nova").in_scope(|| {
         Folding::init(&nova_params, f_circuit, initial_state).expect("Failed to init Nova")
     });
 
@@ -43,6 +42,7 @@ pub fn prepare_folding(
 }
 
 /// Create a new `CircomFCircuit` for the given configuration.
+#[tracing::instrument(name = "Create circuit", skip_all)]
 fn create_circuit(config: &Config, ivc_state_width: usize) -> CircomFCircuit<Fr> {
     let f_circuit_params = (
         config.circuit_file(),
@@ -56,7 +56,7 @@ fn create_circuit(config: &Config, ivc_state_width: usize) -> CircomFCircuit<Fr>
 /// Fold all the `ivc_steps_inputs` into `folding`.
 pub fn fold_input(folding: &mut Folding, ivc_step_inputs: Vec<Vec<Fr>>, rng: &mut impl RngCore) {
     for (i, ivc_step_input) in ivc_step_inputs.into_iter().enumerate() {
-        measure(&format!("Nova::prove_step {i}"), || {
+        info_span!("Fold step", i).in_scope(|| {
             folding
                 .prove_step(&mut *rng, ivc_step_input, None)
                 .expect("Failed to prove step")

@@ -1,6 +1,6 @@
-use decider::prepare_decider;
 use rand::{prelude::StdRng, SeedableRng};
 use sonobe::Decider as _;
+use tracing::info_span;
 
 use crate::{
     config::Config,
@@ -10,7 +10,6 @@ use crate::{
         input::prepare_input,
         solidity::verify_on_chain,
     },
-    time::measure,
 };
 
 mod decider;
@@ -23,7 +22,7 @@ pub fn run(config: &Config) {
 
     // ========================== Prepare input and folding ========================================
 
-    let (ivc_step_inputs, initial_state) = measure("Prepare input", || prepare_input(config));
+    let (ivc_step_inputs, initial_state) = prepare_input(config);
     let num_steps = ivc_step_inputs.len() as u32;
     let (mut folding, folding_params) = prepare_folding(config, initial_state.clone(), &mut rng);
 
@@ -34,8 +33,11 @@ pub fn run(config: &Config) {
 
     // ========================== Prepare decider and compress the proof ===========================
 
-    let (decider_pp, decider_vp) = prepare_decider(folding.clone(), folding_params, &mut rng);
-    let proof = measure("Generated decider proof", || {
+    let (decider_pp, decider_vp) = info_span!("Prepare decider").in_scope(|| {
+        Decider::preprocess(&mut rng, &folding_params, folding.clone())
+            .expect("Failed to preprocess decider")
+    });
+    let proof = info_span!("Generate decider proof").in_scope(|| {
         Decider::prove(rng, decider_pp, folding.clone()).expect("Failed to generate proof")
     });
 

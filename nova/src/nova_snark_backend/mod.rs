@@ -9,7 +9,6 @@ use crate::{
         folding::{fold_input, prepare_folding, verify_folded_proof},
         input::prepare_input,
     },
-    time::measure,
 };
 
 mod folding;
@@ -21,22 +20,19 @@ type G2 = nova_snark::provider::bn256_grumpkin::grumpkin::Point;
 pub fn run(config: &Config) {
     // ========================== Prepare input and folding ========================================
 
-    let (ivc_step_inputs, initial_state, secondary_initial_state) =
-        measure("Prepare input", || prepare_input(config));
+    let (ivc_step_inputs, initial_state, secondary_initial_state) = prepare_input(config);
     let num_steps = ivc_step_inputs.len();
     let (r1cs, folding_params) = prepare_folding(config);
 
     // ========================== Fold the input and verify the folding proof ======================
 
-    let folding_proof = measure("Nova folding", || {
-        fold_input(
-            config,
-            r1cs,
-            ivc_step_inputs,
-            initial_state.clone(),
-            &folding_params,
-        )
-    });
+    let folding_proof = fold_input(
+        config,
+        r1cs,
+        ivc_step_inputs,
+        initial_state.clone(),
+        &folding_params,
+    );
     verify_folded_proof(
         &folding_proof,
         &folding_params,

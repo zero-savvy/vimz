@@ -1,4 +1,5 @@
 use decider::prepare_decider;
+use rand::{prelude::StdRng, SeedableRng};
 use sonobe::{Decider as _, FoldingScheme};
 
 use crate::{
@@ -18,7 +19,7 @@ mod input;
 mod solidity;
 
 pub fn run(config: &Config) {
-    let mut rng = rand::rngs::OsRng;
+    let mut rng = StdRng::from_seed([41; 32]);
 
     // ============================== Prepare input and folding ====================================
 
@@ -30,7 +31,7 @@ pub fn run(config: &Config) {
     for (i, ivc_step_input) in ivc_step_inputs.into_iter().enumerate().take(5) {
         measure(&format!("Nova::prove_step {i}"), || {
             folding
-                .prove_step(rng, ivc_step_input, None)
+                .prove_step(&mut rng, ivc_step_input, None)
                 .expect("Failed to prove step")
         });
     }

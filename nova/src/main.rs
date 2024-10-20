@@ -1,14 +1,19 @@
 use clap::Parser;
 use config::{Backend, Config};
 
+use crate::logging::init_logging;
+
 mod config;
 mod input;
+mod logging;
 mod nova_snark_backend;
 mod sonobe_backend;
 mod time;
 mod transformation;
 
 fn main() {
+    init_logging();
+
     let config = Config::parse();
     config.display();
 

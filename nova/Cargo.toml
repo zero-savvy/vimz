@@ -13,6 +13,8 @@ num-traits = { version = "0.2.15" }
 rand = { version = "0.8.5" }
 serde = { version = "1.0" }
 serde_json = { version = "1.0.85" }
+tracing = { version = "0.1.26" }
+tracing-subscriber = { version = "0.3.18", features = ["fmt", "json", "env-filter"] }
 
 sonobe = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "7097c001fc876578be2229d3590d506858bc0069", package = "folding-schemes" }
 sonobe-solidity = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "7097c001fc876578be2229d3590d506858bc0069", package = "solidity-verifiers" }

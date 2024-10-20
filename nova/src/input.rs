@@ -4,6 +4,42 @@ use ark_bn254::Fr;
 use num_traits::Num;
 use serde::Deserialize;
 
+/// Universal input structure for all supported transformations in the VIMz circuits.
+#[derive(Deserialize)]
+pub struct VIMzInput<FieldRepr> {
+    /// The original image, row by row (with pixels compression).
+    pub original: Vec<Vec<FieldRepr>>,
+    /// The transformed image, row by row (with pixels compression).
+    ///
+    /// For some transformations, the transformed image is not provided and thus empty.
+    #[serde(default)]
+    pub transformed: Vec<Vec<FieldRepr>>,
+    #[serde(flatten)]
+    /// Extra information for the transformation.
+    pub extra: Extra,
+}
+
+impl VIMzInput<String> {
+    /// Parse `path` into a `VIMzInput` structure. Keep the hex strings as they are.
+    pub fn from_file(path: &Path) -> Self {
+        let file_content = fs::read_to_string(path).expect("Failed to read file");
+        serde_json::from_str(&file_content).expect("Deserialization failed")
+    }
+}
+
+impl VIMzInput<Fr> {
+    /// Parse `path` into a `VIMzInput` structure. Convert the hex strings into `Fr` elements.
+    pub fn from_file(path: &Path) -> Self {
+        let self_string = VIMzInput::<String>::from_file(path);
+
+        Self {
+            original: string_2d_seq_to_fr_2d_seq(&self_string.original),
+            transformed: string_2d_seq_to_fr_2d_seq(&self_string.transformed),
+            extra: self_string.extra,
+        }
+    }
+}
+
 /// Extra information for the VIMz input.
 #[derive(Deserialize)]
 #[serde(untagged)]
@@ -38,42 +74,6 @@ impl Extra {
         match self {
             Extra::InfoHash { hash, .. } => *hash,
             _ => unreachable!("No hash provided"),
-        }
-    }
-}
-
-/// Universal input structure for all supported transformations in the VIMz circuits.
-#[derive(Deserialize)]
-pub struct VIMzInput<ValueType> {
-    /// The original image, row by row (with pixels compression).
-    pub original: Vec<Vec<ValueType>>,
-    /// The transformed image, row by row (with pixels compression).
-    ///
-    /// For some transformations, the transformed image is not provided and thus empty.
-    #[serde(default)]
-    pub transformed: Vec<Vec<ValueType>>,
-    #[serde(flatten)]
-    /// Extra information for the transformation.
-    pub extra: Extra,
-}
-
-impl VIMzInput<String> {
-    /// Parse `path` into a `VIMzInput` structure. Keep the hex strings as they are.
-    pub fn from_file(path: &Path) -> Self {
-        let file_content = fs::read_to_string(path).expect("Failed to read file");
-        serde_json::from_str(&file_content).expect("Deserialization failed")
-    }
-}
-
-impl VIMzInput<Fr> {
-    /// Parse `path` into a `VIMzInput` structure. Convert the hex strings into `Fr` elements.
-    pub fn from_file(path: &Path) -> Self {
-        let self_string = VIMzInput::<String>::from_file(path);
-
-        Self {
-            original: string_2d_seq_to_fr_2d_seq(&self_string.original),
-            transformed: string_2d_seq_to_fr_2d_seq(&self_string.transformed),
-            extra: self_string.extra,
         }
     }
 }

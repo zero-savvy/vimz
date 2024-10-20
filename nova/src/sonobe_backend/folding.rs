@@ -43,7 +43,6 @@ pub type DeciderProof = <Decider as DeciderTrait<G1, G2, CircomFCircuit<Fr>, Fol
 pub fn prepare_folding(
     circuit_file: &Path,
     witness_generator_file: &Path,
-    ivc_state_width: usize,
     step_input_width: usize,
     start_ivc_state: Vec<Fr>,
     rng: &mut (impl RngCore + CryptoRng),
@@ -52,7 +51,7 @@ pub fn prepare_folding(
         create_circuit(
             circuit_file,
             witness_generator_file,
-            ivc_state_width,
+            start_ivc_state.len(),
             step_input_width,
         )
     });

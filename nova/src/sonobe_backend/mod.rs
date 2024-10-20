@@ -27,7 +27,6 @@ pub fn run(config: &Config) {
     let (mut folding, decider_pp, decider_vp) = prepare_folding(
         &config.circuit,
         &config.witness_generator,
-        initial_state.len(),
         step_input_width(config.function),
         initial_state,
         &mut rng,

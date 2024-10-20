@@ -1,3 +1,5 @@
+use std::fs;
+
 use nova_scotia::S;
 use nova_snark::CompressedSNARK;
 
@@ -55,4 +57,12 @@ pub fn run(config: &Config) {
     compressed_proof
         .verify(&vk, num_steps, initial_state, secondary_initial_state)
         .expect("Failed to verify proof");
+
+    // ========================== Save final proof =================================================
+
+    fs::write(
+        config.output_file(),
+        serde_json::to_string_pretty(&compressed_proof).unwrap(),
+    )
+    .expect("Failed to write proof to file");
 }

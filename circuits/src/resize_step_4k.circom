@@ -1,8 +1,8 @@
 pragma circom 2.0.0;
 
-include "node_modules/circomlib/circuits/multiplexer.circom";
-include "node_modules/circomlib/circuits/mux1.circom";
-include "node_modules/circomlib/circuits/comparators.circom";
+include "../node_modules/circomlib/circuits/multiplexer.circom";
+include "../node_modules/circomlib/circuits/mux1.circom";
+include "../node_modules/circomlib/circuits/comparators.circom";
 include "utils/pixels.circom";
 include "utils/row_hasher.circom";
 
@@ -48,7 +48,7 @@ template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized){
     
     // private inputs
     signal input row_orig [rowCountOrig][widthOrig];
-    signal input row_tran [rowCountResized][widthResized];
+    signal input row_tran [widthResized];
 
     //outputs
     signal output step_out[2];
@@ -68,17 +68,15 @@ template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized){
         hasher_orig[i] = Hasher(2);
     }
 
-    component row_hasher_resized[rowCountResized];
-    component hasher_resized [rowCountResized];
-    for (var i = 0; i < rowCountResized; i++) {
-        row_hasher_resized[i] = RowHasher(widthResized);
-        hasher_resized[i] = Hasher(2);
-    } 
+    component row_hasher_resized;
+    component hasher_resized;
+    row_hasher_resized = RowHasher(widthResized);
+    hasher_resized = Hasher(2);
 
     var decompressedwidthOrig = widthOrig * 10;
     var decompressedwidthResized = widthResized * 10;
     signal decompressed_row_orig [rowCountOrig][decompressedwidthOrig][3];
-    signal decompressed_row_tran [rowCountResized][decompressedwidthResized][3];
+    signal decompressed_row_tran [decompressedwidthResized][3];
 
     for (var i = 0; i < rowCountOrig; i++) {
         row_hasher_orig[i].img <== row_orig[i];
@@ -100,54 +98,47 @@ template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized){
             }
         }
     }
-    component decompressor_resized[rowCountResized][widthResized];
-    for (var k = 0; k < rowCountResized; k++) {
+    component decompressor_resized[widthResized];
         for (var i = 0; i < widthResized; i++) {
-            decompressor_resized[k][i] = Decompressor();
-            decompressor_resized[k][i].in <== row_tran[k][i];
+            decompressor_resized[i] = Decompressor();
+            decompressor_resized[i].in <== row_tran[i];
             for (var j = 0; j < 10; j++) {
-                decompressed_row_tran[k][i*10+j] <== decompressor_resized[k][i].out[j];
+                decompressed_row_tran[i*10+j] <== decompressor_resized[i].out[j];
             }
         }
-    }
     
-    component lte[rowCountResized][decompressedwidthResized][3][2];
+    component lte[decompressedwidthResized][3][2];
 
     for (var rgb = 0; rgb < 3; rgb++) {
-        for (var i = 0; i < rowCountResized; i++) {
-            for (var j = 0; j < decompressedwidthResized; j++) {
-                var weight = i % 2 == 0 ? 2 : 1;
-                var summ = (decompressed_row_orig[i][j*2][rgb]
-                        + decompressed_row_orig[i][j*2+1][rgb]) * weight
-                        + (decompressed_row_orig[i+1][j*2][rgb]
-                        + decompressed_row_orig[i+1][j*2+1][rgb]) * (3 - weight);
-                // log("---------------------------------------");
-                // log(summ, decompressed_row_tran[i][j][rgb] * 6);
-                // log("---------------------------------------");
+        for (var j = 0; j < decompressedwidthResized; j++) {
+            var summ = (decompressed_row_orig[0][j*2][rgb]
+                    + decompressed_row_orig[0][j*2+1][rgb])
+                    + (decompressed_row_orig[1][j*2][rgb]
+                    + decompressed_row_orig[1][j*2+1][rgb]);
+            // log("---------------------------------------");
+            // log(summ, decompressed_row_tran[i][j][rgb] * 6);
+            // log("---------------------------------------");
 
-                lte[i][j][rgb][0] = LessEqThan(12);
-                lte[i][j][rgb][1] = LessEqThan(12);
+            lte[j][rgb][0] = LessEqThan(12);
+            lte[j][rgb][1] = LessEqThan(12);
 
-                lte[i][j][rgb][0].in[1] <== 6;
-                lte[i][j][rgb][0].in[0] <== summ - (6 * decompressed_row_tran[i][j][rgb]);
-                lte[i][j][rgb][0].out === 1;
+            lte[j][rgb][0].in[1] <== 4;
+            lte[j][rgb][0].in[0] <== summ - (4 * decompressed_row_tran[j][rgb]);
+            lte[j][rgb][0].out === 1;
 
-                lte[i][j][rgb][1].in[1] <== 6;
-                lte[i][j][rgb][1].in[0] <== (6 * decompressed_row_tran[i][j][rgb]) - summ;
-                lte[i][j][rgb][1].out === 1; 
-            }		
-        }
+            lte[j][rgb][1].in[1] <== 4;
+            lte[j][rgb][1].in[0] <== (4 * decompressed_row_tran[j][rgb]) - summ;
+            lte[j][rgb][1].out === 1; 
+        }		
     }
 
-    for (var i=0; i<rowCountResized; i++) {
-        row_hasher_resized[i].img <== row_tran[i];
-        hasher_resized[i].values[0] <== i == 0 ? prev_resized_hash : hasher_resized[i-1].hash;
-        hasher_resized[i].values[1] <== row_hasher_resized[i].hash;
-    }
-    next_resized_hash <== hasher_resized[rowCountResized-1].hash;
+    row_hasher_resized.img <== row_tran;
+    hasher_resized.values[0] <== prev_resized_hash;
+    hasher_resized.values[1] <== row_hasher_resized.hash;
+    next_resized_hash <== hasher_resized.hash;
 
     step_out[0] <== next_orig_hash;
     step_out[1] <== next_resized_hash;
 }
 
-component main { public [step_in] } = ResizeHash(128, 64, 3, 2);
+component main { public [step_in] } = ResizeHash(384, 192, 2, 1);

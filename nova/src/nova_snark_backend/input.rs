@@ -21,7 +21,11 @@ pub fn prepare_input(config: &Config) -> PreparedInputs {
     let initial_state = config.function.ivc_initial_state(&input.extra);
     let ivc_step_inputs =
         prepare_input_for_transformation(config.function, &input, config.resolution);
-    (ivc_step_inputs[..5].to_vec(), initial_state, vec![F::<G2>::zero()])
+    (
+        ivc_step_inputs[..5].to_vec(),
+        initial_state,
+        vec![F::<G2>::zero()],
+    )
 }
 
 pub fn prepare_input_for_transformation(

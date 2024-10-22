@@ -1,11 +1,11 @@
-use ark_bn254::{Bn254, constraints::GVar, Fr, G1Projective as G1};
+use ark_bn254::{constraints::GVar, Bn254, Fr, G1Projective as G1};
 use ark_groth16::Groth16;
 use ark_grumpkin::{constraints::GVar as GVar2, Projective as G2};
 use sonobe::{
     commitment::{kzg::KZG, pedersen::Pedersen},
-    Decider as DeciderTrait,
     folding::nova::decider_eth::Decider as DeciderEth,
     frontend::circom::CircomFCircuit,
+    Decider as DeciderTrait,
 };
 
 use crate::sonobe_backend::folding::Folding;

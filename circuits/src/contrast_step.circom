@@ -123,8 +123,3 @@ template ContrastHash(width){
     checker.transformed <== row_tran;
     checker.cf <== step_in[2];
 }
-
-component main { public [step_in] } = ContrastHash(128);
-
-
-

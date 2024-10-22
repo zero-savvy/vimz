@@ -16,6 +16,8 @@ pub enum Transformation {
     Sharpness,
 }
 
+use Transformation::*;
+
 impl Transformation {
     /// Returns the initial state of the IVC for the given transformation, based on the input.
     pub fn ivc_initial_state<ValueOut: From<u64> + Copy>(&self, input: &Extra) -> Vec<ValueOut> {
@@ -23,16 +25,16 @@ impl Transformation {
         let zzv = |v| vec![zero, zero, ValueOut::from(v)];
 
         match self {
-            Transformation::Blur | Transformation::Sharpness => vec![zero; 4],
-            Transformation::Brightness | Transformation::Contrast => zzv(input.factor()),
-            Transformation::Crop => zzv(input.info()),
-            Transformation::FixedCrop => vec![
+            Blur | Sharpness => vec![zero; 4],
+            Brightness | Contrast => zzv(input.factor()),
+            Crop => zzv(input.info()),
+            FixedCrop => vec![
                 ValueOut::from(input.hash()),
                 zero,
                 ValueOut::from(input.info()),
             ],
-            Transformation::Grayscale | Transformation::Resize => vec![zero; 2],
-            Transformation::Hash => vec![zero],
+            Grayscale | Resize => vec![zero; 2],
+            Hash => vec![zero],
         }
     }
 
@@ -40,9 +42,9 @@ impl Transformation {
     pub fn step_input_width(&self) -> usize {
         match self {
             // Three rows of 128 entries for the kernel input and one for the result.
-            Transformation::Blur => 512,
+            Blur => 512,
             // Two rows of 128 entries.
-            Transformation::Brightness | Transformation::Grayscale => 256,
+            Brightness | Contrast | Grayscale => 256,
             _ => unimplemented!(),
         }
     }

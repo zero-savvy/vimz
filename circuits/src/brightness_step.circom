@@ -133,5 +133,3 @@ template BrightnessHash(width){
     checker.transformed <== row_tran;
     checker.bf <== step_in[2];
 }
-
-// component main { public [ivc_input] } = BrightnessHash(128);

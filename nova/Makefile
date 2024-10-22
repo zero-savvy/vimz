@@ -37,6 +37,15 @@ brightness: # Run VIMz with the brightness transformation.
 		-c ../circuits/$(SUBDIR)/$(SUBDIR)_brightness_step.r1cs -r HD \
 		-b $(backend)
 
+.PHONY: contrast
+contrast: # Run VIMz with the contrast transformation.
+	@cargo run --release $(FEATURES) -- \
+		-f contrast -w ../circuits/$(SUBDIR)/$(SUBDIR)_contrast_step_js/$(SUBDIR)_contrast_step.wasm \
+		-o ../contrast_hd.json \
+		-i ../samples/JSON/HD/transformation_contrast.json \
+		-c ../circuits/$(SUBDIR)/$(SUBDIR)_contrast_step.r1cs -r HD \
+		-b $(backend)
+
 .PHONY: grayscale
 grayscale: # Run VIMz with the grayscale transformation.
 	@cargo run --release $(FEATURES) -- \

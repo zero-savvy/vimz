@@ -1,4 +1,5 @@
 use ark_bn254::Fr;
+use Transformation::*;
 
 use crate::{config::Config, input::VIMzInput, transformation::Transformation};
 
@@ -19,7 +20,7 @@ fn prepare_input_for_transformation(
 ) -> Vec<Vec<Fr>> {
     match transformation {
         // Concatenate the original and transformed row.
-        Transformation::Grayscale | Transformation::Brightness => input
+        Brightness | Contrast | Grayscale => input
             .original
             .into_iter()
             .zip(input.transformed)
@@ -27,7 +28,7 @@ fn prepare_input_for_transformation(
             .collect(),
 
         // Concatenate the original rows that are taken for the kernel, and the transformed row.
-        Transformation::Blur => {
+        Blur => {
             let mut prepared = vec![];
             for (i, transformed) in input.transformed.into_iter().enumerate() {
                 let mut row = input.original[i..i + 3].to_vec();

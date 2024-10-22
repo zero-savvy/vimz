@@ -19,38 +19,36 @@ lint: # Run the linter.
 	@cargo +nightly fmt --all
 	@cargo clippy --release
 
-.PHONY: blur
-blur: # Run VIMz with the blur transformation.
+.PHONY: run-transformation
+run-transformation: # Run a given transformation
+run-transformation:
 	@cargo run --release $(FEATURES) -- \
-		-f blur -w ../circuits/$(SUBDIR)/$(SUBDIR)_blur_step_js/$(SUBDIR)_blur_step.wasm \
-		-o ../blur_hd.json \
-		-i ../samples/JSON/HD/transformation_blur.json \
-		-c ../circuits/$(SUBDIR)/$(SUBDIR)_blur_step.r1cs -r HD \
+ 		-f $(TRANSFORMATION) -w ../circuits/$(SUBDIR)/$(SUBDIR)_$(TRANSFORMATION)_step_js/$(SUBDIR)_$(TRANSFORMATION)_step.wasm \
+		-o ../$(TRANSFORMATION)_hd.json \
+		-i ../samples/JSON/HD/transformation_$(TRANSFORMATION).json \
+		-c ../circuits/$(SUBDIR)/$(SUBDIR)_$(TRANSFORMATION)_step.r1cs -r HD \
 		-b $(backend)
+
+.PHONY: blur
+blur: # Run the blur transformation.
+blur: TRANSFORMATION=blur
+blur: run-transformation
 
 .PHONY: brightness
-brightness: # Run VIMz with the brightness transformation.
-	@cargo run --release $(FEATURES) -- \
-		-f brightness -w ../circuits/$(SUBDIR)/$(SUBDIR)_brightness_step_js/$(SUBDIR)_brightness_step.wasm \
-		-o ../brightness_hd.json \
-		-i ../samples/JSON/HD/transformation_brightness.json \
-		-c ../circuits/$(SUBDIR)/$(SUBDIR)_brightness_step.r1cs -r HD \
-		-b $(backend)
+brightness: # Run the brightness transformation.
+brightness: TRANSFORMATION=brightness
+brightness: run-transformation
 
 .PHONY: contrast
-contrast: # Run VIMz with the contrast transformation.
-	@cargo run --release $(FEATURES) -- \
-		-f contrast -w ../circuits/$(SUBDIR)/$(SUBDIR)_contrast_step_js/$(SUBDIR)_contrast_step.wasm \
-		-o ../contrast_hd.json \
-		-i ../samples/JSON/HD/transformation_contrast.json \
-		-c ../circuits/$(SUBDIR)/$(SUBDIR)_contrast_step.r1cs -r HD \
-		-b $(backend)
+contrast: # Run the contrast transformation.
+contrast: TRANSFORMATION=contrast
+contrast: run-transformation
 
 .PHONY: grayscale
-grayscale: # Run VIMz with the grayscale transformation.
-	@cargo run --release $(FEATURES) -- \
-		-f grayscale -w ../circuits/$(SUBDIR)/$(SUBDIR)_grayscale_step_js/$(SUBDIR)_grayscale_step.wasm \
-		-o ../grayscale_hd.json \
-		-i ../samples/JSON/HD/transformation_grayscale.json \
-		-c ../circuits/$(SUBDIR)/$(SUBDIR)_grayscale_step.r1cs -r HD \
-		-b $(backend)
+grayscale: # Run the grayscale transformation.
+grayscale: TRANSFORMATION=grayscale
+grayscale: run-transformation
+
+.PHONY: all-transformations
+all-transformations: # Run all transformations.
+all-transformations: blur brightness contrast grayscale

@@ -2,14 +2,14 @@ pragma circom 2.0.0;
 
 include "utils/row_hasher.circom";
 include "utils/pixels.circom";
-include "node_modules/circomlib/circuits/bitify.circom";
+include "../node_modules/circomlib/circuits/bitify.circom";
 
 
 template BrightnessChecker(n) {
     signal input orig[n][3];
     signal input bright[n][3];
     signal input bf;
-    // signal input btightness_factor;
+    // signal input brightness_factor;
 
     signal output n_check;
 
@@ -132,10 +132,4 @@ template BrightnessHash(width){
     checker.original <== row_orig;
     checker.transformed <== row_tran;
     checker.bf <== step_in[2];
-
 }
-
-component main { public [step_in] } = BrightnessHash(128);
-
-
-

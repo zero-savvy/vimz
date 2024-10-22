@@ -2,10 +2,10 @@ pragma circom 2.0.0;
 
 include "utils/row_hasher.circom";
 include "utils/pixels.circom";
-include "node_modules/circomlib/circuits/bitify.circom";
-include "node_modules/circomlib/circuits/multiplexer.circom";
-include "node_modules/circomlib/circuits/mux1.circom";
-include "node_modules/circomlib/circuits/comparators.circom";
+include "../node_modules/circomlib/circuits/bitify.circom";
+include "../node_modules/circomlib/circuits/multiplexer.circom";
+include "../node_modules/circomlib/circuits/mux1.circom";
+include "../node_modules/circomlib/circuits/comparators.circom";
 
 
 template ContrastChecker(n) {
@@ -123,8 +123,3 @@ template ContrastHash(width){
     checker.transformed <== row_tran;
     checker.cf <== step_in[2];
 }
-
-component main { public [step_in] } = ContrastHash(128);
-
-
-

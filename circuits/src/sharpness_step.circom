@@ -37,5 +37,3 @@ template Sharpen(width, kernel_size){
     conv_checker.row_orig <== row_orig;
     conv_checker.row_conv <== row_tran;
 }
-
-component main { public [step_in] } = Sharpen(128, 3);

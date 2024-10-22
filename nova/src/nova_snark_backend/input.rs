@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use nova_scotia::F;
 use serde_json::{json, Value};
-
+use Transformation::*;
 use crate::{
     config::Config,
     input::VIMzInput,
@@ -34,7 +34,7 @@ pub fn prepare_input_for_transformation(
     resolution: Resolution,
 ) -> Vec<HashMap<String, Value>> {
     let iter_count = match transformation {
-        Transformation::Resize => resolution.lower().iteration_count(),
+        Resize => resolution.lower().iteration_count(),
         _ => resolution.iteration_count(),
     };
     (0..iter_count)
@@ -50,7 +50,7 @@ fn prepare_step_input(
 ) -> HashMap<String, Value> {
     match transformation {
         // Handle cases where both original and transformed rows are needed.
-        Transformation::Brightness | Transformation::Contrast | Transformation::Grayscale => {
+        Brightness | Contrast | Grayscale => {
             row_input(
                 json!(input.original[step]),
                 Some(json!(input.transformed[step])),
@@ -58,18 +58,18 @@ fn prepare_step_input(
         }
 
         // Handle transformations that require slices of the original and transformed rows.
-        Transformation::Blur | Transformation::Sharpness => row_input(
+        Blur | Sharpness => row_input(
             json!(input.original[step..step + 3]),
             Some(json!(input.transformed[step])),
         ),
 
         // Handle transformations that only need the original row.
-        Transformation::Crop | Transformation::FixedCrop | Transformation::Hash => {
+        Crop | FixedCrop | Hash => {
             row_input(json!(input.original[step]), None)
         }
 
         // Handle the Resize transformation with ranges.
-        Transformation::Resize => {
+        Resize => {
             let (o_range, t_range) = resolution.ratio_to_lower();
             row_input(
                 json!(input.original[step * o_range..(step * o_range) + o_range]),

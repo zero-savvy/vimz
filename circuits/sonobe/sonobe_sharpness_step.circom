@@ -1,6 +1,6 @@
 pragma circom 2.1.0;
 
-include "../src/blur_step.circom";
+include "../src/sharpness_step.circom";
 include "../src/utils/input_transformation.circom";
 
 // Sonobe wrapper over `Sharpen` circuit.

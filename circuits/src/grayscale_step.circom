@@ -86,5 +86,3 @@ template GrayScaleHash(width){
     checker.transformed <== row_tran;
 
 }
-
-// component main { public [step_in] } = GrayScaleHash(128);

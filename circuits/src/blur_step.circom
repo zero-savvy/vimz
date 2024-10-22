@@ -32,5 +32,3 @@ template Blur(width, kernel_size){
     conv_checker.row_conv <== row_tran;
     // conv_checker.kernel <== decompressor_kernel.out;
 }
-
-// component main { public [step_in] } = Blur(128, 3);

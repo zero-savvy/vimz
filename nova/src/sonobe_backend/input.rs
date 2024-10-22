@@ -28,7 +28,7 @@ fn prepare_input_for_transformation(
             .collect(),
 
         // Concatenate the original rows that are taken for the kernel, and the transformed row.
-        Blur => {
+        Blur | Sharpness => {
             let mut prepared = vec![];
             for (i, transformed) in input.transformed.into_iter().enumerate() {
                 let mut row = input.original[i..i + 3].to_vec();

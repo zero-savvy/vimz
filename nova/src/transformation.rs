@@ -42,7 +42,7 @@ impl Transformation {
     pub fn step_input_width(&self) -> usize {
         match self {
             // Three rows of 128 entries for the kernel input and one for the result.
-            Blur => 512,
+            Blur | Sharpness => 512,
             // Two rows of 128 entries.
             Brightness | Contrast | Grayscale => 256,
             _ => unimplemented!(),

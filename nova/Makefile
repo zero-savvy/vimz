@@ -49,6 +49,11 @@ grayscale: # Run the grayscale transformation.
 grayscale: TRANSFORMATION=grayscale
 grayscale: run-transformation
 
+.PHONY: sharpness
+sharpness: # Run the sharpness transformation.
+sharpness: TRANSFORMATION=sharpness
+sharpness: run-transformation
+
 .PHONY: all-transformations
 all-transformations: # Run all transformations.
-all-transformations: blur brightness contrast grayscale
+all-transformations: blur brightness contrast grayscale sharpness

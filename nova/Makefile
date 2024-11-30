@@ -23,10 +23,10 @@ lint: # Run the linter.
 run-transformation: # Run a given transformation
 run-transformation:
 	@cargo run --release $(FEATURES) -- \
- 		-f $(TRANSFORMATION) -w ../circuits/$(SUBDIR)/$(SUBDIR)_$(TRANSFORMATION)_step_js/$(SUBDIR)_$(TRANSFORMATION)_step.wasm \
+ 		-f $(TRANSFORMATION) -w ../circuits/$(SUBDIR)/$(TRANSFORMATION)_step_js/$(TRANSFORMATION)_step.wasm \
 		-o ../$(TRANSFORMATION)_hd.json \
 		-i ../samples/JSON/HD/transformation_$(TRANSFORMATION).json \
-		-c ../circuits/$(SUBDIR)/$(SUBDIR)_$(TRANSFORMATION)_step.r1cs -r HD \
+		-c ../circuits/$(SUBDIR)/$(TRANSFORMATION)_step.r1cs -r HD \
 		-b $(backend)
 
 .PHONY: blur

@@ -1,8 +1,8 @@
 pragma circom 2.1.0;
 
-include "../src/hash_step.circom";
+include "../src/utils/hashers.circom";
 
-// NovaSnark wrapper over `Hash` circuit.
+// Compute running hash for a row of pixels.
 template NovaHash(width){
     // ---- Running IVC state ----
     signal input  step_in;
@@ -10,7 +10,7 @@ template NovaHash(width){
     // ---- Step inputs ----
     signal input row_orig [width];
     // ---- Step computation ----
-    step_out <== Hash(width)(step_in, row_orig);
+    step_out <== HeadTailHasher(width)(step_in, row_orig);
 }
 
 component main { public [step_in] } = NovaHash(768);

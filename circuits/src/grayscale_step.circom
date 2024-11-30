@@ -1,6 +1,6 @@
 pragma circom 2.0.0;
 
-include "utils/row_hasher.circom";
+include "utils/hashers.circom";
 include "utils/pixels.circom";
 include "../node_modules/circomlib/circuits/bitify.circom";
 
@@ -64,25 +64,12 @@ template GrayScaleHash(width){
     // Private inputs
     signal input row_orig [width];
     signal input row_tran [width];
-    
-    component orig_row_hasher = RowHasher(width);
-    component gray_row_hasher = RowHasher(width);
-    component orig_hasher = Hasher(2);
-    component gray_hasher = Hasher(2);
 
-    orig_row_hasher.img <== row_orig;
-    orig_hasher.values[0] <== step_in[0]; // prev_orig_hash
-    orig_hasher.values[1] <== orig_row_hasher.hash;
-    step_out[0] <== orig_hasher.hash; // next_orig_hash
-
-    gray_row_hasher.img <== row_tran;
-    gray_hasher.values[0] <== step_in[1]; // prev_gray_hash
-    gray_hasher.values[1] <== gray_row_hasher.hash;
-    step_out[1] <== gray_hasher.hash; // next_grey_hash
+    step_out[0] <== HeadTailHasher(width)(step_in[0], row_orig);
+    step_out[1] <== HeadTailHasher(width)(step_in[1], row_tran);
 
     // grayscale code here ...
     component checker = GrayScale(width);
     checker.original <== row_orig;
     checker.transformed <== row_tran;
-
 }

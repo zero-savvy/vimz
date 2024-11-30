@@ -4,7 +4,7 @@ include "../node_modules/circomlib/circuits/multiplexer.circom";
 include "../node_modules/circomlib/circuits/mux1.circom";
 include "../node_modules/circomlib/circuits/comparators.circom";
 include "utils/pixels.circom";
-include "utils/row_hasher.circom";
+include "utils/hashers.circom";
 
 
 template MultiplexerCrop(origSize, cropSize) {
@@ -64,14 +64,14 @@ template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized){
     component row_hasher_orig[rowCountOrig];
     component hasher_orig [rowCountOrig];
     for (var i = 0; i < rowCountOrig; i++) {
-        row_hasher_orig[i] = RowHasher(widthOrig);
-        hasher_orig[i] = Hasher(2);
+        row_hasher_orig[i] = ArrayHasher(widthOrig);
+        hasher_orig[i] = PairHasher();
     }
 
     component row_hasher_resized;
     component hasher_resized;
-    row_hasher_resized = RowHasher(widthResized);
-    hasher_resized = Hasher(2);
+    row_hasher_resized = ArrayHasher(widthResized);
+    hasher_resized = PairHasher();
 
     var decompressedwidthOrig = widthOrig * 10;
     var decompressedwidthResized = widthResized * 10;

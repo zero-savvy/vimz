@@ -1,6 +1,6 @@
 pragma circom 2.0.0;
 
-include "utils/row_hasher.circom";
+include "utils/hashers.circom";
 include "utils/pixels.circom";
 include "../node_modules/circomlib/circuits/bitify.circom";
 
@@ -105,27 +105,14 @@ template BrightnessHash(width){
     signal output step_out[3];
     // signal output next_orig_hash;
     // signal output next_gray_hash;
-    // btightness factor
+    // brightness factor
     
     // Private inputs
     signal input row_orig [width];
     signal input row_tran [width];
     
-    component orig_row_hasher = RowHasher(width);
-    component brightness_row_hasher = RowHasher(width);
-    component orig_hasher = Hasher(2);
-    component brightness_hasher = Hasher(2);
-
-    orig_row_hasher.img <== row_orig;
-    orig_hasher.values[0] <== step_in[0]; // prev_orig_hash
-    orig_hasher.values[1] <== orig_row_hasher.hash;
-    step_out[0] <== orig_hasher.hash; // next_orig_hash
-
-    brightness_row_hasher.img <== row_tran;
-    brightness_hasher.values[0] <== step_in[1]; // prev_gray_hash
-    brightness_hasher.values[1] <== brightness_row_hasher.hash;
-    step_out[1] <== brightness_hasher.hash; // next_grey_hash
-
+    step_out[0] <== HeadTailHasher(width)(step_in[0], row_orig);
+    step_out[1] <== HeadTailHasher(width)(step_in[1], row_tran);
     step_out[2] <== step_in[2];
     
     component checker = Brightness(width);

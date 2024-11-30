@@ -1,6 +1,6 @@
 pragma circom 2.0.0;
 
-include "row_hasher.circom";
+include "hashers.circom";
 include "pixels.circom";
 include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
@@ -223,32 +223,17 @@ template IntegrityCheck(width, kernel_size) {
     signal input row_orig [kernel_size][width];
     signal input row_conv [width];
 
-    var row_hashes[kernel_size];
-
-    component orig_row_hasher[kernel_size];
-    component orig_hasher;
-
+    signal row_hashes[kernel_size];
     for (var i = 0; i < kernel_size; i++) {
-        orig_row_hasher[i] = RowHasher(width);
-        orig_row_hasher[i].img <== row_orig[i];
-        row_hashes[i] = orig_row_hasher[i].hash;
+        row_hashes[i] <== ArrayHasher(width)(row_orig[i]);
     }
     
-    orig_hasher = Hasher(2);
-    orig_hasher.values[0] <== step_in[kernel_size-1];
-    orig_hasher.values[1] <== row_hashes[(kernel_size \ 2) + 1]; // hash with hash of middle row  
-    step_out[kernel_size-1] <== orig_hasher.hash;
+    step_out[kernel_size-1] <== PairHasher()(
+        step_in[kernel_size-1],
+        row_hashes[(kernel_size \ 2) + 1] // hash with hash of middle row
+    );
 
-    component conv_row_hasher;
-    component conv_hasher;
-
-    conv_row_hasher = RowHasher(width);
-    conv_row_hasher.img <== row_conv;
-
-    conv_hasher = Hasher(2);
-    conv_hasher.values[0] <== step_in[kernel_size];
-    conv_hasher.values[1] <== conv_row_hasher.hash; 
-    step_out[kernel_size] <== conv_hasher.hash;
+    step_out[kernel_size] <== HeadTailHasher(width)(step_in[kernel_size], row_conv);
 
     component zero_checker[kernel_size - 1];
     for (var i = 0; i < kernel_size-1; i++) {

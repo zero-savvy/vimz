@@ -9,7 +9,6 @@ pub enum Transformation {
     Brightness,
     Contrast,
     Crop,
-    FixedCrop,
     Grayscale,
     Hash,
     Resize,
@@ -28,11 +27,6 @@ impl Transformation {
             Blur | Sharpness => vec![zero; 4],
             Brightness | Contrast => zzv(input.factor()),
             Crop => zzv(input.info()),
-            FixedCrop => vec![
-                ValueOut::from(input.hash()),
-                zero,
-                ValueOut::from(input.info()),
-            ],
             Grayscale | Resize => vec![zero; 2],
             Hash => vec![zero],
         }
@@ -47,7 +41,9 @@ impl Transformation {
             Brightness | Contrast | Grayscale => 256,
             // Single row of 768 entries.
             Hash => 768,
-            _ => unimplemented!(),
+            // Single row of 128 entries.
+            Crop => 128,
+            Resize => unimplemented!(),
         }
     }
 }

@@ -72,16 +72,7 @@ template CropHash(widthOrig, widthCrop, heightCrop){
     var same_crop_start_x;
     var same_crop_start_y;
 
-    component orig_row_hasher = ArrayHasher(widthOrig);
-    component trans_row_hasher = ArrayHasher(widthCrop);
-    component orig_hasher = PairHasher();
-    component trans_hasher = PairHasher();
-
-
-    orig_row_hasher.img <== row_orig;
-    orig_hasher.values[0] <== prev_orig_hash;
-    orig_hasher.values[1] <== orig_row_hasher.hash;
-    next_orig_hash = orig_hasher.hash;
+    next_orig_hash = HeadTailHasher(widthOrig)(prev_orig_hash, row_orig);
 
     // ----------------------------
     // calc cropped hash
@@ -107,15 +98,14 @@ template CropHash(widthOrig, widthCrop, heightCrop){
         }
     } 
 
+    component trans_row_hasher = ArrayHasher(widthCrop);
     for (var i=0; i<widthCrop; i++) {
-        trans_row_hasher.img[i] <== cropped_data[i].out;
+        trans_row_hasher.array[i] <== cropped_data[i].out;
     }
-    trans_hasher.values[0] <== prev_crop_hash;
-    trans_hasher.values[1] <== trans_row_hasher.hash;
-    
+
     component selector = Mux1();
     selector.c[0] <== prev_crop_hash;
-    selector.c[1] <== trans_hasher.hash;
+    selector.c[1] <== PairHasher()(prev_crop_hash, trans_row_hasher.hash);
 
     // if the row is within the cropped area
     component gte = GreaterEqThan(12);
@@ -137,8 +127,4 @@ template CropHash(widthOrig, widthCrop, heightCrop){
     step_out[0] <== next_orig_hash;
     step_out[1] <== next_crop_hash;
     step_out[2] <== compressed_info + 1;
-
-    
 }
-
-component main { public [step_in] } = CropHash(128, 64, 480);

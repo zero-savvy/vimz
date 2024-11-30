@@ -45,7 +45,7 @@ fn prepare_input_for_transformation(
         }
 
         // Simply rewrite the input data.
-        Hash => input.original,
-        _ => unimplemented!(),
+        Hash | Crop => input.original,
+        Resize => unimplemented!(),
     }
 }

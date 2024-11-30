@@ -67,7 +67,7 @@ fn prepare_step_input(
         ),
 
         // Handle transformations that only need the original row.
-        Crop | FixedCrop | Hash => row_input(json!(input.original[step]), None),
+        Crop | Hash => row_input(json!(input.original[step]), None),
 
         // Handle the Resize transformation with ranges.
         Resize => {

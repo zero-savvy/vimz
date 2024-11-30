@@ -14,15 +14,15 @@ template PairHasher() {
 
 // Compute Poseidon hash of an array of values.
 template ArrayHasher(length) {
-    signal input  sequence[length];
+    signal input  array[length];
     signal output hash;
 
     // TODO: Implement a more efficient way to hash a sequence of values. Try batching.
     signal intermediate_hash[length-1];
 
-    intermediate_hash[0] <== PairHasher()(sequence[0], sequence[1]);
+    intermediate_hash[0] <== PairHasher()(array[0], array[1]);
     for(var i = 1; i < length-1; i++) {
-        intermediate_hash[i] <== PairHasher()(intermediate_hash[i-1], sequence[i+1]);
+        intermediate_hash[i] <== PairHasher()(intermediate_hash[i-1], array[i+1]);
     }
 
     hash <== intermediate_hash[length-2];

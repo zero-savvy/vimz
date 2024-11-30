@@ -50,6 +50,11 @@ contrast: # Run the contrast transformation.
 contrast: TRANSFORMATION=contrast
 contrast: run-transformation
 
+.PHONY: crop
+crop: # Run the crop transformation.
+crop: TRANSFORMATION=crop
+crop: run-transformation
+
 .PHONY: grayscale
 grayscale: # Run the grayscale transformation.
 grayscale: TRANSFORMATION=grayscale
@@ -67,4 +72,4 @@ sharpness: run-transformation
 
 .PHONY: all-transformations
 all-transformations: # Run all transformations.
-all-transformations: blur brightness contrast grayscale sharpness
+all-transformations: blur brightness contrast crop grayscale hash sharpness

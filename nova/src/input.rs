@@ -46,8 +46,6 @@ impl VIMzInput<Fr> {
 pub enum Extra {
     /// An optional factor for tuning the transformation.
     Factor { factor: u64 },
-    /// An optional scalar info and hash.
-    InfoHash { info: u64, hash: u64 },
     /// An optional scalar info.
     Info { info: u64 },
     /// No extra information.
@@ -65,15 +63,7 @@ impl Extra {
     pub fn info(&self) -> u64 {
         match self {
             Extra::Info { info } => *info,
-            Extra::InfoHash { info, .. } => *info,
             _ => unreachable!("No info provided"),
-        }
-    }
-
-    pub fn hash(&self) -> u64 {
-        match self {
-            Extra::InfoHash { hash, .. } => *hash,
-            _ => unreachable!("No hash provided"),
         }
     }
 }
@@ -124,7 +114,6 @@ mod tests {
     test_input!(brightness, Extra::Factor { .. });
     test_input!(contrast, Extra::Factor { .. });
     test_input!(crop, Extra::Info { .. });
-    test_input!(crop_op, Extra::Info { .. });
     test_input!(grayscale, Extra::None {});
     test_input!(resize, Extra::None {});
     test_input!(sharpness, Extra::None {});

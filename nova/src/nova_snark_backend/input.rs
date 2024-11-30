@@ -11,7 +11,11 @@ use crate::{
     transformation::{Resolution, Transformation},
 };
 
-pub type PreparedInputs = (Vec<HashMap<String, Value>>, Vec<F<G1>>, Vec<F<G2>>);
+pub struct PreparedInputs {
+    pub ivc_step_inputs: Vec<HashMap<String, Value>>,
+    pub initial_state: Vec<F<G1>>,
+    pub secondary_initial_state: Vec<F<G2>>,
+}
 
 /// Read the input data specified in the configuration and prepare it for the folding scheme.
 ///
@@ -22,11 +26,11 @@ pub fn prepare_input(config: &Config) -> PreparedInputs {
     let initial_state = config.function.ivc_initial_state(&input.extra);
     let ivc_step_inputs =
         prepare_input_for_transformation(config.function, &input, config.resolution);
-    (
-        ivc_step_inputs[..5].to_vec(),
+    PreparedInputs {
+        ivc_step_inputs: ivc_step_inputs[..5].to_vec(),
         initial_state,
-        vec![F::<G2>::zero()],
-    )
+        secondary_initial_state: vec![F::<G2>::zero()],
+    }
 }
 
 pub fn prepare_input_for_transformation(

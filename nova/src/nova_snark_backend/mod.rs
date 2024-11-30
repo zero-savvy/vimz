@@ -8,7 +8,7 @@ use crate::{
     config::Config,
     nova_snark_backend::{
         folding::{fold_input, prepare_folding, verify_folded_proof},
-        input::prepare_input,
+        input::{prepare_input, PreparedInputs},
     },
 };
 
@@ -21,7 +21,11 @@ type G2 = nova_snark::provider::bn256_grumpkin::grumpkin::Point;
 pub fn run(config: &Config) {
     // ========================== Prepare input and folding ========================================
 
-    let (ivc_step_inputs, initial_state, secondary_initial_state) = prepare_input(config);
+    let PreparedInputs {
+        ivc_step_inputs,
+        initial_state,
+        secondary_initial_state,
+    } = prepare_input(config);
     let num_steps = ivc_step_inputs.len();
     let (r1cs, folding_params) = prepare_folding(config);
 

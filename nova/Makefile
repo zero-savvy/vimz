@@ -49,6 +49,11 @@ grayscale: # Run the grayscale transformation.
 grayscale: TRANSFORMATION=grayscale
 grayscale: run-transformation
 
+.PHONY: hash
+hash: # Run the hash transformation.
+hash: TRANSFORMATION=hash
+hash: run-transformation
+
 .PHONY: sharpness
 sharpness: # Run the sharpness transformation.
 sharpness: TRANSFORMATION=sharpness

@@ -37,6 +37,9 @@ fn prepare_input_for_transformation(
             }
             prepared
         }
+
+        // Simply rewrite the input data.
+        Hash => input.original,
         _ => unimplemented!(),
     }
 }

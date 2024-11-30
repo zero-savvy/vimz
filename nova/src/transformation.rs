@@ -45,6 +45,8 @@ impl Transformation {
             Blur | Sharpness => 512,
             // Two rows of 128 entries.
             Brightness | Contrast | Grayscale => 256,
+            // Single row of 768 entries.
+            Hash => 768,
             _ => unimplemented!(),
         }
     }

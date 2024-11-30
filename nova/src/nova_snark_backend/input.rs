@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use nova_scotia::F;
 use serde_json::{json, Value};
 use Transformation::*;
+
 use crate::{
     config::Config,
     input::VIMzInput,
@@ -50,12 +51,10 @@ fn prepare_step_input(
 ) -> HashMap<String, Value> {
     match transformation {
         // Handle cases where both original and transformed rows are needed.
-        Brightness | Contrast | Grayscale => {
-            row_input(
-                json!(input.original[step]),
-                Some(json!(input.transformed[step])),
-            )
-        }
+        Brightness | Contrast | Grayscale => row_input(
+            json!(input.original[step]),
+            Some(json!(input.transformed[step])),
+        ),
 
         // Handle transformations that require slices of the original and transformed rows.
         Blur | Sharpness => row_input(
@@ -64,9 +63,7 @@ fn prepare_step_input(
         ),
 
         // Handle transformations that only need the original row.
-        Crop | FixedCrop | Hash => {
-            row_input(json!(input.original[step]), None)
-        }
+        Crop | FixedCrop | Hash => row_input(json!(input.original[step]), None),
 
         // Handle the Resize transformation with ranges.
         Resize => {

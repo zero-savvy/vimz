@@ -10,8 +10,8 @@ template Hash(widthOrig){
     // outputs
     signal output step_out;
 
-    step_out <== Hasher(2)(
-        step_in,
-        RowHasher(widthOrig)(row_orig)
-    );
+    component hasher = Hasher(2);
+    hasher.values[0] <== step_in;
+    hasher.values[1] <== RowHasher(widthOrig)(row_orig);
+    step_out <== hasher.hash;
 }

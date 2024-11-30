@@ -54,6 +54,10 @@ pub struct Config {
     /// The backend proof system.
     #[clap(short, long, value_enum)]
     pub backend: Backend,
+
+    /// Run the procedure only on a small part of the image.
+    #[clap(short, long)]
+    pub demo: bool,
 }
 
 impl Config {
@@ -95,6 +99,7 @@ impl Config {
         println!("| Circuit file: {:?}", self.circuit);
         println!("| Witness generator: {:?}", self.witness_generator);
         println!("| Image resolution: {:?}", self.resolution);
+        println!("| Demo mode: {}", self.demo);
         println!(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
     }
 }

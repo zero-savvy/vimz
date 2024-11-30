@@ -4,12 +4,7 @@ use nova_scotia::F;
 use serde_json::{json, Value};
 use Transformation::*;
 
-use crate::{
-    config::Config,
-    input::VIMzInput,
-    nova_snark_backend::{G1, G2},
-    transformation::{Resolution, Transformation},
-};
+use crate::{config::Config, DEMO_STEPS, input::VIMzInput, nova_snark_backend::{G1, G2}, transformation::{Resolution, Transformation}};
 
 pub struct PreparedInputs {
     pub ivc_step_inputs: Vec<HashMap<String, Value>>,
@@ -24,10 +19,15 @@ pub struct PreparedInputs {
 pub fn prepare_input(config: &Config) -> PreparedInputs {
     let input = VIMzInput::<String>::from_file(&config.input_file());
     let initial_state = config.function.ivc_initial_state(&input.extra);
-    let ivc_step_inputs =
+    let mut ivc_step_inputs =
         prepare_input_for_transformation(config.function, &input, config.resolution);
+
+    if config.demo {
+        ivc_step_inputs.truncate(DEMO_STEPS);
+    }
+
     PreparedInputs {
-        ivc_step_inputs: ivc_step_inputs[..5].to_vec(),
+        ivc_step_inputs,
         initial_state,
         secondary_initial_state: vec![F::<G2>::zero()],
     }

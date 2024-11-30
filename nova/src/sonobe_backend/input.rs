@@ -1,7 +1,8 @@
 use ark_bn254::Fr;
+
 use Transformation::*;
 
-use crate::{config::Config, input::VIMzInput, transformation::Transformation};
+use crate::{config::Config, DEMO_STEPS, input::VIMzInput, transformation::Transformation};
 
 /// Read the input data specified in the configuration and prepare it for the folding scheme.
 ///
@@ -10,8 +11,13 @@ use crate::{config::Config, input::VIMzInput, transformation::Transformation};
 pub fn prepare_input(config: &Config) -> (Vec<Vec<Fr>>, Vec<Fr>) {
     let input = VIMzInput::<Fr>::from_file(&config.input_file());
     let initial_state = config.function.ivc_initial_state(&input.extra);
-    let ivc_step_inputs = prepare_input_for_transformation(config.function, input);
-    (ivc_step_inputs[..5].to_vec(), initial_state)
+    let mut ivc_step_inputs = prepare_input_for_transformation(config.function, input);
+
+    if config.demo {
+        ivc_step_inputs.truncate(DEMO_STEPS);
+    }
+
+    (ivc_step_inputs, initial_state)
 }
 
 fn prepare_input_for_transformation(

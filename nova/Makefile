@@ -4,10 +4,16 @@ else
     FEATURES +=
 endif
 
-ifeq ($(backend),nova-snark)
+ifeq ($(BACKEND),nova-snark)
     SUBDIR = nova_snark
 else
     SUBDIR = sonobe
+endif
+
+ifeq ($(DEMO),yes)
+	DEMO_FLAG := --demo
+else
+	DEMO_FLAG := ""
 endif
 
 .PHONY: help
@@ -27,7 +33,7 @@ run-transformation:
 		-o ../$(TRANSFORMATION)_hd.json \
 		-i ../samples/JSON/HD/transformation_$(TRANSFORMATION).json \
 		-c ../circuits/$(SUBDIR)/$(TRANSFORMATION)_step.r1cs -r HD \
-		-b $(backend)
+		-b $(BACKEND) $(DEMO_FLAG)
 
 .PHONY: blur
 blur: # Run the blur transformation.

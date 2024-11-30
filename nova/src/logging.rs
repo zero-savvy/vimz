@@ -16,6 +16,7 @@ use tracing_subscriber::{
     EnvFilter,
 };
 
+/// Set up and initialize logging for the application.
 pub fn init_logging() {
     let format = Format::default().without_time().with_target(false);
 
@@ -31,6 +32,9 @@ pub fn init_logging() {
         .init();
 }
 
+/// Get the filter for the logger. This will set the default log level to WARN, but will allow
+/// the user to override this with the `RUST_LOG` environment variable. Additionally, it will
+/// set the log level for the `vimz` module to INFO.
 fn get_filter() -> EnvFilter {
     EnvFilter::builder()
         .with_default_directive(LevelFilter::WARN.into())
@@ -38,6 +42,8 @@ fn get_filter() -> EnvFilter {
         .add_directive("vimz=info".parse().unwrap())
 }
 
+/// Custom field formatter for VIMz. Essentially, this behaves like the default field formatter,
+/// but it will report span time in a nicer format.
 struct VIMzFieldFormatter;
 impl<'writer> FormatFields<'writer> for VIMzFieldFormatter {
     fn format_fields<R: RecordFields>(
@@ -57,6 +63,8 @@ struct VIMzFieldVisitor {
 }
 
 impl VIMzFieldVisitor {
+    /// Format `fields`. If it happens that it is representing a span closing, then we will format
+    /// the time in a nicer format. Otherwise, we will use the default field formatter.
     fn dump<R: RecordFields>(self, mut writer: Writer, fields: R) -> std::fmt::Result {
         match self.span_closing_time {
             None => DefaultFields::new().format_fields(writer, fields),

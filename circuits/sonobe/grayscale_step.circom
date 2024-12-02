@@ -4,7 +4,7 @@ include "../src/grayscale_step.circom";
 include "../src/utils/input_transformation.circom";
 
 // Sonobe wrapper over `GrayScaleHash` circuit.
-template SonobeGrayScaleHash(width){
+template SonobeGrayScale(width){
     // ---- Running IVC state ----
     signal input  ivc_input[2];
     signal output ivc_output[2];
@@ -17,4 +17,4 @@ template SonobeGrayScaleHash(width){
     ivc_output <== GrayScaleHash(width)(ivc_input, row_orig, row_tran);
 }
 
-component main { public [ivc_input] } = SonobeGrayScaleHash(128);
+component main { public [ivc_input] } = SonobeGrayScale(128);

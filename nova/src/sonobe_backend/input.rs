@@ -1,8 +1,12 @@
 use ark_bn254::Fr;
-
 use Transformation::*;
 
-use crate::{config::Config, DEMO_STEPS, input::VIMzInput, transformation::Transformation};
+use crate::{
+    config::Config,
+    input::VIMzInput,
+    transformation::{Resolution, Transformation},
+    DEMO_STEPS,
+};
 
 /// Read the input data specified in the configuration and prepare it for the folding scheme.
 ///
@@ -11,7 +15,8 @@ use crate::{config::Config, DEMO_STEPS, input::VIMzInput, transformation::Transf
 pub fn prepare_input(config: &Config) -> (Vec<Vec<Fr>>, Vec<Fr>) {
     let input = VIMzInput::<Fr>::from_file(&config.input_file());
     let initial_state = config.function.ivc_initial_state(&input.extra);
-    let mut ivc_step_inputs = prepare_input_for_transformation(config.function, input);
+    let mut ivc_step_inputs =
+        prepare_input_for_transformation(config.function, input, config.resolution);
 
     if config.demo {
         ivc_step_inputs.truncate(DEMO_STEPS);
@@ -23,6 +28,7 @@ pub fn prepare_input(config: &Config) -> (Vec<Vec<Fr>>, Vec<Fr>) {
 fn prepare_input_for_transformation(
     transformation: Transformation,
     input: VIMzInput<Fr>,
+    resolution: Resolution,
 ) -> Vec<Vec<Fr>> {
     match transformation {
         // Concatenate the original and transformed row.
@@ -46,6 +52,21 @@ fn prepare_input_for_transformation(
 
         // Simply rewrite the input data.
         Hash | Crop => input.original,
-        Resize => unimplemented!(),
+
+        // Concatenate the batches of original and transformed rows.
+        Resize => {
+            let mut prepared = vec![];
+            let (o_range, t_range) = resolution.ratio_to_lower();
+
+            for i in 0..(resolution.iteration_count() / o_range) {
+                let row = [
+                    input.original[i * o_range..(i + 1) * o_range].concat(),
+                    input.transformed[i * t_range..(i + 1) * t_range].concat(),
+                ];
+                prepared.push(row.concat());
+            }
+
+            prepared
+        }
     }
 }

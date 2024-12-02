@@ -39,7 +39,7 @@ pub fn prepare_input_for_transformation(
     resolution: Resolution,
 ) -> Vec<HashMap<String, Value>> {
     let iter_count = match transformation {
-        Resize => resolution.lower().iteration_count(),
+        Resize => resolution.iteration_count() / resolution.ratio_to_lower().0,
         _ => resolution.iteration_count(),
     };
     (0..iter_count)
@@ -73,9 +73,9 @@ fn prepare_step_input(
         Resize => {
             let (o_range, t_range) = resolution.ratio_to_lower();
             row_input(
-                json!(input.original[step * o_range..(step * o_range) + o_range]),
+                json!(input.original[step * o_range..(step + 1) * o_range]),
                 Some(json!(
-                    input.transformed[step * t_range..(step * t_range) + t_range]
+                    input.transformed[step * t_range..(step + 1) * t_range]
                 )),
             )
         }

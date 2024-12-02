@@ -1,4 +1,4 @@
-pragma circom 2.0.0;
+pragma circom 2.1.0;
 
 include "../node_modules/circomlib/circuits/multiplexer.circom";
 include "../node_modules/circomlib/circuits/mux1.circom";
@@ -81,9 +81,9 @@ template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized){
     signal decompressed_row_tran [rowCountResized][decompressedwidthResized][3];
 
     for (var i = 0; i < rowCountOrig; i++) {
-        row_hasher_orig[i].img <== row_orig[i];
-        hasher_orig[i].values[0] <== i == 0 ? prev_orig_hash : hasher_orig[i-1].hash;
-        hasher_orig[i].values[1] <== row_hasher_orig[i].hash;
+        row_hasher_orig[i].array <== row_orig[i];
+        hasher_orig[i].a <== i == 0 ? prev_orig_hash : hasher_orig[i-1].hash;
+        hasher_orig[i].b <== row_hasher_orig[i].hash;
     }
     next_orig_hash <== hasher_orig[rowCountOrig-1].hash;
 
@@ -140,14 +140,12 @@ template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized){
     }
 
     for (var i=0; i<rowCountResized; i++) {
-        row_hasher_resized[i].img <== row_tran[i];
-        hasher_resized[i].values[0] <== i == 0 ? prev_resized_hash : hasher_resized[i-1].hash;
-        hasher_resized[i].values[1] <== row_hasher_resized[i].hash;
+        row_hasher_resized[i].array <== row_tran[i];
+        hasher_resized[i].a <== i == 0 ? prev_resized_hash : hasher_resized[i-1].hash;
+        hasher_resized[i].b <== row_hasher_resized[i].hash;
     }
     next_resized_hash <== hasher_resized[rowCountResized-1].hash;
 
     step_out[0] <== next_orig_hash;
     step_out[1] <== next_resized_hash;
 }
-
-component main { public [step_in] } = ResizeHash(128, 64, 3, 2);

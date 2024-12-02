@@ -4,7 +4,7 @@ include "../src/brightness_step.circom";
 include "../src/utils/input_transformation.circom";
 
 // Sonobe wrapper over `BrightnessHash` circuit.
-template SonobeBrightnessHash(width){
+template SonobeBrightness(width){
     // ---- Running IVC state ----
     signal input  ivc_input[3];
     signal output ivc_output[3];
@@ -17,4 +17,4 @@ template SonobeBrightnessHash(width){
     ivc_output <== BrightnessHash(width)(ivc_input, row_orig, row_tran);
 }
 
-component main { public [ivc_input] } = SonobeBrightnessHash(128);
+component main { public [ivc_input] } = SonobeBrightness(128);

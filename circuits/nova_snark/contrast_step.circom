@@ -3,7 +3,7 @@ pragma circom 2.1.0;
 include "../src/contrast_step.circom";
 
 // NovaSnark wrapper over `ContrastHash` circuit.
-template NovaContrastHash(width){
+template NovaContrast(width){
     // ---- Running IVC state ----
     signal input  step_in[3];
     signal output step_out[3];
@@ -13,4 +13,4 @@ template NovaContrastHash(width){
     step_out <== ContrastHash(width)(step_in, row_orig, row_tran);
 }
 
-component main { public [step_in] } = NovaContrastHash(128);
+component main { public [step_in] } = NovaContrast(128);

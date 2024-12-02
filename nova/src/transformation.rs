@@ -43,7 +43,8 @@ impl Transformation {
             Hash => 768,
             // Single row of 128 entries.
             Crop => 128,
-            Resize => unimplemented!(),
+            // Three rows of 128 entries for the original image and two of 64 entries for the transformed.
+            Resize => 128 * 3 + 64 * 2,
         }
     }
 }
@@ -72,17 +73,6 @@ impl Resolution {
             Resolution::FHD => 1080,
             Resolution::_4K => 2160,
             Resolution::_8K => 4320,
-        }
-    }
-
-    /// Returns the lower resolution (step by one).
-    pub fn lower(&self) -> Resolution {
-        match self {
-            Resolution::SD => panic!("Cannot lower resolution from SD"),
-            Resolution::HD => Resolution::SD,
-            Resolution::FHD => Resolution::HD,
-            Resolution::_4K => Resolution::FHD,
-            Resolution::_8K => Resolution::_4K,
         }
     }
 

@@ -65,6 +65,11 @@ hash: # Run the hash transformation.
 hash: TRANSFORMATION=hash
 hash: run-transformation
 
+.PHONY: resize
+resize: # Run the resize transformation.
+resize: TRANSFORMATION=resize
+resize: run-transformation
+
 .PHONY: sharpness
 sharpness: # Run the sharpness transformation.
 sharpness: TRANSFORMATION=sharpness

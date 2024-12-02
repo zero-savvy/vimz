@@ -21,7 +21,7 @@ fi
 cd "$subfolder" || exit
 
 # Set the pattern of files you want to process
-file_pattern="crop_step.circom"
+file_pattern="*.circom"
 
 shopt -s nullglob
 

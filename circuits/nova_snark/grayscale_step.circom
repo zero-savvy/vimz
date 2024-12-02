@@ -3,7 +3,7 @@ pragma circom 2.1.0;
 include "../src/grayscale_step.circom";
 
 // NovaSnark wrapper over `GrayScaleHash` circuit.
-template NovaGrayScaleHash(width){
+template NovaGrayScale(width){
     // ---- Running IVC state ----
     signal input  step_in[2];
     signal output step_out[2];
@@ -13,4 +13,4 @@ template NovaGrayScaleHash(width){
     step_out <== GrayScaleHash(width)(step_in, row_orig, row_tran);
 }
 
-component main { public [step_in] } = NovaGrayScaleHash(128);
+component main { public [step_in] } = NovaGrayScale(128);

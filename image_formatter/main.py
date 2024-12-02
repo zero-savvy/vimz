@@ -3,11 +3,8 @@ from tkinter import filedialog
 import json
 from PIL import Image
 import numpy as np
-import matplotlib.pyplot as plt
-import math
 
-
-VESTA_PRIME = 28948022309329048855892746252171976963363056481941647379679742748393362948097
+from plotting import plot_images_side_by_side
 
 
 def get_image_path():
@@ -15,46 +12,6 @@ def get_image_path():
     root.withdraw()
     file_path = filedialog.askopenfilename()
     return file_path
-
-
-def plot_images_side_by_side_auto_size(np_image1, np_image2):
-    """
-    Plot two NumPy array images side by side as subfigures using matplotlib.
-    Adjusts the figure size based on the dimensions of the input images.
-
-    Args:
-    np_image1 (numpy.ndarray): The first input image as a NumPy array.
-    np_image2 (numpy.ndarray): The second input image as a NumPy array.
-    title1 (str): The title for the first subfigure.
-    title2 (str): The title for the second subfigure.
-
-    Returns:
-    None
-    """
-    height1, width1 = np_image1.shape[:2]
-    height2, width2 = np_image2.shape[:2]
-
-    # Calculate the total width and maximum height of the two images
-    total_width = width1 + width2
-    max_height = max(height1, height2)
-
-    desired_width = 1000  # Pixels
-
-    scaling_factor = desired_width / total_width
-
-    plt.figure(figsize=(desired_width / 80, max_height * scaling_factor / 80))
-
-    plt.subplot(1, 2, 1)
-    plt.imshow(np_image1, cmap='gray' if len(np_image1.shape) == 2 else None)
-    plt.title("Original")
-    plt.axis('off')
-
-    plt.subplot(1, 2, 2)
-    plt.imshow(np_image2, cmap='gray' if len(np_image2.shape) == 2 else None)
-    plt.title("Transformed")
-    plt.axis('off')
-
-    plt.show()
 
 
 def compress(image_in):
@@ -123,7 +80,7 @@ def sharppen_image(image_path):
         g_adjusted = conv2d(g_channel, kernel)
         b_adjusted = conv2d(b_channel, kernel)
         adjusted_image = np.dstack((r_adjusted, g_adjusted, b_adjusted))
-        plot_images_side_by_side_auto_size(np.array(image), adjusted_image)
+        plot_images_side_by_side(np.array(image), adjusted_image)
 
         return compress(adjusted_image), [["0x00"] * (len(image_np[0]) // 10)]
 
@@ -142,18 +99,15 @@ def blur_image(image_path):
         g_adjusted = conv2d(g_channel, kernel, 9)
         b_adjusted = conv2d(b_channel, kernel, 9)
         adjusted_image = np.dstack((r_adjusted, g_adjusted, b_adjusted))
-        plot_images_side_by_side_auto_size(np.array(image), adjusted_image)
+        plot_images_side_by_side(np.array(image), adjusted_image)
 
         return compress(adjusted_image), [["0x00"] * (len(image_np[0]) // 10)]
-
-
-
 
 
 def convert_to_grayscale(image_path):
     with Image.open(image_path) as image:
         grayscale_image = image.convert('L')
-        plot_images_side_by_side_auto_size(np.array(image), np.array(grayscale_image))
+        plot_images_side_by_side(np.array(image), np.array(grayscale_image))
         return compress(grayscale_image)
 
 
@@ -172,7 +126,7 @@ def adjust_contrast(image_path, desired_contrast):
         b_adjusted = ((b_channel - float(b_mean) / 1000) * desired_contrast + float(b_mean) / 1000).clip(0, 255).astype(np.uint8)
         adjusted_image = np.dstack((r_adjusted, g_adjusted, b_adjusted))
         
-        plot_images_side_by_side_auto_size(image_np, adjusted_image)
+        plot_images_side_by_side(image_np, adjusted_image)
         return compress(adjusted_image)
 
 
@@ -188,7 +142,7 @@ def adjust_brightness(np_image, brightness_factor):
         adjusted_image_float = np_image_float * brightness_factor
         adjusted_image = np.clip(adjusted_image_float, 0, 255).astype(np.uint8)
 
-        plot_images_side_by_side_auto_size(image_np, adjusted_image)
+        plot_images_side_by_side(image_np, adjusted_image)
     
         return compress(adjusted_image)
     
@@ -198,7 +152,7 @@ def crop_image(image_path, x: int, y:int, new_width: int, new_height:int):
         image_np = np.array(image)
         adjusted_image = image_np[y:y+new_height, x:x+new_width]
         # adjusted_image = [[image_np[i][j] for j in range(x, x+new_width)] for i in range(y, y+new_height)]
-        plot_images_side_by_side_auto_size(image_np, adjusted_image)
+        plot_images_side_by_side(image_np, adjusted_image)
     
         return compress(adjusted_image)
     
@@ -263,7 +217,7 @@ def resize_image(image_path, new_height:int, new_width: int):
                     summ = a * weight + b * weight + c * weight + d * weight
                     new_img_array[i, j] = summ / 2
 
-        plot_images_side_by_side_auto_size(img_array, new_img_array)
+        plot_images_side_by_side(img_array, new_img_array)
 
         return compress(new_img_array)
 

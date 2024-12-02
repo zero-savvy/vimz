@@ -1,18 +1,13 @@
+import argparse
+import json
 import tkinter as tk
 from tkinter import filedialog
-import json
-from PIL import Image
+
 import numpy as np
+from PIL import Image
 
 from img_utils import compress, conv2d
 from plotting import plot_images_side_by_side
-
-
-def get_image_path():
-    root = tk.Tk()
-    root.withdraw()
-    file_path = filedialog.askopenfilename()
-    return file_path
 
 
 def sharpen_image(image_path):
@@ -173,7 +168,30 @@ def resize_image(image_path, new_height: int, new_width: int):
         return compress(new_img_array)
 
 
-# Get the image path using Tkinter file dialog
+def get_image_path():
+    """Get the image path from the command line arguments or using a file dialog."""
+
+    # Try to get the image path from the command line arguments.
+    parser = argparse.ArgumentParser(description="Image sharpening tool.")
+    parser.add_argument(
+        "image_path",
+        default=None,
+        nargs="?",
+        help="Path to the input image. If not provided, an interactive file dialog will open."
+    )
+    args = parser.parse_args()
+    if args.image_path is not None:
+        return args.image_path
+
+    # If the image path is not provided as an argument, open a file dialog.
+    print("No image path provided. Please select an image file.")
+    tk.Tk().withdraw()
+    return filedialog.askopenfilename(
+        title="Select an Image",
+        filetypes=[("Image files", ["*.jpg","*.jpeg","*.png","*.bmp","*.tiff"])]
+    )
+
+
 image_path = get_image_path()
 
 if image_path:

@@ -1,6 +1,7 @@
 import argparse
 import json
 import tkinter as tk
+from os import path
 from tkinter import filedialog
 
 import numpy as np
@@ -199,10 +200,14 @@ def parse_args():
         help="Operation to perform on the image"
     )
     parser.add_argument(
-        "image_path",
+        "--image_path",
         default=None,
-        nargs="?",
         help="Path to the input image. If not provided, an interactive file dialog will open."
+    )
+    parser.add_argument(
+        "--output_dir",
+        default="./",
+        help="Directory to save the output image. Default is the current directory."
     )
     return parser.parse_args()
 
@@ -260,7 +265,7 @@ def main():
         print(f"Operation '{operation}' is not implemented.")
         return
 
-    output_path = f"transformation_{operation}.json"
+    output_path = path.join(args.output_dir, f"transformation_{operation}.json")
 
     # Save the output to a JSON file
     with open(output_path, "w") as fp:

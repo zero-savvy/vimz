@@ -76,12 +76,7 @@ def adjust_contrast(image_path, desired_contrast):
         return compress(adjusted_image)
 
 
-def compress_image(image_path):
-    with Image.open(image_path) as image:
-        return compress(image)
-
-
-def adjust_brightness(np_image, brightness_factor):
+def adjust_brightness(image_path, brightness_factor):
     with Image.open(image_path) as image:
         image_np = np.array(image)
         np_image_float = image_np.astype(float)
@@ -168,18 +163,10 @@ def resize_image(image_path, new_height: int, new_width: int):
         return compress(new_img_array)
 
 
-def get_image_path():
+def get_image_path(args):
     """Get the image path from the command line arguments or using a file dialog."""
 
     # Try to get the image path from the command line arguments.
-    parser = argparse.ArgumentParser(description="Image sharpening tool.")
-    parser.add_argument(
-        "image_path",
-        default=None,
-        nargs="?",
-        help="Path to the input image. If not provided, an interactive file dialog will open."
-    )
-    args = parser.parse_args()
     if args.image_path is not None:
         return args.image_path
 
@@ -188,111 +175,98 @@ def get_image_path():
     tk.Tk().withdraw()
     return filedialog.askopenfilename(
         title="Select an Image",
-        filetypes=[("Image files", ["*.jpg","*.jpeg","*.png","*.bmp","*.tiff"])]
+        filetypes=[("Image files", ["*.jpg", "*.jpeg", "*.png", "*.bmp", "*.tiff"])]
     )
 
 
-image_path = get_image_path()
+operations = {
+    "crop": crop_image,
+    "resize": resize_image,
+    "grayscale": convert_to_grayscale,
+    "brightness": adjust_brightness,
+    "contrast": adjust_contrast,
+    "sharpen": sharpen_image,
+    "blur": blur_image,
+}
 
-if image_path:
-    # Example usage
 
-    # Crop the image and save it
-    compressed_original_image = compress_image(image_path)
-    out = {
-        "original": compressed_original_image,
-    }
-    print("Image compressed successfully.")
-    cmd = int(input("Enter your command (default[1]): 1) crop, 2) resize, 3) greyscale, 4) brightness,"
-                    " 5) contrast, 6) sharpen, 7) blur: ") or "1")
+def parse_args():
+    parser = argparse.ArgumentParser(description="Image formatting tool")
+    parser.add_argument(
+        "operation",
+        type=str,
+        choices=operations.keys(),
+        help="Operation to perform on the image"
+    )
+    parser.add_argument(
+        "image_path",
+        default=None,
+        nargs="?",
+        help="Path to the input image. If not provided, an interactive file dialog will open."
+    )
+    return parser.parse_args()
 
-    if cmd == 1:
-        output_path = 'transformation_crop.json'  # Path to save the cropped image
-        x = int(input("Enter x coordination:"))
-        y = int(input("Enter y coordination:"))
-        crop_size = int(input("Enter crop_size: 1) SD, 2) HD, 3) FHD: "))
-        if crop_size == 1:
-            w = 640
-            h = 480
-        elif crop_size == 2:
-            w = 1280
-            h = 720
-        elif crop_size == 3:
-            w = 1920
-            h = 1080
+
+def main():
+    args = parse_args()
+    image_path = get_image_path(args)
+    operation = args.operation
+
+    # Compress and serialize the original image
+    with Image.open(image_path) as image:
+        original_image = compress(image)
+    out = {"original": original_image}
+    print(f"Image compressed successfully. Selected operation: {operation}")
+
+    if operation == "crop":
+        x = int(input("Enter x coordinate: "))
+        y = int(input("Enter y coordinate: "))
+        crop_size = input("Enter crop size (SD, HD, FHD): ").lower()
+        size_map = {"sd": (640, 480), "hd": (1280, 720), "fhd": (1920, 1080)}
+
+        if crop_size in size_map:
+            w, h = size_map[crop_size]
+            out["transformed"] = operations[operation](image_path, x, y, w, h)
+            out["info"] = x * 2 ** 24 + y * 2 ** 12
         else:
-            print("The entered command was wrong. It should an Integer from 1 to 3.")
-            exit()
-        compressed_transformed_image = crop_image(image_path, x, y, w, h)
-        print("Applied CROP filter successfully.")
+            print("Invalid crop size. Use SD, HD, or FHD.")
+            return
 
-        out["info"] = x * 2 ** 24 + y * 2 ** 12
+    elif operation == "resize":
+        resize_option = input("Enter resize option (HD to SD, 4K to FHD): ").lower()
+        size_map = {"hd to sd": (640, 480), "4k to fhd": (1920, 1080)}
 
-    elif cmd == 2:
-        output_path = 'transformation_resize.json'  # Path to save the resized image
-        new_size = int(input("Enter resize: 1) HD --> SD, 2) 4K --> FHD: "))
-        if new_size == 1:
-            w = 640
-            h = 480
-        elif new_size == 2:
-            w = 1920
-            h = 1080
+        if resize_option in size_map:
+            w, h = size_map[resize_option]
+            out["transformed"] = operations[operation](image_path, h, w)
         else:
-            print("The entered command was wrong. It should an Integer from 1 to 2.")
-        compressed_transformed_image = resize_image(image_path, h, w)
-        print("Applied RESIZE filter successfully.")
+            print("Invalid resize option.")
+            return
 
-        out["transformed"] = compressed_transformed_image
+    elif operation in {"brightness", "contrast"}:
+        factor = float(input(f"Enter {operation} factor (1.00 = no effect): "))
+        out["transformed"] = operations[operation](image_path, factor)
+        out["factor"] = int(factor * 10)
 
-    elif cmd == 3:
-        output_path = 'transformation_grayscale.json'  # Path to save the cropped image
-        compressed_transformed_image = convert_to_grayscale(image_path)
-        print("Applied GRAYSCALE filter successfully.")
+    elif operation == "grayscale":
+        out["transformed"] = operations[operation](image_path)
 
-        out["transformed"] = compressed_transformed_image
-
-
-    elif cmd == 4:
-        output_path = 'transformation_brightness.json'  # Path to save the cropped image
-        desired_brightness = float(input("Enter desired brightness factor (1.00 = no effect):"))
-        compressed_transformed_image = adjust_brightness(image_path, desired_brightness)
-        print("Applied BRIGHTNESS filter successfully.")
-
-        out["transformed"] = compressed_transformed_image
-        out["factor"] = int(desired_brightness * 10)
-
-
-    elif cmd == 5:
-        output_path = 'transformation_contrast.json'  # Path to save the cropped image
-        desired_contrast = float(input("Enter desired contrast (1.00 = no effect):"))
-        compressed_transformed_image = adjust_contrast(image_path, desired_contrast)
-        print("Applied CONTRAST filter successfully.")
-
-        out["transformed"] = compressed_transformed_image
-        out["factor"] = int(desired_contrast * 10)
-
-    elif cmd == 6:
-        output_path = 'transformation_sharpen.json'  # Path to save the cropped image
-        compressed_transformed_image, compressed_zeros = sharpen_image(image_path)
-        print("Applied SHARPNESS filter successfully.")
-
-        out["transformed"] = compressed_transformed_image
-        out["original"] = compressed_zeros + out["original"] + compressed_zeros
-
-    elif cmd == 7:
-        output_path = 'transformation_blur.json'  # Path to save the cropped image
-        compressed_transformed_image, compressed_zeros = blur_image(image_path)
-        print("Applied BLUR filter successfully.")
-
-        out["transformed"] = compressed_transformed_image
-        out["original"] = compressed_zeros + out["original"] + compressed_zeros
+    elif operation in {"sharpen", "blur"}:
+        transformed_image, zeros = operations[operation](image_path)
+        out["original"] = zeros + original_image + zeros
+        out["transformed"] = transformed_image
 
     else:
-        print("The entered command was wrong. It should an Integer from 1 to 7.")
-        exit()
+        print(f"Operation '{operation}' is not implemented.")
+        return
 
-    with open(output_path, 'w') as fp:
+    output_path = f"transformation_{operation}.json"
+
+    # Save the output to a JSON file
+    with open(output_path, "w") as fp:
         json.dump(out, fp, indent=4)
-    print("Image data dumped successfully.")
-else:
-    print("No image selected.")
+    print(f"Transformation data saved to {output_path}.")
+
+
+if __name__ == "__main__":
+    main()

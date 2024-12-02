@@ -24,9 +24,8 @@ def sharpen_image(image_path):
         g_adjusted = conv2d(g_channel, kernel)
         b_adjusted = conv2d(b_channel, kernel)
         adjusted_image = np.dstack((r_adjusted, g_adjusted, b_adjusted))
-        plot_images_side_by_side(np.array(image), adjusted_image)
 
-        return compress(adjusted_image), [["0x00"] * (len(image_np[0]) // 10)]
+        return adjusted_image, [["0x00"] * (len(image_np[0]) // 10)]
 
 
 def blur_image(image_path):
@@ -43,25 +42,19 @@ def blur_image(image_path):
         g_adjusted = conv2d(g_channel, kernel, 9)
         b_adjusted = conv2d(b_channel, kernel, 9)
         adjusted_image = np.dstack((r_adjusted, g_adjusted, b_adjusted))
-        plot_images_side_by_side(np.array(image), adjusted_image)
 
-        return compress(adjusted_image), [["0x00"] * (len(image_np[0]) // 10)]
+        return adjusted_image, [["0x00"] * (len(image_np[0]) // 10)]
 
 
 def convert_to_grayscale(image_path):
     with Image.open(image_path) as image:
-        grayscale_image = image.convert('L')
-        plot_images_side_by_side(np.array(image), np.array(grayscale_image))
-        return compress(grayscale_image)
+        return image.convert('L')
 
 
 def adjust_contrast(image_path, desired_contrast):
     with Image.open(image_path) as image:
         image_np = np.array(image)
         r_channel, g_channel, b_channel = np.rollaxis(image_np, axis=-1)
-        # r_mean = int(np.mean(r_channel) *1000)
-        # b_mean = int(np.mean(b_channel) *1000)
-        # g_mean = int(np.mean(b_channel) *1000)
         r_mean = int(128 * 1000)
         b_mean = int(128 * 1000)
         g_mean = int(128 * 1000)
@@ -71,10 +64,7 @@ def adjust_contrast(image_path, desired_contrast):
             np.uint8)
         b_adjusted = ((b_channel - float(b_mean) / 1000) * desired_contrast + float(b_mean) / 1000).clip(0, 255).astype(
             np.uint8)
-        adjusted_image = np.dstack((r_adjusted, g_adjusted, b_adjusted))
-
-        plot_images_side_by_side(image_np, adjusted_image)
-        return compress(adjusted_image)
+        return np.dstack((r_adjusted, g_adjusted, b_adjusted))
 
 
 def adjust_brightness(image_path, brightness_factor):
@@ -82,40 +72,23 @@ def adjust_brightness(image_path, brightness_factor):
         image_np = np.array(image)
         np_image_float = image_np.astype(float)
         adjusted_image_float = np_image_float * brightness_factor
-        adjusted_image = np.clip(adjusted_image_float, 0, 255).astype(np.uint8)
-
-        plot_images_side_by_side(image_np, adjusted_image)
-
-        return compress(adjusted_image)
+        return np.clip(adjusted_image_float, 0, 255).astype(np.uint8)
 
 
 def crop_image(image_path, x: int, y: int, new_width: int, new_height: int):
     with Image.open(image_path) as image:
         image_np = np.array(image)
-        adjusted_image = image_np[y:y + new_height, x:x + new_width]
-        # adjusted_image = [[image_np[i][j] for j in range(x, x+new_width)] for i in range(y, y+new_height)]
-        plot_images_side_by_side(image_np, adjusted_image)
-
-        return compress(adjusted_image)
+        return image_np[y:y + new_height, x:x + new_width]
 
 
 def resize_image(image_path, new_height: int, new_width: int):
     with Image.open(image_path) as image:
-        # image_np = np.array(image)
-        # adjusted_image = image.resize((new_width, new_height), resample=Image.Resampling.BILINEAR)
-        # adjusted_image_np = np.array(adjusted_image)
-
-        # adjusted_image = [[image_np[i][j] for j in range(x, x+new_width)] for i in range(y, y+new_height)]
-
         img_array = np.array(image)
 
         # Get the dimensions of the original image
         height, width, channels = img_array.shape
 
         # Calculate the scaling factors for each dimension
-        # scale_y = (new_height - 1) / (height - 1)
-        # scale_x = (new_width - 1) / (width - 1)
-
         x_ratio = float(width) / float(new_width)
         y_ratio = float(height) / float(new_height)
 
@@ -159,9 +132,7 @@ def resize_image(image_path, new_height: int, new_width: int):
                     summ = a * weight + b * weight + c * weight + d * weight
                     new_img_array[i, j] = summ / 2
 
-        plot_images_side_by_side(img_array, new_img_array)
-
-        return compress(new_img_array)
+        return new_img_array
 
 
 def get_image_path(args):
@@ -193,22 +164,14 @@ operations = {
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Image formatting tool")
+    parser.add_argument("operation", type=str, choices=operations.keys(), help="Operation to perform on the image")
     parser.add_argument(
-        "operation",
-        type=str,
-        choices=operations.keys(),
-        help="Operation to perform on the image"
+        "--image_path", "-i",
+        default=None, help="Path to the input image. If not provided, an interactive file dialog will open."
     )
-    parser.add_argument(
-        "--image_path",
-        default=None,
-        help="Path to the input image. If not provided, an interactive file dialog will open."
-    )
-    parser.add_argument(
-        "--output_dir",
-        default="./",
-        help="Directory to save the output image. Default is the current directory."
-    )
+    parser.add_argument("--output_dir", "-o", default="./",
+                        help="Directory to save the output image. Default is the current directory.")
+    parser.add_argument("--render", action="store_true", help="Render the result")
     return parser.parse_args()
 
 
@@ -217,11 +180,11 @@ def main():
     image_path = get_image_path(args)
     operation = args.operation
 
-    # Compress and serialize the original image
     with Image.open(image_path) as image:
-        original_image = compress(image)
-    out = {"original": original_image}
-    print(f"Image compressed successfully. Selected operation: {operation}")
+        original_image = image.copy()
+
+    # Initialize the output dictionary
+    out = {"original": compress(original_image)}
 
     if operation == "crop":
         x = int(input("Enter x coordinate: "))
@@ -231,11 +194,10 @@ def main():
 
         if crop_size in size_map:
             w, h = size_map[crop_size]
-            out["transformed"] = operations[operation](image_path, x, y, w, h)
+            transformed = operations[operation](image_path, x, y, w, h)
             out["info"] = x * 2 ** 24 + y * 2 ** 12
         else:
-            print("Invalid crop size. Use SD, HD, or FHD.")
-            return
+            raise Exception("Invalid crop size. Use SD, HD, or FHD.")
 
     elif operation == "resize":
         resize_option = input("Enter resize option (HD to SD, 4K to FHD): ").lower()
@@ -243,31 +205,33 @@ def main():
 
         if resize_option in size_map:
             w, h = size_map[resize_option]
-            out["transformed"] = operations[operation](image_path, h, w)
+            transformed = operations[operation](image_path, h, w)
         else:
-            print("Invalid resize option.")
-            return
+            raise Exception("Invalid resize option.")
 
     elif operation in {"brightness", "contrast"}:
         factor = float(input(f"Enter {operation} factor (1.00 = no effect): "))
-        out["transformed"] = operations[operation](image_path, factor)
+        transformed = operations[operation](image_path, factor)
         out["factor"] = int(factor * 10)
 
     elif operation == "grayscale":
-        out["transformed"] = operations[operation](image_path)
+        transformed = operations[operation](image_path)
 
     elif operation in {"sharpen", "blur"}:
         transformed_image, zeros = operations[operation](image_path)
-        out["original"] = zeros + original_image + zeros
-        out["transformed"] = transformed_image
+        # Extend the original image with zero-padding
+        out["original"] = zeros + compress(original_image) + zeros
+        transformed = transformed_image
 
     else:
-        print(f"Operation '{operation}' is not implemented.")
-        return
+        raise Exception(f"Operation '{operation}' is not implemented.")
 
-    output_path = path.join(args.output_dir, f"transformation_{operation}.json")
+    out["transformed"] = compress(transformed)
+    if args.render:
+        plot_images_side_by_side(np.array(original_image), transformed)
 
     # Save the output to a JSON file
+    output_path = path.join(args.output_dir, f"{operation}.json")
     with open(output_path, "w") as fp:
         json.dump(out, fp, indent=4)
     print(f"Transformation data saved to {output_path}.")

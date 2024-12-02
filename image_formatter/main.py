@@ -15,7 +15,7 @@ def get_image_path():
     return file_path
 
 
-def sharppen_image(image_path):
+def sharpen_image(image_path):
     kernel = np.array([
         [0, -1, 0],
         [-1, 5, -1],
@@ -255,7 +255,7 @@ if image_path:
 
     elif cmd == 6:
         output_path = 'transformation_sharpen.json'  # Path to save the cropped image
-        compressed_transformed_image, compressed_zeros = sharppen_image(image_path)
+        compressed_transformed_image, compressed_zeros = sharpen_image(image_path)
         print("Applied SHARPNESS filter successfully.")
 
         out["transformed"] = compressed_transformed_image

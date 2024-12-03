@@ -1,6 +1,10 @@
 .idea/
-*.jpg
 */venv/
+
+input_data/
+
+*.json
+
 circuits/**/*_cpp/
 circuits/**/*_js/
 circuits/**/*.r1cs

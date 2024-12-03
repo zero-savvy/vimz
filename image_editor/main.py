@@ -241,10 +241,10 @@ def main():
         plot_images_side_by_side(np.array(original_image), transformed)
 
     # Save the output to a JSON file
-    output_path = path.join(args.output_dir, f"transformation_{operation}.json")
+    output_path = path.join(args.output_dir, f"{operation}.json")
     with open(output_path, "w") as fp:
         json.dump(out, fp, indent=4)
-    print(f"Transformation data saved to {output_path}.")
+    print(f"Transformation {operation} applied successfully. Data saved to {output_path}.")
 
 
 if __name__ == "__main__":

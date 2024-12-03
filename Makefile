@@ -2,11 +2,13 @@
 help: # Show help for each of the Makefile recipes.
 	@grep -E '^[a-zA-Z0-9 -]+:.*#'  Makefile | sort | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m:$$(echo $$l | cut -f 2- -d'#')\n"; done
 
-INPUT_SOURCE = --image-path ./samples/HD.png
-INPUT_TARGET = --output-dir ./samples/JSON/HD/
+INPUT_SOURCE = --image-path ./source_image/HD.png
+INPUT_TARGET_DIR = ./input_data/
+INPUT_TARGET = --output-dir $(INPUT_TARGET_DIR)
 
 .PHONY: generate-input-data
 generate-input-data: # Prepare input data for every supported transformation.
+	@mkdir -p $(INPUT_TARGET_DIR) || true
 	@python3 image_editor/main.py blur       $(INPUT_SOURCE) $(INPUT_TARGET)
 	@python3 image_editor/main.py brightness $(INPUT_SOURCE) $(INPUT_TARGET) --factor 1.4
 	@python3 image_editor/main.py contrast   $(INPUT_SOURCE) $(INPUT_TARGET) --factor 1.4

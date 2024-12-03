@@ -165,13 +165,27 @@ operations = {
 def parse_args():
     parser = argparse.ArgumentParser(description="Image formatting tool")
     parser.add_argument("operation", type=str, choices=operations.keys(), help="Operation to perform on the image")
+
+    # ====================================== FILE PATHS ======================================
     parser.add_argument(
-        "--image_path", "-i",
+        "--image-path", "-i",
         default=None, help="Path to the input image. If not provided, an interactive file dialog will open."
     )
-    parser.add_argument("--output_dir", "-o", default="./",
+    parser.add_argument("--output-dir", "-o", default="./",
                         help="Directory to save the output image. Default is the current directory.")
+
+    # ====================================== RENDERING ======================================
     parser.add_argument("--render", action="store_true", help="Render the result")
+
+    # ===================================== TRANSFORMATION PARAMETERS ======================================
+    parser.add_argument("--factor", type=float, help="Transformation factor (for brightness and contrast operations)")
+
+    parser.add_argument("--x", type=int, help="X coordinate for cropping")
+    parser.add_argument("--y", type=int, help="Y coordinate for cropping")
+    parser.add_argument("--crop-size", choices=["SD", "HD", "FHD"], help="Size of the cropped image")
+
+    parser.add_argument("--resize-option", choices=["HD to SD", "4K to FHD"], help="Resize option")
+
     return parser.parse_args()
 
 
@@ -187,20 +201,16 @@ def main():
     out = {"original": compress(original_image)}
 
     if operation == "crop":
-        x = int(input("Enter x coordinate: "))
-        y = int(input("Enter y coordinate: "))
-        crop_size = input("Enter crop size (SD, HD, FHD): ").lower()
-        size_map = {"sd": (640, 480), "hd": (1280, 720), "fhd": (1920, 1080)}
+        x, y, crop_size = args.x, args.y, args.crop_size
 
-        if crop_size in size_map:
-            w, h = size_map[crop_size]
-            transformed = operations[operation](image_path, x, y, w, h)
-            out["info"] = x * 2 ** 24 + y * 2 ** 12
-        else:
-            raise Exception("Invalid crop size. Use SD, HD, or FHD.")
+        size_map = {"sd": (640, 480), "hd": (1280, 720), "fhd": (1920, 1080)}
+        w, h = size_map[crop_size.lower()]
+
+        transformed = operations[operation](image_path, x, y, w, h)
+        out["info"] = x * 2 ** 24 + y * 2 ** 12
 
     elif operation == "resize":
-        resize_option = input("Enter resize option (HD to SD, 4K to FHD): ").lower()
+        resize_option = args.resize_option.lower()
         size_map = {"hd to sd": (640, 480), "4k to fhd": (1920, 1080)}
 
         if resize_option in size_map:
@@ -210,7 +220,7 @@ def main():
             raise Exception("Invalid resize option.")
 
     elif operation in {"brightness", "contrast"}:
-        factor = float(input(f"Enter {operation} factor (1.00 = no effect): "))
+        factor = args.factor
         transformed = operations[operation](image_path, factor)
         out["factor"] = int(factor * 10)
 

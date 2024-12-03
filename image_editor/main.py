@@ -157,7 +157,7 @@ operations = {
     "grayscale": convert_to_grayscale,
     "brightness": adjust_brightness,
     "contrast": adjust_contrast,
-    "sharpen": sharpen_image,
+    "sharpness": sharpen_image,
     "blur": blur_image,
 }
 
@@ -227,7 +227,7 @@ def main():
     elif operation == "grayscale":
         transformed = operations[operation](image_path)
 
-    elif operation in {"sharpen", "blur"}:
+    elif operation in {"sharpness", "blur"}:
         transformed_image, zeros = operations[operation](image_path)
         # Extend the original image with zero-padding
         out["original"] = zeros + compress(original_image) + zeros
@@ -241,7 +241,7 @@ def main():
         plot_images_side_by_side(np.array(original_image), transformed)
 
     # Save the output to a JSON file
-    output_path = path.join(args.output_dir, f"{operation}.json")
+    output_path = path.join(args.output_dir, f"transformation_{operation}.json")
     with open(output_path, "w") as fp:
         json.dump(out, fp, indent=4)
     print(f"Transformation data saved to {output_path}.")

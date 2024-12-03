@@ -14,5 +14,6 @@ generate-input-data: # Prepare input data for every supported transformation.
 	@python3 image_editor/main.py contrast   $(INPUT_SOURCE) $(INPUT_TARGET) --factor 1.4
 	@python3 image_editor/main.py crop       $(INPUT_SOURCE) $(INPUT_TARGET) --x 200 --y 100 --crop-size HD
 	@python3 image_editor/main.py grayscale  $(INPUT_SOURCE) $(INPUT_TARGET)
+	@python3 image_editor/main.py hash       $(INPUT_SOURCE) $(INPUT_TARGET)
 	@python3 image_editor/main.py resize     $(INPUT_SOURCE) $(INPUT_TARGET) --resize-option "HD to SD"
 	@python3 image_editor/main.py sharpness  $(INPUT_SOURCE) $(INPUT_TARGET)

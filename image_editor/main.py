@@ -152,13 +152,14 @@ def get_image_path(args):
 
 
 operations = {
-    "crop": crop_image,
-    "resize": resize_image,
-    "grayscale": convert_to_grayscale,
+    "blur": blur_image,
     "brightness": adjust_brightness,
     "contrast": adjust_contrast,
+    "crop": crop_image,
+    "grayscale": convert_to_grayscale,
+    "hash": None,
+    "resize": resize_image,
     "sharpness": sharpen_image,
-    "blur": blur_image,
 }
 
 
@@ -200,7 +201,25 @@ def main():
     # Initialize the output dictionary
     out = {"original": compress(original_image)}
 
-    if operation == "crop":
+    if operation == "hash":
+        # nothing to do here for now (currently, we don't check public input)
+        transformed = None
+
+    elif operation == "grayscale":
+        transformed = operations[operation](image_path)
+
+    elif operation in {"brightness", "contrast"}:
+        factor = args.factor
+        transformed = operations[operation](image_path, factor)
+        out["factor"] = int(factor * 10)
+
+    elif operation in {"sharpness", "blur"}:
+        transformed_image, zeros = operations[operation](image_path)
+        # Extend the original image with zero-padding
+        out["original"] = zeros + compress(original_image) + zeros
+        transformed = transformed_image
+
+    elif operation == "crop":
         x, y, crop_size = args.x, args.y, args.crop_size
 
         size_map = {"sd": (640, 480), "hd": (1280, 720), "fhd": (1920, 1080)}
@@ -219,26 +238,10 @@ def main():
         else:
             raise Exception("Invalid resize option.")
 
-    elif operation in {"brightness", "contrast"}:
-        factor = args.factor
-        transformed = operations[operation](image_path, factor)
-        out["factor"] = int(factor * 10)
-
-    elif operation == "grayscale":
-        transformed = operations[operation](image_path)
-
-    elif operation in {"sharpness", "blur"}:
-        transformed_image, zeros = operations[operation](image_path)
-        # Extend the original image with zero-padding
-        out["original"] = zeros + compress(original_image) + zeros
-        transformed = transformed_image
-
-    else:
-        raise Exception(f"Operation '{operation}' is not implemented.")
-
-    out["transformed"] = compress(transformed)
-    if args.render:
-        plot_images_side_by_side(np.array(original_image), transformed)
+    if transformed is not None:
+        out["transformed"] = compress(transformed)
+        if args.render:
+            plot_images_side_by_side(np.array(original_image), transformed)
 
     # Save the output to a JSON file
     output_path = path.join(args.output_dir, f"{operation}.json")

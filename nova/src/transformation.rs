@@ -39,10 +39,8 @@ impl Transformation {
             Blur | Sharpness => 512,
             // Two rows of 128 entries.
             Brightness | Contrast | Grayscale => 256,
-            // Single row of 768 entries.
-            Hash => 768,
             // Single row of 128 entries.
-            Crop => 128,
+            Crop | Hash => 128,
             // Three rows of 128 entries for the original image and two of 64 entries for the transformed.
             Resize => 128 * 3 + 64 * 2,
         }

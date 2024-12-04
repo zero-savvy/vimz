@@ -13,4 +13,4 @@ template NovaHash(width){
     step_out <== HeadTailHasher(width)(step_in, row_orig);
 }
 
-component main { public [step_in] } = NovaHash(768);
+component main { public [step_in] } = NovaHash(128);

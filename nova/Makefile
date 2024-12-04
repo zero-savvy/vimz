@@ -77,4 +77,12 @@ sharpness: run-transformation
 
 .PHONY: all-transformations
 all-transformations: # Run all transformations.
-all-transformations: blur brightness contrast crop grayscale hash sharpness
+all-transformations:
+	@$(MAKE) blur
+	@$(MAKE) brightness
+	@$(MAKE) contrast
+	@$(MAKE) crop
+	@$(MAKE) grayscale
+	@$(MAKE) hash
+	@$(MAKE) resize
+	@$(MAKE) sharpness

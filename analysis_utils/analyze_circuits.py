@@ -38,4 +38,7 @@ if __name__ == '__main__':
     if backend not in ["nova_snark", "sonobe"]:
         raise ValueError("Invalid backend. Must be either 'nova_snark' or 'sonobe'.")
 
-    print(tabulate(gather_circuit_parameters(backend), headers="keys", tablefmt="grid"))
+    parameters = gather_circuit_parameters(backend)
+
+    print(tabulate(parameters, headers="keys", tablefmt="grid"))
+    parameters.to_csv(f"circuits/{backend}/circuit_parameters.csv", index=False)

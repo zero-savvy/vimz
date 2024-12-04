@@ -45,6 +45,11 @@ circuits/%_step.r1cs circuits/%_step_js/%_step.wasm circuits/%_step.compile_log:
 	transformation_file=$$transformation\_step.circom; \
 	./circuits/build_circuits.sh circuits/$$backend $$transformation_file
 
+.PHONY: report-circuit-parameters
+report-circuit-parameters: build-circuits
+	@python3 analysis_utils/analyze_circuits.py sonobe > /dev/null
+	@python3 analysis_utils/analyze_circuits.py nova_snark > /dev/null
+
 .PHONY: clean-circuits
 clean-circuits:
 	@cd circuits && ./clear_builds.sh sonobe && ./clear_builds.sh nova_snark

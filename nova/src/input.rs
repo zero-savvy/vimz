@@ -95,9 +95,7 @@ mod tests {
     use crate::input::{Extra, VIMzInput};
 
     fn filepath(transformation: &str) -> PathBuf {
-        PathBuf::from(format!(
-            "../samples/JSON/HD/transformation_{transformation}.json"
-        ))
+        PathBuf::from(format!("../input_data/{transformation}.json"))
     }
 
     macro_rules! test_input {
@@ -115,6 +113,7 @@ mod tests {
     test_input!(contrast, Extra::Factor { .. });
     test_input!(crop, Extra::Info { .. });
     test_input!(grayscale, Extra::None {});
+    test_input!(hash, Extra::None {});
     test_input!(resize, Extra::None {});
     test_input!(sharpness, Extra::None {});
 }

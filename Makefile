@@ -33,12 +33,13 @@ BACKEND = sonobe nova_snark
 
 ARTIFACTS := $(foreach backend,$(BACKEND),$(foreach trans,$(TRANSFORMATIONS), \
     circuits/$(backend)/$(trans)_step.r1cs \
-    circuits/$(backend)/$(trans)_step_js/$(trans)_step.wasm))
+    circuits/$(backend)/$(trans)_step_js/$(trans)_step.wasm \
+    circuits/$(backend)/$(trans)_step.compile_log))
 
 .PHONY: build-circuits
 build-circuits: $(ARTIFACTS)
 
-circuits/%_step.r1cs circuits/%_step_js/%_step.wasm: circuits/%_step.circom
+circuits/%_step.r1cs circuits/%_step_js/%_step.wasm circuits/%_step.compile_log: circuits/%_step.circom
 	@backend=$(word 1,$(subst /, ,$*)); \
 	transformation=$(word 2,$(subst /, ,$*)); \
 	transformation_file=$$transformation\_step.circom; \

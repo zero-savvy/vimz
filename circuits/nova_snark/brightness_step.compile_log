@@ -1,11 +1,11 @@
-[32mtemplate instances[0m: 86
-non-linear constraints: 353280
+[32mtemplate instances[0m: 165
+non-linear constraints: 307272
 linear constraints: 1
 public inputs: 3
 private inputs: 256
 public outputs: 3
-wires: 337925
-labels: 729362
+wires: 291917
+labels: 606134
 [32mWritten successfully:[0m ./brightness_step.r1cs
 [32mWritten successfully:[0m ./brightness_step_js/brightness_step.wasm
 [32mEverything went okay[0m

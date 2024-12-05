@@ -1,11 +1,11 @@
-[32mtemplate instances[0m: 87
-non-linear constraints: 345126
+[32mtemplate instances[0m: 166
+non-linear constraints: 253110
 linear constraints: 0
 public inputs: 4
 private inputs: 512 (none belong to witness)
 public outputs: 4
-wires: 337449
-labels: 865988
+wires: 245433
+labels: 619532
 [32mWritten successfully:[0m ./blur_step.r1cs
 [32mWritten successfully:[0m ./blur_step_js/blur_step.wasm
 [32mEverything went okay[0m

@@ -12,20 +12,44 @@ template PairHasher() {
     hash <== hasher.out;
 }
 
-// Compute Poseidon hash of an array of values.
+// Compute Poseidon hash of an array of values using a chunk size of 8.
 template ArrayHasher(length) {
-    signal input  array[length];
+    signal input array[length];
     signal output hash;
 
-    // TODO: Implement a more efficient way to hash a sequence of values. Try batching.
-    signal intermediate_hash[length-1];
+    if (length == 1) {
+        hash <== array[0];
+    } else {
+        var chunkSize = 8;
 
-    intermediate_hash[0] <== PairHasher()(array[0], array[1]);
-    for(var i = 1; i < length-1; i++) {
-        intermediate_hash[i] <== PairHasher()(intermediate_hash[i-1], array[i+1]);
+        var fullChunks = length \ chunkSize;
+        component fullHashers[fullChunks];
+        for (var i = 0; i < fullChunks; i++) {
+            fullHashers[i] = Poseidon(chunkSize);
+            for (var j = 0; j < chunkSize; j++) {
+                fullHashers[i].inputs[j] <== array[i * chunkSize + j];
+            }
+        }
+
+        if (length % chunkSize == 0) {
+            component nextRound = ArrayHasher(fullChunks);
+            for (var i = 0; i < fullChunks; i++) {
+                nextRound.array[i] <== fullHashers[i].out;
+            }
+            hash <== nextRound.hash;
+        } else {
+            component partialHasher = Poseidon(length % chunkSize);
+            for (var i = 0; i < length % chunkSize; i++) {
+                partialHasher.inputs[i] <== array[fullChunks * chunkSize + i];
+            }
+            component nextRound = ArrayHasher(fullChunks + 1);
+            for (var i = 0; i < fullChunks; i++) {
+                nextRound.array[i] <== fullHashers[i].out;
+            }
+            nextRound.array[fullChunks] <== partialHasher.out;
+            hash <== nextRound.hash;
+        }
     }
-
-    hash <== intermediate_hash[length-2];
 }
 
 // Compute Poseidon hash of a single value and an array of values.

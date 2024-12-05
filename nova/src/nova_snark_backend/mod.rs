@@ -67,11 +67,13 @@ pub fn run(config: &Config) {
 
     // ========================== Save final proof =================================================
 
-    info_span!("Save proof").in_scope(|| {
-        fs::write(
-            config.output_file(),
-            serde_json::to_string_pretty(&compressed_proof).unwrap(),
-        )
-        .expect("Failed to write proof to file");
-    });
+    if let Some(output_file) = config.output_file() {
+        info_span!("Save proof").in_scope(|| {
+            fs::write(
+                output_file,
+                serde_json::to_string_pretty(&compressed_proof).unwrap(),
+            )
+            .expect("Failed to write proof to file");
+        });
+    }
 }

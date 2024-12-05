@@ -94,10 +94,7 @@ mod tests {
 
         for (res, lower) in [(HD, SD), (FHD, HD), (_4K, FHD), (_8K, _4K)] {
             let (num, den) = res.ratio_to_lower();
-            assert_eq!(
-                res.iteration_count() * den,
-                lower.iteration_count() * num
-            );
+            assert_eq!(res.iteration_count() * den, lower.iteration_count() * num);
         }
     }
 }

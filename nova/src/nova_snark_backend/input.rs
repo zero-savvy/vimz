@@ -4,7 +4,13 @@ use nova_scotia::F;
 use serde_json::{json, Value};
 use Transformation::*;
 
-use crate::{config::Config, DEMO_STEPS, input::VIMzInput, nova_snark_backend::{G1, G2}, transformation::{Resolution, Transformation}};
+use crate::{
+    config::Config,
+    input::VIMzInput,
+    nova_snark_backend::{G1, G2},
+    transformation::{Resolution, Transformation},
+    DEMO_STEPS,
+};
 
 pub struct PreparedInputs {
     pub ivc_step_inputs: Vec<HashMap<String, Value>>,

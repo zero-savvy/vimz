@@ -29,7 +29,7 @@ pub struct Config {
     ///
     /// The path is assumed to be relative to the current working directory.
     #[clap(short, long)]
-    output: PathBuf,
+    output: Option<PathBuf>,
 
     /// The R1CS file of the compiled Circom circuit.
     ///
@@ -69,8 +69,8 @@ impl Config {
         Self::root_dir().join(&self.input)
     }
 
-    pub fn output_file(&self) -> PathBuf {
-        Self::root_dir().join(&self.output)
+    pub fn output_file(&self) -> Option<PathBuf> {
+        self.output.as_ref().map(|path| Self::root_dir().join(path))
     }
 
     pub fn circuit_file(&self) -> PathBuf {

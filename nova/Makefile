@@ -30,7 +30,6 @@ run-transformation: # Run a given transformation
 run-transformation:
 	@cargo run --release $(FEATURES) -- \
  		-f $(TRANSFORMATION) -w ../circuits/$(SUBDIR)/$(TRANSFORMATION)_step_js/$(TRANSFORMATION)_step.wasm \
-		-o ../$(TRANSFORMATION)_hd.json \
 		-i ../input_data/$(TRANSFORMATION).json \
 		-c ../circuits/$(SUBDIR)/$(TRANSFORMATION)_step.r1cs -r HD \
 		-b $(BACKEND) $(DEMO_FLAG)

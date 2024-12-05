@@ -59,9 +59,18 @@ clean-circuits:
 ########################################################################################################################
 
 RUN_ARTIFACTS := $(foreach trans,$(TRANSFORMATIONS), runs/nova_snark/$(trans).out)
+NS_REPORT_FILE = runs/nova_snark_report.txt
 
 .PHONY: run-nova-snark-benchmarks
 run-nova-snark-benchmarks: generate-input-data build-circuits $(RUN_ARTIFACTS)
+	@echo "Nova Snark Folding Times Report" > $(NS_REPORT_FILE)
+	@echo "-------------------------------" >> $(NS_REPORT_FILE)
+	@for log in $(RUN_ARTIFACTS); do \
+		func=$$(grep -m1 "Selected function:" $$log | sed -E 's/.*Selected function: (.*)/\1/'); \
+		fold_time=$$(grep "Fold input" $$log | awk '{print $$NF}'); \
+		echo "$$func: $$fold_time" >> $(NS_REPORT_FILE); \
+	done
+	@echo "Report saved to $(NS_REPORT_FILE)"
 
 runs/nova_snark/%.out:
 	@mkdir -p runs/nova_snark

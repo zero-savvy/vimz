@@ -3,7 +3,7 @@ use config::{Backend, Config};
 
 use crate::logging::init_logging;
 
-const DEMO_STEPS: usize = 5;
+const DEMO_STEPS: usize = 10;
 
 mod config;
 mod input;

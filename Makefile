@@ -31,13 +31,13 @@ $(INPUT_TARGET_DIR)%.json:
 
 BACKEND = sonobe nova_snark
 
-ARTIFACTS := $(foreach backend,$(BACKEND),$(foreach trans,$(TRANSFORMATIONS), \
+COMPILATION_ARTIFACTS := $(foreach backend,$(BACKEND),$(foreach trans,$(TRANSFORMATIONS), \
     circuits/$(backend)/$(trans)_step.r1cs \
     circuits/$(backend)/$(trans)_step_js/$(trans)_step.wasm \
     circuits/$(backend)/$(trans)_step.compile_log))
 
 .PHONY: build-circuits
-build-circuits: $(ARTIFACTS)
+build-circuits: $(COMPILATION_ARTIFACTS)
 
 circuits/%_step.r1cs circuits/%_step_js/%_step.wasm circuits/%_step.compile_log: circuits/%_step.circom
 	@backend=$(word 1,$(subst /, ,$*)); \
@@ -53,3 +53,16 @@ report-circuit-parameters: build-circuits
 .PHONY: clean-circuits
 clean-circuits:
 	@cd circuits && ./clear_builds.sh sonobe && ./clear_builds.sh nova_snark
+
+########################################################################################################################
+########################### BENCHMARKING ###############################################################################
+########################################################################################################################
+
+RUN_ARTIFACTS := $(foreach trans,$(TRANSFORMATIONS), runs/nova_snark/$(trans).out)
+
+.PHONY: run-nova-snark-benchmarks
+run-nova-snark-benchmarks: generate-input-data build-circuits $(RUN_ARTIFACTS)
+
+runs/nova_snark/%.out:
+	@mkdir -p runs/nova_snark
+	@cd vimz/ && $(MAKE) $* BACKEND=nova-snark DEMO=yes > ../$@

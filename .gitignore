@@ -2,6 +2,7 @@
 */venv/
 
 input_data/
+runs/
 
 *.json
 

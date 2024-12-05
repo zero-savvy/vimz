@@ -44,5 +44,5 @@ fi
 for file in "${file_list[@]}"; do
   echo -e "\033[1mBuilding circuit: ${file}\033[0m"
   base_name=$(basename "$file" .circom)
-  circom "$file" --r1cs --wasm > "${base_name}.compile_log"
+  circom "$file" --O2 --r1cs --wasm > "${base_name}.compile_log"
 done

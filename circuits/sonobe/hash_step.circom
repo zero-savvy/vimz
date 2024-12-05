@@ -13,4 +13,4 @@ template SonobeHash(width){
     ivc_output <== HeadTailHasher(width)(ivc_input, external_inputs);
 }
 
-component main { public [ivc_input] } = SonobeHash(768);
+component main { public [ivc_input] } = SonobeHash(128);

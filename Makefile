@@ -58,20 +58,33 @@ clean-circuits:
 ########################### BENCHMARKING ###############################################################################
 ########################################################################################################################
 
-RUN_ARTIFACTS := $(foreach trans,$(TRANSFORMATIONS), runs/nova_snark/$(trans).out)
+RUN_NS_ARTIFACTS := $(foreach trans,$(TRANSFORMATIONS), runs/nova_snark/$(trans).out)
+RUN_SN_ARTIFACTS := $(foreach trans,$(TRANSFORMATIONS), runs/sonobe/$(trans).out)
 NS_REPORT_FILE = runs/nova_snark_report.txt
+SN_REPORT_FILE = runs/sonobe_report.txt
 
 .PHONY: run-nova-snark-benchmarks
-run-nova-snark-benchmarks: generate-input-data build-circuits $(RUN_ARTIFACTS)
-	@echo "Nova Snark Folding Times Report" > $(NS_REPORT_FILE)
-	@echo "-------------------------------" >> $(NS_REPORT_FILE)
-	@for log in $(RUN_ARTIFACTS); do \
-		func=$$(grep -m1 "Selected function:" $$log | sed -E 's/.*Selected function: (.*)/\1/'); \
-		fold_time=$$(grep "Fold input" $$log | awk '{print $$NF}'); \
-		echo "$$func: $$fold_time" >> $(NS_REPORT_FILE); \
-	done
-	@echo "Report saved to $(NS_REPORT_FILE)"
+run-nova-snark-benchmarks: generate-input-data build-circuits $(RUN_NS_ARTIFACTS)
+	@$(call generate-report,$(RUN_NS_ARTIFACTS),$(NS_REPORT_FILE))
 
 runs/nova_snark/%.out:
 	@mkdir -p runs/nova_snark
 	@cd vimz/ && $(MAKE) $* BACKEND=nova-snark DEMO=yes > ../$@
+
+.PHONY: run-sonobe-benchmarks
+run-sonobe-benchmarks: generate-input-data build-circuits $(RUN_SN_ARTIFACTS)
+	@$(call generate-report,$(RUN_SN_ARTIFACTS),$(SN_REPORT_FILE))
+
+runs/sonobe/%.out:
+	@mkdir -p runs/sonobe
+	@cd vimz/ && $(MAKE) $* BACKEND=sonobe DEMO=yes LIGHT_TEST=yes > ../$@
+
+define generate-report
+	> $2
+	for log in $1; do \
+		func=$$(grep -m1 "Selected function:" $$log | sed -E 's/.*Selected function: (.*)/\1/'); \
+		fold_time=$$(grep "Fold input" $$log | grep -v "completed" | awk '{print $$NF}' | tail -n1); \
+		echo "$$func: $$fold_time" >> $2; \
+	done
+	echo "Report saved to $2"
+endef

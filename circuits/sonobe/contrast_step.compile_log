@@ -1,11 +1,11 @@
-[32mtemplate instances[0m: 166
-non-linear constraints: 307272
+[32mtemplate instances[0m: 88
+non-linear constraints: 353280
 linear constraints: 1
 public inputs: 3
 private inputs: 256
 public outputs: 3
-wires: 291917
-labels: 606902
+wires: 337925
+labels: 730388
 [32mWritten successfully:[0m ./contrast_step.r1cs
 [32mWritten successfully:[0m ./contrast_step_js/contrast_step.wasm
 [32mEverything went okay[0m

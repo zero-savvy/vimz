@@ -1,11 +1,11 @@
-[32mtemplate instances[0m: 154
-non-linear constraints: 7716
+[32mtemplate instances[0m: 76
+non-linear constraints: 30720
 linear constraints: 0
 public inputs: 1
 private inputs: 128
 public outputs: 1
-wires: 7846
-labels: 37463
+wires: 30850
+labels: 99206
 [32mWritten successfully:[0m ./hash_step.r1cs
 [32mWritten successfully:[0m ./hash_step_js/hash_step.wasm
 [32mEverything went okay[0m

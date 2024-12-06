@@ -1,11 +1,11 @@
-[32mtemplate instances[0m: 176
-non-linear constraints: 673718
+[32mtemplate instances[0m: 97
+non-linear constraints: 708224
 linear constraints: 1
 public inputs: 3
 private inputs: 128
 public outputs: 3
-wires: 673079
-labels: 2596364
+wires: 707585
+labels: 2688977
 [32mWritten successfully:[0m ./crop_step.r1cs
 [32mWritten successfully:[0m ./crop_step_js/crop_step.wasm
 [32mEverything went okay[0m

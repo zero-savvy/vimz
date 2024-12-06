@@ -1,11 +1,11 @@
-[32mtemplate instances[0m: 163
-non-linear constraints: 245904
+[32mtemplate instances[0m: 84
+non-linear constraints: 337920
 linear constraints: 0
 public inputs: 2
 private inputs: 512 (none belong to witness)
 public outputs: 2
-wires: 238227
-labels: 596313
+wires: 330243
+labels: 843282
 [32mWritten successfully:[0m ./resize_step.r1cs
 [32mWritten successfully:[0m ./resize_step_js/resize_step.wasm
 [32mEverything went okay[0m

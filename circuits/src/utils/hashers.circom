@@ -18,9 +18,7 @@ template PairHasher() {
 template ArrayHasher(LENGTH) {
     signal input  array[LENGTH];
     signal output hash;
-    hash <== _LinearFoldHasher(LENGTH)(array);
-//    hash <== _WindowFoldHasher(LENGTH, 8)(array);
-//    hash <== _MerkleHasher(LENGTH, 8)(array);
+    hash <== _WindowFoldHasher(LENGTH, 8)(array);
 }
 
 // Compute Poseidon hash of an array by folding the it *one element at a time*.

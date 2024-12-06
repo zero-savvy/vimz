@@ -1,11 +1,11 @@
-[32mtemplate instances[0m: 94
-non-linear constraints: 421926
+[32mtemplate instances[0m: 172
+non-linear constraints: 325734
 linear constraints: 0
 public inputs: 4
 private inputs: 512 (128 belong to witness)
 public outputs: 4
-wires: 406569
-labels: 1052360
+wires: 310377
+labels: 787028
 [32mWritten successfully:[0m ./sharpness_step.r1cs
 [32mWritten successfully:[0m ./sharpness_step_js/sharpness_step.wasm
 [32mEverything went okay[0m

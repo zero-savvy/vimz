@@ -1,0 +1,33 @@
+[package]
+name = "vimz"
+version = "1.4.0"
+edition = "2021"
+
+[dependencies]
+ark-bn254 = { version = "^0.4.0", features = ["r1cs"] }
+ark-grumpkin = { version = "0.4.0", features = ["r1cs"] }
+ark-groth16 = { version = "0.4.0", features = ["parallel"] }
+clap = { version = "4.5.16", features = ["derive"] }
+num-bigint = { version = "0.4.3" }
+num-traits = { version = "0.2.15" }
+rand = { version = "0.8.5" }
+serde = { version = "1.0" }
+serde_json = { version = "1.0.85" }
+tracing = { version = "0.1.26" }
+tracing-subscriber = { version = "0.3.18", features = ["fmt", "json", "env-filter"] }
+
+sonobe = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "7097c001fc876578be2229d3590d506858bc0069", package = "folding-schemes" }
+sonobe-solidity = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "7097c001fc876578be2229d3590d506858bc0069", package = "solidity-verifiers" }
+
+nova-scotia = { version = "0.5.0" }
+nova-snark = { version = "0.23.0" }
+
+[patch.crates-io]
+ark-bn254 = { git = "https://github.com/arnaucube/ark-curves-cherry-picked", branch = "cherry-pick" }
+ark-grumpkin = { git = "https://github.com/arnaucube/ark-curves-cherry-picked", branch = "cherry-pick" }
+ark-r1cs-std = { git = "https://github.com/winderica/r1cs-std", branch = "cherry-pick" }
+
+[features]
+light-test = [
+    "sonobe/light-test",
+]

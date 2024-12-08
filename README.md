@@ -60,6 +60,8 @@ Following table provides performance measurements of VIMz executed separately on
 
 `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y`
 
+`rustup default stable`
+
 #### I-d) Additional build-essential libraries and packages:
 
 `sudo apt install gcc`
@@ -75,6 +77,8 @@ Following table provides performance measurements of VIMz executed separately on
 `cargo build --release`
 
 `cargo install --path circom`
+
+Verify the installation: `circom --version`
 
 ### II-Installing VIMz
 
@@ -109,7 +113,12 @@ build node modules:
 
 build ZK circuits using the provided script in this directory:
 
-`./build-circuits.sh`
+> [!NOTE]
+> For the sake or reprucability, we suggest to only build a few circuits, because building all of the circuits can take some time!
+
+ - Full build: `./build-circuits.sh`
+
+ - Circuit-spesific build: `./build-circuits.sh grayscale.circom` or `./build-circuits.sh contrast.circom`
 
 ## How to Use
 

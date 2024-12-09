@@ -44,7 +44,7 @@ Following table provides performance measurements of VIMz executed separately on
    - `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash`
    - `source ~/.bashrc`
    - `nvm install v16.20.0`
-> [!NOTE]
+> [!TIP]
 > in rare cases (miss-configured Linux distros), if you got an error stating that version "v16.20.0" was not found; following command might help:
 > `export NVM_NODEJS_ORG_MIRROR=http://nodejs.org/dist`
 
@@ -79,10 +79,12 @@ To obtain the latest version of VIMz, head to directory of your choice and insta
   - go to the circuits directory: `cd ../circuits`
   - build node modules: `npm install`
   - build ZK circuits using the provided script in this directory:
-    > [!NOTE]
-    > For the sake or reprucability, we suggest to only build a few circuits, because building all of the circuits can take some time!
     - Circuit-spesific build: `./build-circuits.sh grayscale.circom` or `./build-circuits.sh contrast.circom`
     - Full build: `./build-circuits.sh`
+> [!NOTE]
+> For the sake or reprucability, we suggest to only build a few circuits, because building all of the circuits can take some time!
+
+    
 
 ## Benchmarks
 

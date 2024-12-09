@@ -21,40 +21,45 @@ calculate_total_max_resident_size() {
     done
 }
 
-# Run multiple commands in parallel
-run_multiple_commands() {
+# Run multiple commands in parallel or single command in foreground
+run_commands() {
     local commands=("$@")
     local pids=()
     tmp_dir=".tmp_runs"
 
-    if [ ! -d "$tmp_dir" ]; then
-        mkdir -p "$tmp_dir"
-    fi
-
-    # Loop through each command
-    for i in "${!commands[@]}"; do
-        cmd="${commands[i]}"
-        dir=".tmp_runs/cmd$((i + 1))"  # Construct directory name based on command index
-
-        # Check if directory exists, if not, create it
-        if [ ! -d "$dir" ]; then
-            mkdir -p "$dir"
+    if [ "${#commands[@]}" -eq 1 ]; then
+        # Single command case: Run in the foreground and print output
+        bash -c "${commands[0]}"
+    else
+        if [ ! -d "$tmp_dir" ]; then
+            mkdir -p "$tmp_dir"
         fi
 
-        # Generate a unique output file name for each command
-        output_file="output_$(date +%s%N).txt"
+        # Loop through each command
+        for i in "${!commands[@]}"; do
+            cmd="${commands[i]}"
+            dir=".tmp_runs/cmd$((i + 1))"  # Construct directory name based on command index
 
-        # Run the command in the background, redirecting output to the output file
-        (cd "$dir" && bash -c "$cmd") > "$output_file" 2>&1 &
+            # Check if directory exists, if not, create it
+            if [ ! -d "$dir" ]; then
+                mkdir -p "$dir"
+            fi
 
-        # Store PID of background process
-        pids+=("$!")
-    done
+            # Generate a unique output file name for each command
+            output_file="output_$(date +%s%N).txt"
 
-    # Wait for all commands to finish
-    for pid in "${pids[@]}"; do
-        wait "$pid"
-    done
+            # Run the command in the background, redirecting output to the output file
+            (cd "$dir" && bash -c "$cmd") > "$output_file" 2>&1 &
+
+            # Store PID of background process
+            pids+=("$!")
+        done
+
+        # Wait for all commands to finish
+        for pid in "${pids[@]}"; do
+            wait "$pid"
+        done
+    fi
 }
 
 # Check command-line argument
@@ -88,6 +93,6 @@ for arg in "$@"; do
             ;;
     esac
 done
-run_multiple_commands "${commands[@]}"
+run_commands "${commands[@]}"
 
 rm -rf .tmp_runs

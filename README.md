@@ -19,7 +19,7 @@ Our tests show that VIMz is fast and efficient on both the prover and verifier s
 
 ## Reference
 
-**Paper:** **[2024]** Dziembowski, Ebrahimi, Hassanizadeh, [VIMz: Verifiable Image Manipulation using Folding-based zkSNARKs](https://eprint.iacr.org/2024/1063)
+1) **PETS conference Paper:** **[2025]** S. Dziembowski, S. Ebrahimi, P. Hassanizadeh, [VIMz: Private Proofs of Image Manipulation using Folding-based zkSNARKs](https://eprint.iacr.org/2024/1063)
 
 ## Performance
 
@@ -38,96 +38,51 @@ Following table provides performance measurements of VIMz executed separately on
 
 ## Installation
 
-### I-Prerequisites
+### I-Dependecies
 
-#### I-a) For Installing Node JS:
-
-`curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash`
-
-`source ~/.bashrc`
-
-`nvm install v16.20.0`
-
+ - **I-a) Node JS**:
+   - `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash`
+   - `source ~/.bashrc`
+   - `nvm install v16.20.0`
 > [!NOTE]
 > in rare cases (miss-configured Linux distros), if you got an error stating that version "v16.20.0" was not found; following command might help:
 > `export NVM_NODEJS_ORG_MIRROR=http://nodejs.org/dist`
 
-#### I-b) For installing snarkjs:
-
-`npm install -g snarkjs`
-
-#### I-c) For installing Rust:
-
-`curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y`
-
-`rustup default stable`
-
-#### I-d) Additional build-essential libraries and packages:
-
-`sudo apt install gcc`
-
-`sudo apt install build-essential nlohmann-json3-dev libgmp3-dev nasm`
-
-#### I-e) For installing Circom:
-
-`git clone https://github.com/iden3/circom.git`
-
-`cd circom`
-
-`cargo build --release`
-
-`cargo install --path circom`
-
-Verify the installation: `circom --version`
+  - **I-b) snarkjs**:
+    - `npm install -g snarkjs`
+  - **I-c) Rust**:
+    - `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y`
+    - `rustup default stable`
+  - **I-d) build-essentials:**
+    - `sudo apt install gcc build-essential nlohmann-json3-dev libgmp3-dev nasm`
+  - **I-e) Circom**:
+    - `git clone https://github.com/iden3/circom.git`
+    - ` cd circom`
+    - `cargo build --release`
+    - `cargo install --path circom`
+    - Verify the installation: `circom --version`
 
 ### II-Installing VIMz
 
-Once you have installed dependencies, you can proceed with setting up and running VIMz. To obtain the latest version of VIMz, clone its GitHub repository using the following command:
+Once you have installed dependencies, you can proceed with setting up and running VIMz. 
+To obtain the latest version of VIMz, head to directory of your choice and install VIMz using the following command:
 
-`git clone https://github.com/zero-savvy/vimz.git`
-
-#### II-a) Installing VIMz itself
-
-Head to the `nova` directory:
-cd vimz/nova
-
-build and install `vimz` using `cargo`:
-
-`cargo build`
-
-`cargo install --path .`
-
-verify installation of `vimz`:
-
-`vimz --help`
+  - Clone: `git clone https://github.com/zero-savvy/vimz.git`
+  - Head to the `nova` directory: `cd vimz/nova`
+  - build and install `vimz` using `cargo`:
+    - `cargo build`
+    - `cargo install --path .`
+    - verify installation of `vimz`: `vimz --help`
 
 #### II-b) Building Circuits
 
-go to the circuits directory:
-
-`cd vimz/circuits`
-
-build node modules:
-
-`npm install`
-
-build ZK circuits using the provided script in this directory:
-
-> [!NOTE]
-> For the sake or reprucability, we suggest to only build a few circuits, because building all of the circuits can take some time!
-
- - Full build: `./build-circuits.sh`
-
- - Circuit-spesific build: `./build-circuits.sh grayscale.circom` or `./build-circuits.sh contrast.circom`
-
-## How to Use
-
-```
-vimz --function <FUNCTION>
---resolution <RESOLUTION> --input <FILE>
---circuit <R1CS FILE> --output <FILE>
---witnessgenerator <BINARY/WASM FILE>
-```
+  - go to the circuits directory: `cd ../circuits`
+  - build node modules: `npm install`
+  - build ZK circuits using the provided script in this directory:
+    > [!NOTE]
+    > For the sake or reprucability, we suggest to only build a few circuits, because building all of the circuits can take some time!
+    - Circuit-spesific build: `./build-circuits.sh grayscale.circom` or `./build-circuits.sh contrast.circom`
+    - Full build: `./build-circuits.sh`
 
 ## Benchmarks
 
@@ -138,6 +93,11 @@ simply Go to the main directory of vimz repo and run any number of transformatio
 ./benchmark.sh [list-of-transformations]
 
 ```
+> [!IMPORTANT]
+> Make sure that the circuit related to the benchmarking transformation must be already built (check [**II-b Building Circuits**](README.md#ii-b-building-circuits) section).
+
+> [!TIP]
+> Since the proof generation process can be time consuming, it is recommended to initially benchmark with only one transformation at a time~(replicating the results presented in _**Table 4**_ of the paper). Once these results are verified, you can proceed to run multiple transformations in parallel to replicate the results shown in _**Table 5**_.
 
 **Example 1**: benchmarking a single transformation:
 
@@ -157,15 +117,24 @@ simply Go to the main directory of vimz repo and run any number of transformatio
 ./benchmark.sh resize blur sharpness
 ```
 
-> [!NOTE]
-> Since the proof generation process can be time consuming, it is recommended to initially benchmark with only one transformation at a time~(replicating the results presented in Table IV of the paper). Once these results are verified, you can proceed to run multiple transformations in parallel to replicate the results shown in Table V.
-
-**Sample output**: The script generates a file (or multiple files, one per given transformation) with a `.output` suffix in the same directory. These files contain the standard output of running the `vimz` command directly, as shown in Figure below. The output includes various performance metrics. The total proof generation time can be calculated as the sum of two numbers: `RecursiveSNARK creation` and `CompressedSNARK::prove:` from the output.
+> [!IMPORTANT]
+> **Sample output**: When benchmarking only one transformation, the output will be visible in the `stdout`. However, while benchmarking parallel execution of multiple transformations, the script generates a file (or multiple files, one per given transformation) with a `.output` suffix in the same directory. These files contain the standard output of running the `vimz` command directly, as shown in Figure below. Nonetheless, the output includes various performance metrics. The total proof generation time can be calculated as the sum of two numbers: `RecursiveSNARK creation` and `CompressedSNARK::prove:` from the output.
 
 <p align="center">
   <img width="100%" src="sample-output.png" alt="output">
   <em>VIMz STD output</em>
 </p>
+
+
+## How to Use
+Other than benchmarking, if you want to execute VIMz directly, it should be done using the following command. For more details of running VIMz, use `vimz --help`:
+
+```
+vimz --function <FUNCTION>
+--resolution <RESOLUTION> --input <FILE>
+--circuit <R1CS FILE> --output <FILE>
+--witnessgenerator <BINARY/WASM FILE>
+```
 
 ## Acknowledgement
 

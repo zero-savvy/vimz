@@ -38,7 +38,7 @@ Following table provides performance measurements of VIMz executed separately on
 
 ## Installation
 
-### I-Dependecies
+### I-Dependencies
 
  - **I-a) Node JS**:
    - `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash`
@@ -82,7 +82,7 @@ To obtain the latest version of VIMz, head to directory of your choice and insta
     - Circuit-spesific build: `./build-circuits.sh grayscale.circom` or `./build-circuits.sh contrast.circom`
     - Full build: `./build-circuits.sh`
 > [!NOTE]
-> For the sake or reprucability, we suggest to only build a few circuits, because building all of the circuits can take some time!
+> If you only want to reproduce results, we suggest to only build a few circuits, because building all of the circuits can take some time! It's not that long, but why wait? :D
 
     
 

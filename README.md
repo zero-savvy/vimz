@@ -79,8 +79,8 @@ To obtain the latest version of VIMz, head to directory of your choice and insta
   - go to the circuits directory: `cd ../circuits`
   - build node modules: `npm install`
   - build ZK circuits using the provided script in this directory:
-    - Circuit-spesific build: `./build-circuits.sh grayscale.circom` or `./build-circuits.sh contrast.circom`
-    - Full build: `./build-circuits.sh`
+    - Circuit-spesific build: `./build_circuits.sh grayscale.circom` or `./build_circuits.sh contrast.circom`
+    - Full build: `./build_circuits.sh`
 > [!NOTE]
 > If you only want to reproduce results, we suggest to only build a few circuits, because building all of the circuits can take some time! It's not that long, but why wait? :D
 

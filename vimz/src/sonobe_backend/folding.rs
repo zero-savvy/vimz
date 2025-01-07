@@ -46,8 +46,8 @@ pub fn prepare_folding(
 #[tracing::instrument(name = "Create circuit", skip_all)]
 fn create_circuit(config: &Config, ivc_state_width: usize) -> CircomFCircuit<Fr> {
     let f_circuit_params = (
-        config.circuit_file(),
-        config.witness_generator_file(),
+        config.circuit_file().into(),
+        config.witness_generator_file().into(),
         ivc_state_width,
         config.function.step_input_width(),
     );

@@ -34,7 +34,7 @@ pub fn run(config: &Config) {
     // ========================== Prepare decider and compress the proof ===========================
 
     let (decider_pp, decider_vp) = info_span!("Prepare decider").in_scope(|| {
-        Decider::preprocess(&mut rng, &folding_params, folding.clone())
+        Decider::preprocess(&mut rng, folding_params, folding.clone())
             .expect("Failed to preprocess decider")
     });
     let proof = info_span!("Generate decider proof").in_scope(|| {

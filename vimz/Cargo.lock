@@ -28,7 +28,7 @@ dependencies = [
  "ark-ff 0.5.0",
  "cfg-if",
  "hex",
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "serde",
 ]
 
@@ -58,7 +58,7 @@ dependencies = [
  "k256 0.11.6",
  "keccak",
  "libaes",
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "p256",
  "sha2",
  "thiserror 1.0.39",
@@ -299,7 +299,7 @@ dependencies = [
  "fnv",
  "hex",
  "num",
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "num-traits",
  "thiserror 1.0.39",
  "wasmer",
@@ -372,7 +372,7 @@ dependencies = [
  "fnv",
  "hashbrown 0.15.2",
  "itertools 0.13.0",
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "num-integer",
  "num-traits",
  "rayon",
@@ -390,7 +390,7 @@ dependencies = [
  "ark-serialize 0.3.0",
  "ark-std 0.3.0",
  "derivative",
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "num-traits",
  "paste",
  "rayon",
@@ -412,7 +412,7 @@ dependencies = [
  "digest 0.10.7",
  "educe",
  "itertools 0.13.0",
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "num-traits",
  "paste",
  "rayon",
@@ -445,7 +445,7 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "db2fd794a08ccb318058009eefdf15bcaaaaf6f8161eb3345f907222bac38b20"
 dependencies = [
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "num-traits",
  "quote",
  "syn 1.0.109",
@@ -457,7 +457,7 @@ version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09be120733ee33f7693ceaa202ca41accd5653b779563608f1234f78ae07c4b3"
 dependencies = [
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "num-traits",
  "proc-macro2",
  "quote",
@@ -558,7 +558,7 @@ dependencies = [
  "ark-relations 0.5.1",
  "ark-std 0.5.0",
  "educe",
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "num-integer",
  "num-traits",
  "tracing",
@@ -608,7 +608,7 @@ dependencies = [
  "ark-std 0.5.0",
  "arrayvec 0.7.6",
  "digest 0.10.7",
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "rayon",
 ]
 
@@ -1020,7 +1020,7 @@ source = "git+https://github.com/winderica/noir?branch=arkworks-next#fc9e995c163
 dependencies = [
  "acir",
  "acvm_blackbox_solver",
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "num-traits",
  "thiserror 1.0.39",
 ]
@@ -2033,6 +2033,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "69dc321eb6be977f44674620ca3aa21703cb20ffbe560e1ae97da08401ffbcad"
 
 [[package]]
+name = "experimental-frontends"
+version = "0.1.0"
+source = "git+https://github.com/privacy-scaling-explorations/sonobe?rev=1ef933a70707fe08865c88ca71269e87fa887855#1ef933a70707fe08865c88ca71269e87fa887855"
+dependencies = [
+ "acvm",
+ "ark-circom",
+ "ark-ff 0.5.0",
+ "ark-r1cs-std",
+ "ark-relations 0.5.1",
+ "ark-serialize 0.5.0",
+ "ark-std 0.5.0",
+ "folding-schemes",
+ "getrandom 0.2.15",
+ "noname",
+ "num-bigint 0.4.6",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "eyre"
 version = "0.6.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2133,7 +2153,7 @@ checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 [[package]]
 name = "folding-schemes"
 version = "0.1.0"
-source = "git+https://github.com/privacy-scaling-explorations/sonobe?rev=fa8f821fc2fd8d230342d67662206a8577ec1122#fa8f821fc2fd8d230342d67662206a8577ec1122"
+source = "git+https://github.com/privacy-scaling-explorations/sonobe?rev=1ef933a70707fe08865c88ca71269e87fa887855#1ef933a70707fe08865c88ca71269e87fa887855"
 dependencies = [
  "ark-bn254 0.5.0",
  "ark-crypto-primitives",
@@ -2150,31 +2170,11 @@ dependencies = [
  "ark-std 0.5.0",
  "getrandom 0.2.15",
  "log",
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "num-integer",
  "rayon",
  "sha3",
  "thiserror 1.0.39",
-]
-
-[[package]]
-name = "frontends"
-version = "0.1.0"
-source = "git+https://github.com/privacy-scaling-explorations/sonobe?rev=fa8f821fc2fd8d230342d67662206a8577ec1122#fa8f821fc2fd8d230342d67662206a8577ec1122"
-dependencies = [
- "acvm",
- "ark-circom",
- "ark-ff 0.5.0",
- "ark-r1cs-std",
- "ark-relations 0.5.1",
- "ark-serialize 0.5.0",
- "ark-std 0.5.0",
- "folding-schemes",
- "getrandom 0.2.15",
- "noname",
- "num-bigint 0.4.3",
- "serde",
- "serde_json",
 ]
 
 [[package]]
@@ -2416,7 +2416,7 @@ dependencies = [
  "ff 0.13.0",
  "group 0.13.0",
  "lazy_static",
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "num-traits",
  "pasta_curves",
  "paste",
@@ -2777,7 +2777,7 @@ dependencies = [
  "itertools 0.10.5",
  "mina-curves",
  "mina-poseidon",
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "num-derive",
  "num-integer",
  "num-traits",
@@ -3123,7 +3123,7 @@ dependencies = [
  "itertools 0.10.5",
  "kimchi",
  "miette",
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "num-bigint-dig",
  "num-traits",
  "once_cell",
@@ -3151,7 +3151,7 @@ dependencies = [
  "itertools 0.9.0",
  "js-sys",
  "nova-snark",
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "num-traits",
  "pasta_curves",
  "rayon",
@@ -3180,7 +3180,7 @@ dependencies = [
  "halo2curves",
  "itertools 0.11.0",
  "neptune",
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "num-integer",
  "num-traits",
  "pasta-msm",
@@ -3206,11 +3206,11 @@ dependencies = [
 
 [[package]]
 name = "num"
-version = "0.4.0"
+version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43db66d1170d347f9a065114077f7dccb00c1b9478c89384490a3425279a4606"
+checksum = "35bd024e8b2ff75562e5f34e7f4905839deb4b22955ef5e73d2fea1b9813cb23"
 dependencies = [
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "num-complex",
  "num-integer",
  "num-iter",
@@ -3231,11 +3231,10 @@ dependencies = [
 
 [[package]]
 name = "num-bigint"
-version = "0.4.3"
+version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f93ab6289c7b344a8a9f60f88d80aa20032336fe78da341afc91c8a2341fc75f"
+checksum = "a5e44f723f1133c9deac646763579fdb3ac745e418f2a7af9cd0c431da1f20b9"
 dependencies = [
- "autocfg 1.4.0",
  "num-integer",
  "num-traits",
  "rand 0.8.5",
@@ -3262,9 +3261,9 @@ dependencies = [
 
 [[package]]
 name = "num-complex"
-version = "0.4.5"
+version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23c6602fda94a57c990fe0df199a035d83576b496aa29f4e634a8ac6004e68a6"
+checksum = "73f88a1307638156682bada9d7604135552957b7818057dcef22705b4d509495"
 dependencies = [
  "num-traits",
 ]
@@ -3308,21 +3307,20 @@ dependencies = [
 
 [[package]]
 name = "num-rational"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0638a1c9d0a3c0914158145bc76cff373a75a627e6ecbfb71cbe6f453a5a19b0"
+checksum = "f83d14da390562dca69fc84082e73e548e1ad308d24accdedd2720017cb37824"
 dependencies = [
- "autocfg 1.4.0",
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "num-integer",
  "num-traits",
 ]
 
 [[package]]
 name = "num-traits"
-version = "0.2.15"
+version = "0.2.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "578ede34cf02f8924ab9447f50c28075b4d3e5b269972345e7e0372b38c6cdcd"
+checksum = "071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841"
 dependencies = [
  "autocfg 1.4.0",
  "libm",
@@ -3370,7 +3368,7 @@ dependencies = [
  "ark-serialize 0.3.0",
  "bcs",
  "hex",
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "num-integer",
  "num-traits",
  "rand 0.8.5",
@@ -4643,7 +4641,7 @@ checksum = "b7c388c1b5e93756d0c740965c41e8822f866621d41acbdf6336a6a168f8840c"
 [[package]]
 name = "solidity-verifiers"
 version = "0.1.0"
-source = "git+https://github.com/privacy-scaling-explorations/sonobe?rev=fa8f821fc2fd8d230342d67662206a8577ec1122#fa8f821fc2fd8d230342d67662206a8577ec1122"
+source = "git+https://github.com/privacy-scaling-explorations/sonobe?rev=1ef933a70707fe08865c88ca71269e87fa887855#1ef933a70707fe08865c88ca71269e87fa887855"
 dependencies = [
  "ark-bn254 0.5.0",
  "ark-groth16",
@@ -4651,7 +4649,7 @@ dependencies = [
  "ark-serialize 0.5.0",
  "askama",
  "folding-schemes",
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "revm",
  "rust-crypto",
 ]
@@ -5259,11 +5257,11 @@ dependencies = [
  "ark-groth16",
  "ark-grumpkin",
  "clap 4.5.23",
+ "experimental-frontends",
  "folding-schemes",
- "frontends",
  "nova-scotia",
  "nova-snark",
- "num-bigint 0.4.3",
+ "num-bigint 0.4.6",
  "num-traits",
  "rand 0.8.5",
  "serde",

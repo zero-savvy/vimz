@@ -1,6 +1,6 @@
-use ark_bn254::{constraints::GVar, Bn254, Fr, G1Projective as G1};
+use ark_bn254::{Bn254, Fr, G1Projective as G1};
 use ark_groth16::Groth16;
-use ark_grumpkin::{constraints::GVar as GVar2, Projective as G2};
+use ark_grumpkin::Projective as G2;
 use sonobe::{
     commitment::{kzg::KZG, pedersen::Pedersen},
     folding::{nova::decider_eth::Decider as DeciderEth, traits::CommittedInstanceOps},
@@ -13,9 +13,7 @@ use crate::sonobe_backend::folding::Folding;
 /// Compressed proof producer.
 pub type Decider = DeciderEth<
     G1,
-    GVar,
     G2,
-    GVar2,
     CircomFCircuit<Fr>,
     KZG<'static, Bn254>,
     Pedersen<G2>,

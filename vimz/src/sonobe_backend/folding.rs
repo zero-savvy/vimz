@@ -1,5 +1,5 @@
-use ark_bn254::{constraints::GVar, Bn254, Fr, G1Projective as G1};
-use ark_grumpkin::{constraints::GVar as GVar2, Projective as G2};
+use ark_bn254::{Bn254, Fr, G1Projective as G1};
+use ark_grumpkin::Projective as G2;
 use rand::{CryptoRng, RngCore};
 use sonobe::{
     commitment::{kzg::KZG, pedersen::Pedersen},
@@ -14,8 +14,7 @@ use tracing::info_span;
 use crate::config::Config;
 
 /// The folding scheme used.
-pub type Folding =
-    Nova<G1, GVar, G2, GVar2, CircomFCircuit<Fr>, KZG<'static, Bn254>, Pedersen<G2>, false>;
+pub type Folding = Nova<G1, G2, CircomFCircuit<Fr>, KZG<'static, Bn254>, Pedersen<G2>, false>;
 pub type FoldingParams = (
     <Folding as FoldingScheme<G1, G2, CircomFCircuit<Fr>>>::ProverParam,
     <Folding as FoldingScheme<G1, G2, CircomFCircuit<Fr>>>::VerifierParam,

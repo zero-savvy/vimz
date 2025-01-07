@@ -4,9 +4,9 @@ version = "1.4.0"
 edition = "2021"
 
 [dependencies]
-ark-bn254 = { version = "^0.4.0", features = ["r1cs"] }
-ark-grumpkin = { version = "0.4.0", features = ["r1cs"] }
-ark-groth16 = { version = "0.4.0", features = ["parallel"] }
+ark-bn254 = { version = "^0.5.0", features = ["r1cs"] }
+ark-grumpkin = { version = "^0.5.0", features = ["r1cs"] }
+ark-groth16 = { version = "^0.5.0", features = ["parallel"] }
 clap = { version = "4.5.16", features = ["derive"] }
 num-bigint = { version = "0.4.3" }
 num-traits = { version = "0.2.15" }
@@ -16,17 +16,12 @@ serde_json = { version = "1.0.85" }
 tracing = { version = "0.1.26" }
 tracing-subscriber = { version = "0.3.18", features = ["fmt", "json", "env-filter"] }
 
-sonobe = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "234600b39f2c719b8da19840bf26a9eb01167406", package = "folding-schemes" }
-sonobe-frontends = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "234600b39f2c719b8da19840bf26a9eb01167406", package = "frontends" }
-sonobe-solidity = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "234600b39f2c719b8da19840bf26a9eb01167406", package = "solidity-verifiers" }
+sonobe = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "fa8f821fc2fd8d230342d67662206a8577ec1122", package = "folding-schemes" }
+sonobe-frontends = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "fa8f821fc2fd8d230342d67662206a8577ec1122", package = "frontends" }
+sonobe-solidity = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "fa8f821fc2fd8d230342d67662206a8577ec1122", package = "solidity-verifiers" }
 
 nova-scotia = { version = "0.5.0" }
 nova-snark = { version = "0.23.0" }
-
-[patch.crates-io]
-ark-bn254 = { git = "https://github.com/arnaucube/ark-curves-cherry-picked", branch = "cherry-pick" }
-ark-grumpkin = { git = "https://github.com/arnaucube/ark-curves-cherry-picked", branch = "cherry-pick" }
-ark-r1cs-std = { git = "https://github.com/winderica/r1cs-std", branch = "cherry-pick" }
 
 [features]
 light-test = [

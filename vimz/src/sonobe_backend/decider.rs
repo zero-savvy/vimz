@@ -3,7 +3,7 @@ use ark_groth16::Groth16;
 use ark_grumpkin::{constraints::GVar as GVar2, Projective as G2};
 use sonobe::{
     commitment::{kzg::KZG, pedersen::Pedersen},
-    folding::nova::decider_eth::Decider as DeciderEth,
+    folding::{nova::decider_eth::Decider as DeciderEth, traits::CommittedInstanceOps},
     Decider as DeciderTrait,
 };
 use sonobe_frontends::circom::CircomFCircuit;
@@ -38,8 +38,8 @@ pub fn verify_final_proof(
         folding.i,
         folding.z_0.clone(),
         folding.z_i.clone(),
-        &folding.U_i,
-        &folding.u_i,
+        &folding.U_i.get_commitments(),
+        &folding.u_i.get_commitments(),
         proof,
     )
     .expect("Failed to verify proof"))

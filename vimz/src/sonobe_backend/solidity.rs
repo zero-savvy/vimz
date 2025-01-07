@@ -1,8 +1,6 @@
 use ark_bn254::Fr;
-use sonobe::{
-    folding::nova::decider_eth::prepare_calldata,
-    frontend::{circom::CircomFCircuit, FCircuit},
-};
+use sonobe::{folding::nova::decider_eth::prepare_calldata, frontend::FCircuit};
+use sonobe_frontends::circom::CircomFCircuit;
 use sonobe_solidity::{
     evm::{compile_solidity, Evm},
     get_decider_template_for_cyclefold_decider,

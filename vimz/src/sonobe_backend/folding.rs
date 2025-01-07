@@ -4,10 +4,11 @@ use rand::{CryptoRng, RngCore};
 use sonobe::{
     commitment::{kzg::KZG, pedersen::Pedersen},
     folding::nova::{Nova, PreprocessorParam},
-    frontend::{circom::CircomFCircuit, FCircuit},
+    frontend::FCircuit,
     transcript::poseidon::poseidon_canonical_config,
     FoldingScheme,
 };
+use sonobe_frontends::circom::CircomFCircuit;
 use tracing::info_span;
 
 use crate::config::Config;
@@ -67,10 +68,7 @@ pub fn fold_input(folding: &mut Folding, ivc_step_inputs: Vec<Vec<Fr>>, rng: &mu
 }
 
 #[tracing::instrument(name = "Verify folded proof", skip_all)]
-pub fn verify_folding(
-    folding: &Folding,
-    folding_params: &FoldingParams,
-) {
+pub fn verify_folding(folding: &Folding, folding_params: &FoldingParams) {
     Folding::verify(folding_params.1.clone(), folding.ivc_proof())
         .expect("Failed to verify folded proof");
 }

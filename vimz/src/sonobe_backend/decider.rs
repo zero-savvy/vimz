@@ -4,9 +4,9 @@ use ark_grumpkin::{constraints::GVar as GVar2, Projective as G2};
 use sonobe::{
     commitment::{kzg::KZG, pedersen::Pedersen},
     folding::nova::decider_eth::Decider as DeciderEth,
-    frontend::circom::CircomFCircuit,
     Decider as DeciderTrait,
 };
+use sonobe_frontends::circom::CircomFCircuit;
 
 use crate::sonobe_backend::folding::Folding;
 

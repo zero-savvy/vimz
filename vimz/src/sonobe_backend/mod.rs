@@ -23,13 +23,12 @@ pub fn run(config: &Config) {
     // ========================== Prepare input and folding ========================================
 
     let (ivc_step_inputs, initial_state) = prepare_input(config);
-    let num_steps = ivc_step_inputs.len() as u32;
     let (mut folding, folding_params) = prepare_folding(config, initial_state.clone(), &mut rng);
 
     // ========================== Fold the input and verify the folding proof ======================
 
     fold_input(&mut folding, ivc_step_inputs, &mut rng);
-    verify_folding(&folding, &folding_params, initial_state, num_steps);
+    verify_folding(&folding, &folding_params);
 
     // ========================== Prepare decider and compress the proof ===========================
 

@@ -70,18 +70,7 @@ pub fn fold_input(folding: &mut Folding, ivc_step_inputs: Vec<Vec<Fr>>, rng: &mu
 pub fn verify_folding(
     folding: &Folding,
     folding_params: &FoldingParams,
-    initial_state: Vec<Fr>,
-    num_steps: u32,
 ) {
-    let (running_instance, incoming_instance, cyclefold_instance) = folding.instances();
-    Folding::verify(
-        folding_params.1.clone(),
-        initial_state,
-        folding.state(),
-        Fr::from(num_steps),
-        running_instance,
-        incoming_instance,
-        cyclefold_instance,
-    )
-    .expect("Failed to verify folded proof");
+    Folding::verify(folding_params.1.clone(), folding.ivc_proof())
+        .expect("Failed to verify folded proof");
 }

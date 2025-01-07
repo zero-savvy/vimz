@@ -2328,7 +2328,7 @@ checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 [[package]]
 name = "folding-schemes"
 version = "0.1.0"
-source = "git+https://github.com/privacy-scaling-explorations/sonobe?rev=0ad54576ec6462d63313ebde18bb0a24669fd00e#0ad54576ec6462d63313ebde18bb0a24669fd00e"
+source = "git+https://github.com/privacy-scaling-explorations/sonobe?rev=cb1b8e37aa07dda255d3f3651385a45613beed4e#cb1b8e37aa07dda255d3f3651385a45613beed4e"
 dependencies = [
  "acvm",
  "ark-bn254 0.4.0",
@@ -5303,7 +5303,7 @@ dependencies = [
 [[package]]
 name = "solidity-verifiers"
 version = "0.1.0"
-source = "git+https://github.com/privacy-scaling-explorations/sonobe?rev=0ad54576ec6462d63313ebde18bb0a24669fd00e#0ad54576ec6462d63313ebde18bb0a24669fd00e"
+source = "git+https://github.com/privacy-scaling-explorations/sonobe?rev=cb1b8e37aa07dda255d3f3651385a45613beed4e#cb1b8e37aa07dda255d3f3651385a45613beed4e"
 dependencies = [
  "ark-bn254 0.4.0",
  "ark-ec 0.4.1",

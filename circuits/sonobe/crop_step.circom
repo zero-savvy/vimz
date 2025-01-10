@@ -1,4 +1,4 @@
-pragma circom 2.1.0;
+pragma circom 2.2.0;
 
 include "../src/crop_step.circom";
 include "../src/utils/input_transformation.circom";

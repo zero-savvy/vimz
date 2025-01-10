@@ -1,6 +1,6 @@
 // Mini-library exposing various hasher templates. They impement Poseidon hashing for different input types.
 
-pragma circom 2.0.0;
+pragma circom 2.2.0;
 include "../../node_modules/circomlib/circuits/poseidon.circom";
 
 // Compute Poseidon hash of a pair of values.

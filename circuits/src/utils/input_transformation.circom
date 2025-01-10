@@ -1,4 +1,4 @@
-pragma circom 2.1.0;
+pragma circom 2.2.0;
 
 // Splits a combined input array into two separate rows of signals.
 //

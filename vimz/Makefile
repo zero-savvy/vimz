@@ -28,7 +28,7 @@ lint: # Run the linter.
 .PHONY: run-transformation
 run-transformation: # Run a given transformation
 run-transformation:
-	@cargo run --release $(FEATURES) -- \
+	@cargo run --release $(FEATURES) --bin vimz -- \
  		-f $(TRANSFORMATION) -w ../circuits/$(SUBDIR)/$(TRANSFORMATION)_step_js/$(TRANSFORMATION)_step.wasm \
 		-i ../input_data/$(TRANSFORMATION).json \
 		-c ../circuits/$(SUBDIR)/$(TRANSFORMATION)_step.r1cs -r HD \

@@ -1,16 +1,9 @@
 use clap::Parser;
-use config::{Backend, Config};
-
-use crate::logging::init_logging;
-
-const DEMO_STEPS: usize = 10;
-
-mod config;
-mod input;
-mod logging;
-mod nova_snark_backend;
-mod sonobe_backend;
-mod transformation;
+use vimz::{
+    config::{Backend, Config},
+    logging::init_logging,
+    nova_snark_backend, sonobe_backend,
+};
 
 fn main() {
     init_logging();

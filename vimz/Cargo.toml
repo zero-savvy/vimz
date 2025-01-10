@@ -3,6 +3,14 @@ name = "vimz"
 version = "1.4.0"
 edition = "2021"
 
+[[bin]]
+name = "vimz"
+path = "src/bin/main.rs"
+
+[[bin]]
+name = "generate_verifier_contracts"
+path = "src/bin/generate_verifier_contracts.rs"
+
 [dependencies]
 ark-bn254 = { version = "^0.5.0", features = ["r1cs"] }
 ark-grumpkin = { version = "^0.5.0", features = ["r1cs"] }

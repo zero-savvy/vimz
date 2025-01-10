@@ -85,3 +85,25 @@ all-transformations:
 	@$(MAKE) hash
 	@$(MAKE) resize
 	@$(MAKE) sharpness
+
+
+.PHONY: generate-contract
+generate-contract: # Generate verifier contract
+generate-contract:
+	@cargo run --release $(FEATURES) --bin generate-verifier-contract -- \
+ 		-f $(TRANSFORMATION) -w ../circuits/sonobe/$(TRANSFORMATION)_step_js/$(TRANSFORMATION)_step.wasm \
+		-i ../input_data/$(TRANSFORMATION).json -o ../contracts/ \
+		-c ../circuits/sonobe/$(TRANSFORMATION)_step.r1cs -r HD \
+		-b sonobe --demo
+
+.PHONY: generate-verifier-contracts
+generate-verifier-contracts: # Generate all verifier contracts
+generate-verifier-contracts:
+	@$(MAKE) generate-contract TRANSFORMATION=blur
+	@$(MAKE) generate-contract TRANSFORMATION=brightness
+	@$(MAKE) generate-contract TRANSFORMATION=contrast
+	@$(MAKE) generate-contract TRANSFORMATION=crop
+	@$(MAKE) generate-contract TRANSFORMATION=grayscale
+	@$(MAKE) generate-contract TRANSFORMATION=hash
+	@$(MAKE) generate-contract TRANSFORMATION=resize
+	@$(MAKE) generate-contract TRANSFORMATION=sharpness

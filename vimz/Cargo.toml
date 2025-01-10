@@ -8,8 +8,8 @@ name = "vimz"
 path = "src/bin/main.rs"
 
 [[bin]]
-name = "generate_verifier_contracts"
-path = "src/bin/generate_verifier_contracts.rs"
+name = "generate-verifier-contract"
+path = "src/bin/generate_verifier_contract.rs"
 
 [dependencies]
 ark-bn254 = { version = "^0.5.0", features = ["r1cs"] }

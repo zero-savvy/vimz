@@ -12,10 +12,10 @@ use crate::{
     },
 };
 
-mod decider;
-mod folding;
-mod input;
-mod solidity;
+pub mod decider;
+pub mod folding;
+pub mod input;
+pub mod solidity;
 
 pub fn run(config: &Config) {
     let mut rng = StdRng::from_seed([41; 32]);

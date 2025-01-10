@@ -32,6 +32,16 @@ impl Transformation {
         }
     }
 
+    /// Returns the size of the IVC state.
+    pub fn ivc_state_len(&self) -> usize {
+        match self {
+            Blur | Sharpness => 4,
+            Brightness | Contrast | Crop => 3,
+            Grayscale | Resize => 2,
+            Hash => 1,
+        }
+    }
+
     /// Returns the amount of the input field elements for a single step for the given transformation.
     pub fn step_input_width(&self) -> usize {
         match self {

@@ -19,7 +19,20 @@ Our tests show that VIMz is fast and efficient on both the prover and verifier s
 
 ## Reference
 
+If you have used this repo to develop a research work or product, please cite our paper:
+
 1) **PETS conference Paper:** **[2025]** S. Dziembowski, S. Ebrahimi, P. Hassanizadeh, [VIMz: Private Proofs of Image Manipulation using Folding-based zkSNARKs](https://eprint.iacr.org/2024/1063)
+
+   ```
+    @inproceedings{vimz25pets,
+      title     = {VIMz: Private Proofs of Image Manipulation using Folding-based zkSNARKs},
+      author    = {Dziembowski, Stefan and Ebrahimi, Shahriar and Hassanizadeh, Parisa},
+      booktitle = {Proceedings on Privacy Enhancing Technologies (PoPETs},
+      address   = {Mountain View, CA},
+      month     = {July},
+      year      = 2025
+    }
+    ```
 
 ## Performance
 

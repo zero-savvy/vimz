@@ -124,31 +124,31 @@ We've built the tools necessary for benchmarking using the samples provided in t
 simply Go to the main directory of vimz repo and run any number of transformations as you prefer using the provided script:
 
 ```
-./benchmark.sh [list-of-transformations]
+./benchmark.sh <resolution> [list-of-transformations]
 
 ```
 > [!IMPORTANT]
 > Make sure that the circuit related to the benchmarking transformation must be already built (check [**II-b Building Circuits**](README.md#ii-b-building-circuits) section).
 
 > [!TIP]
-> Since the proof generation process can be time consuming, it is recommended to initially benchmark with only one transformation at a time~(replicating the results presented in _**Table 4**_ of the paper). Once these results are verified, you can proceed to run multiple transformations in parallel to replicate the results shown in _**Table 5**_.
+> Since the proof generation process can be time consuming, it is recommended to initially benchmark with only one transformation at a time (replicating the HD resolution results presented in _**Table 4**_ of the paper). Once these results are verified, you can proceed to run multiple transformations in parallel to replicate the results shown in _**Table 5**_.
 
 **Example 1**: benchmarking a single transformation:
 
 ```
-./benchmark.sh contrast
+./benchmark.sh HD contrast
      or
-./benchmark.sh blur
+./benchmark.sh 4K blur
      or
-./benchmark.sh grayscale
+./benchmark.sh HD grayscale
 ```
 
 **Example 2**: benchmarking parallel execution of multiple transformations:
 
 ```
-./benchmark.sh contrast blur
+./benchmark.sh HD contrast blur
      or
-./benchmark.sh resize blur sharpness
+./benchmark.sh 4K resize blur sharpness
 ```
 
 > [!IMPORTANT]

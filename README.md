@@ -36,7 +36,8 @@ If you have used this repo to develop a research work or product, please cite ou
 
 ## Performance
 
-Following table provides performance measurements of VIMz executed separately on two different devices (Core-i5 Laptop and a Ryzen 9 Server), while proving transformations on an HD resolution image. More detailed analysis are available in the paper:
+Following table provides performance measurements of VIMz executed separately on two different devices (Core-i5 Laptop and a Ryzen 9 Server), while proving transformations on an HD resolution image.
+We have executed multiple runs using different input values and reported the average performance in the following table. However, we note that in all of our runs we observed very high consistency between the results. More detailed analysis are available in the paper:
 
 | Transformation | Mid-range Laptop<br>(Key. Gen.) | Mid-range Laptop<br>(Proving) | Server<br>(Key. Gen.) | Server<br>(Proving) | Peak<br>Memory |
 |:--------------:|:-------------------------------:|:-----------------------------:|:---------------------:|:-------------------:|:--------------:|

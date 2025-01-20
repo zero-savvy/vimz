@@ -1,2 +1,6 @@
 node_modules/
 package-lock.json
+*_cpp/
+*_js/
+*.sym
+*.r1cs

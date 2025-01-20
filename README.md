@@ -86,6 +86,8 @@ The repository is organized into four directories:
     - `cargo build --release`
     - `cargo install --path circom`
     - Verify the installation: `circom --version`
+  - **I-f) Time**:
+    - `sudo apt install time`
 
 > [!NOTE]
 > We have successfully executed benchmarks on multiple systems and expect there should be minimal sensitivity regarding spesific versions in the dependencies, however, we note one of our recent system configurations for the record:

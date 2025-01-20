@@ -48,6 +48,18 @@ Following table provides performance measurements of VIMz executed separately on
 | Sharpness      |              11.8 s             |            614.1 s            |         6.8 s         |       455.8 s       |     2.8 GB     |
 | Blur           |              11.5 s             |            555.3 s            |         6.6 s         |       406.0 s       |     2.5 GB     |
 
+## Directories
+The repository is organized into four directories:
+
+- **circuits:** Contains the underlying ZK circuits of VIMz in `circom` language.
+
+- **contracts:** Contains high-level Solidity smart contracts~(see Appendix~\ref{apx:protocol-design}) that provide the infrastructure for a C2PA-compatible marketplace on EVM-based blockchains.
+
+- **nova:** Contains the main `cargo`-based package for building and installing VIMz using `nova` protocol.
+
+- **py\_modules:** Houses the Python interface (GUI) of VIMz, facilitating image editing and preparation of input files for the VIMz prover.
+
+- **samples:** Holds images in standard resolutions (e.g., HD, 4K) along with pre-built `JSON` files of supported edits to be fed into the VIMz prover.
 
 ## Installation
 
@@ -75,6 +87,13 @@ Following table provides performance measurements of VIMz executed separately on
     - `cargo install --path circom`
     - Verify the installation: `circom --version`
 
+> [!NOTE]
+> We have successfully executed benchmarks on multiple systems and expect there should be minimal sensitivity regarding spesific versions in the dependencies, however, we note one of our recent system configurations for the record:
+> - Ubuntu @ 22.04
+> - Circom @ 2.2.1
+> - snarkjs @ 0.7.5
+> - rustc @ 1.86.0-nightly
+
 ### II-Installing VIMz
 
 Once you have installed dependencies, you can proceed with setting up and running VIMz. 
@@ -92,12 +111,12 @@ To obtain the latest version of VIMz, head to directory of your choice and insta
   - go to the circuits directory: `cd ../circuits`
   - build node modules: `npm install`
   - build ZK circuits using the provided script in this directory:
-    - Circuit-spesific build: `./build_circuits.sh grayscale.circom` or `./build_circuits.sh contrast.circom`
+    - Circuit-spesific build: `./build_circuits.sh grayscale_step_HD.circom` or `./build_circuits.sh contrast_4K.circom`
     - Full build: `./build_circuits.sh`
 > [!NOTE]
 > If you only want to reproduce results, we suggest to only build a few circuits, because building all of the circuits can take some time! It's not that long, but why wait? :D
 
-    
+
 
 ## Benchmarks
 
@@ -133,12 +152,15 @@ simply Go to the main directory of vimz repo and run any number of transformatio
 ```
 
 > [!IMPORTANT]
-> **Sample output**: When benchmarking only one transformation, the output will be visible in the `stdout`. However, while benchmarking parallel execution of multiple transformations, the script generates a file (or multiple files, one per given transformation) with a `.output` suffix in the same directory. These files contain the standard output of running the `vimz` command directly, as shown in Figure below. Nonetheless, the output includes various performance metrics. The total proof generation time can be calculated as the sum of two numbers: `RecursiveSNARK creation` and `CompressedSNARK::prove:` from the output.
+> **Sample output**: When benchmarking only one transformation, the output will be visible in the `stdout`. However, while benchmarking parallel execution of multiple transformations, the script generates a file (or multiple files, one per given transformation) with a `.output` suffix in the same directory. These files contain the standard output of running the `vimz` command directly, as shown in Figure below. Nonetheless, the output includes various performance metrics.
+> - The total proof generation time can be calculated as the sum of two numbers: `RecursiveSNARK creation` and `CompressedSNARK::prove:` from the output. 
+> - `CompressedSNARK::verify:` represents the verification time.
 
 <p align="center">
   <img width="100%" src="sample-output.png" alt="output">
   <em>VIMz STD output</em>
 </p>
+
 
 
 ## How to Use

@@ -70,7 +70,7 @@ cleanup() {
   fi
 
 #  remove_artifacts
-  stop_node
+#  stop_node
 }
 
 trap cleanup EXIT SIGINT SIGTERM
@@ -151,11 +151,15 @@ compute_proof() {
 }
 
 send_solution() {
+  SELECTOR="cf2c8294"
+  PROOF=$(xxd -p -c 10000 < "../calldata/proof" | cut -c 9-)
+  SUFFIX=$(cast abi-encode "f(uint256,string memory)" "0" "$SOLUTION_ID" | cut -c 3-)
+
   cast send \
+    "$CONTRACT_ADDRESS" \
+    0x"${SELECTOR}${PROOF}${SUFFIX}" \
     --private-key "$SUBMITTER_KEY" \
     --rpc-url "$RPC_URL" \
-    "$CONTRACT_ADDRESS" \
-    "submitSolution(uint256,string)" "0" "$SOLUTION_ID" \
     &>> /dev/null
   log_progress "  ✅ Solution submitted"
 }

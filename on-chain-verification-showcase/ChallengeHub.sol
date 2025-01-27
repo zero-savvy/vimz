@@ -78,16 +78,44 @@ contract ChallengeHub {
         return challenges[challengeId].imageID;
     }
 
-    function submitSolution(uint256 challengeId, string memory solutionID) external {
+    function submitSolution(
+        uint256[9] calldata i_z0_zi,
+        uint256[4] calldata U_i_cmW_U_i_cmE,
+        uint256[2] calldata u_i_cmW,
+        uint256[3] calldata cmT_r,
+        uint256[2] calldata pA,
+        uint256[2][2] calldata pB,
+        uint256[2] calldata pC,
+        uint256[4] calldata challenge_W_challenge_E_kzg_evals,
+        uint256[2][2] calldata kzg_proof,
+        uint256 challengeId,
+        string memory solutionID
+    ) external {
         Challenge storage challenge = challenges[challengeId];
         require(!challenge.solved, "Challenge already solved");
 
-        bool isValid = true;
+        ISnarkVerifier verifier;
+        if (challenge.transformationType == TransformationType.Blur) {
+            verifier = blurVerifier;
+        } else {
+            verifier = contrastVerifier;
+        }
+
+        bool isValid = verifier.verifyNovaProof(
+            i_z0_zi,
+            U_i_cmW_U_i_cmE,
+            u_i_cmW,
+            cmT_r,
+            pA,
+            pB,
+            pC,
+            challenge_W_challenge_E_kzg_evals,
+            kzg_proof
+        );
         require(isValid, "Invalid proof");
 
         challenge.solved = true;
 
-        // Transfer the reward to the solver
         uint256 reward = challenge.reward;
         challenge.reward = 0; // Prevent reentrancy
         (bool success,) = msg.sender.call{value: reward}("");

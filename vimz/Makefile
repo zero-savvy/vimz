@@ -32,7 +32,7 @@ run-transformation:
  		-f $(TRANSFORMATION) -w ../circuits/$(SUBDIR)/$(TRANSFORMATION)_step_js/$(TRANSFORMATION)_step.wasm \
 		-i ../input_data/$(TRANSFORMATION).json \
 		-c ../circuits/$(SUBDIR)/$(TRANSFORMATION)_step.r1cs -r HD \
-		-b $(BACKEND) $(DEMO_FLAG)
+		-b $(BACKEND) $(DEMO_FLAG) -o ../calldata/$(TRANSFORMATION).bytes
 
 .PHONY: blur
 blur: # Run the blur transformation.

@@ -1,3 +1,5 @@
+use std::fs;
+
 use rand::{prelude::StdRng, SeedableRng};
 use sonobe::Decider as _;
 use tracing::info_span;
@@ -8,7 +10,7 @@ use crate::{
         decider::{verify_final_proof, Decider},
         folding::{fold_input, prepare_folding, verify_folding},
         input::prepare_input,
-        solidity::verify_on_chain,
+        solidity::{prepare_contract_calldata},
     },
 };
 
@@ -40,8 +42,16 @@ pub fn run(config: &Config) {
         Decider::prove(rng, decider_pp, folding.clone()).expect("Failed to generate proof")
     });
 
-    // ========================== Verify the final proof ===========================================
+    // ========================== Verify the final proof locally ===================================
 
     verify_final_proof(&proof, &folding, decider_vp.clone());
-    verify_on_chain(&folding.F.clone(), decider_vp, folding, proof);
+
+    // ========================== Prepare calldata for on-chain verification =======================
+
+    if let Some(output_file) = config.output_file() {
+        info_span!("Save calldata").in_scope(|| {
+            fs::write(output_file, prepare_contract_calldata(&folding.F.clone(), decider_vp, &folding, proof))
+                .expect("Failed to write calldata to file");
+        });
+    }
 }

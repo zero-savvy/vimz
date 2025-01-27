@@ -69,8 +69,8 @@ cleanup() {
     log_progress "✅ Scenario successfully run"
   fi
 
-#  remove_artifacts
-#  stop_node
+  remove_artifacts
+  stop_node
 }
 
 trap cleanup EXIT SIGINT SIGTERM
@@ -170,7 +170,7 @@ solve_challenge() {
   fetch_challenge
   process_image
   upload_solution
-#  compute_proof
+  compute_proof
   send_solution
 }
 

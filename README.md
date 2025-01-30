@@ -39,22 +39,27 @@ If you have used this repo to develop a research work or product, please cite ou
 Following table provides performance measurements of VIMz executed separately on two different devices (Core-i5 Laptop and a Ryzen 9 Server), while proving transformations on an HD resolution image.
 We have executed multiple runs using different input values and reported the average performance in the following table. However, we note that in all of our runs we observed very high consistency between the results. More detailed analysis are available in the paper:
 
-| Transformation | Mid-range Laptop<br>(Key. Gen.) | Mid-range Laptop<br>(Proving) | Server<br>(Key. Gen.) | Server<br>(Proving) | Peak<br>Memory |
-|:--------------:|:-------------------------------:|:-----------------------------:|:---------------------:|:-------------------:|:--------------:|
-| Crop           |              3.8 s              |            187.1 s            |         3.5 s         |       133.0 s       |     0.7~GB     |
-| Resize         |              11.5 s             |            187.0 s            |         6.6 s         |       135.7 s       |     2.5 GB     |
-| Contrast       |              11.7 s             |            479.4 s            |         6.5 s         |       371.7 s       |     2.4 GB     |
-| Grayscale      |              8.2 s              |            279.6 s            |         3.7 s         |       240.6 s       |     1.3 GB     |
-| Brightness     |              11.3 s             |            474.0 s            |         6.5 s         |       372.5 s       |     2.4 GB     |
-| Sharpness      |              11.8 s             |            614.1 s            |         6.8 s         |       455.8 s       |     2.8 GB     |
-| Blur           |              11.5 s             |            555.3 s            |         6.6 s         |       406.0 s       |     2.5 GB     |
+| Transformation | Related Circom Circuit for the steps in Nova | Mid-range Laptop (Key. Gen.) | Mid-range Laptop (Proving) | Server (Key. Gen.) | Server (Proving) | Peak Memory |
+|----------------|-------------------------|------------------------------|----------------------------|--------------------|------------------|-------------|
+| Crop           | optimized_crop_step_HD  | 3.8 s                        | 187.1 s                    | 3.5 s              | 133.0 s          | 0.7~GB      |
+| Resize         | resize_step_HD          | 11.5 s                       | 187.0 s                    | 6.6 s              | 135.7 s          | 2.5 GB      |
+| Contrast       | contrast_step_HD        | 11.7 s                       | 479.4 s                    | 6.5 s              | 371.7 s          | 2.4 GB      |
+| Grayscale      | grayscale_step_HD       | 8.2 s                        | 279.6 s                    | 3.7 s              | 240.6 s          | 1.3 GB      |
+| Brightness     | brightness_step_HD      | 11.3 s                       | 474.0 s                    | 6.5 s              | 372.5 s          | 2.4 GB      |
+| Sharpness      | sharpness_step_HD       | 11.8 s                       | 614.1 s                    | 6.8 s              | 455.8 s          | 2.8 GB      |
+| Blur           | blur_step_HD            | 11.5 s                       | 555.3 s                    | 6.6 s              | 406.0 s          | 2.5 GB      |
+
+> [!NOTE]
+> We have two implementations of `crop`, by default we run the `optimizaed_crop` version in our benchmarks, which has a fix starting point for the crop. However, the other version of our `crop` circuit supports arbitrary starting point that we refer to it in the paper as **selective crop**, which is far morecomplex than the `optimized crop` circuit. You can find the circuits for each version below:
+> - Static/Fixed Crop: `circuits/optimized_crop_HD.circom` and `circuits/optimized_crop_4K.circom`
+> - Selective Crop: `circuits/crop_HD.circom` and `circuits/crop_4K.circom`
 
 ## Directories
 The repository is organized into four directories:
 
 - **circuits:** Contains the underlying ZK circuits of VIMz in `circom` language.
 
-- **contracts:** Contains high-level Solidity smart contracts~(see Appendix~\ref{apx:protocol-design}) that provide the infrastructure for a C2PA-compatible marketplace on EVM-based blockchains.
+- **contracts:** Contains high-level Solidity smart contracts~(see Appendix F C2PA-Compatible Marketplace) that provide the infrastructure for a C2PA-compatible marketplace on EVM-based blockchains.
 
 - **nova:** Contains the main `cargo`-based package for building and installing VIMz using `nova` protocol.
 
@@ -114,7 +119,7 @@ To obtain the latest version of VIMz, head to directory of your choice and insta
   - go to the circuits directory: `cd ../circuits`
   - build node modules: `npm install`
   - build ZK circuits using the provided script in this directory:
-    - Circuit-spesific build: `./build_circuits.sh grayscale_step_HD.circom` or `./build_circuits.sh contrast_4K.circom`
+    - Circuit-spesific build: `./build_circuits.sh grayscale_step_HD.circom` or `./build_circuits.sh contrast_step_4K.circom`
     - Full build: `./build_circuits.sh`
 > [!NOTE]
 > If you only want to reproduce results, we suggest to only build a few circuits, because building all of the circuits can take some time! It's not that long, but why wait? :D
@@ -154,6 +159,12 @@ simply Go to the main directory of vimz repo and run any number of transformatio
 ./benchmark.sh 4K resize blur sharpness
 ```
 
+> [!TIP]
+> **Reproducing Parallel Experiments:** You can easily reproduce the benchmarks reported in the Table 5 of the paper using the script. Just add the list of transformations according the entry you want to reproduce from Table 5. For instnce, in order to run the experiment ofr the `Cn-Sh-Re` entry, you should run `./benchmark.sh HD contrast sharpness grayscale`.
+
+
+
+
 > [!IMPORTANT]
 > **Sample output**: When benchmarking only one transformation, the output will be visible in the `stdout`. However, while benchmarking parallel execution of multiple transformations, the script generates a file (or multiple files, one per given transformation) with a `.output` suffix in the same directory. These files contain the standard output of running the `vimz` command directly, as shown in Figure below. Nonetheless, the output includes various performance metrics.
 > - The total proof generation time can be calculated as the sum of two numbers: `RecursiveSNARK creation` and `CompressedSNARK::prove:` from the output. 
@@ -175,6 +186,20 @@ vimz --function <FUNCTION>
 --circuit <R1CS FILE> --output <FILE>
 --witnessgenerator <BINARY/WASM FILE>
 ```
+
+## Python Image Editor
+We've provided a python GUI to apply the effects on the given images. You canfind it in `py_modules` directory. 
+1. When running it, a `tkinter`-based file picker will open to select the input image, which must be exactly in HD or 4K resolution. You can also use the sample images provided in the `samples` directory.
+2. After this, the script will take a little time to digest the image and create propoer inputs for the Nova prover.
+3. Then the script will as to select the edit you wish to apply on the image: `Enter your command: 1) crop 2) resize ... 7) blur`, which can be done by inputting a number related to the transformation you want. For instance `2` for applying `resize`.
+4. Based on the selected effect, the script might ask for other configs, such as the _ratio_ for the `contrast` or `sharpness`.
+5. The script then views the image and the applied effect in a new window. See the figure below as an example. 
+6. After closing the window, the script will work on applying the transfomation and creating the final JSON file for your image eefect to be proven with VIMz. The JSON file should follow the exact structure as the sample JSON files available in the `samples/` directory. 
+
+<p align="center">
+  <img width="100%" src="interface.png" alt="GUI for the pythn_formatter.py">
+  <em>GUI for the pythn_formatter.py</em>
+</p>
 
 ## Acknowledgement
 

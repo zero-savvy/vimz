@@ -1,12 +1,13 @@
 pragma circom 2.2.0;
 
 include "../src/grayscale_step.circom";
+include "../src/utils/state.circom";
 
 // NovaSnark wrapper over `GrayScaleHash` circuit.
 template NovaGrayScale(width){
     // ---- Running IVC state ----
-    signal input  step_in[2];
-    signal output step_out[2];
+    input  IVCState step_in;
+    output IVCState step_out;
     // ---- Step inputs ----
     signal input row_orig[width], row_tran[width];
     // ---- Step computation ----

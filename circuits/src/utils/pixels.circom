@@ -65,7 +65,7 @@ template DecompressorKernel(kernel_size){
 }
 
 
-template DecompressorGrey(){
+template DecompressorGray(){
     signal input in;
 	signal output out[10];
 
@@ -111,7 +111,7 @@ template DecompressorCrop(){
     signal input in;
 	signal output out[10];
 
-	component decomp = DecompressorGrey();
+	component decomp = DecompressorGray();
 	
 	decomp.in <== in;
 	out <== decomp.out;

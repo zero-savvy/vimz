@@ -2,12 +2,13 @@ pragma circom 2.2.0;
 
 include "../src/grayscale_step.circom";
 include "../src/utils/input_transformation.circom";
+include "../src/utils/state.circom";
 
 // Sonobe wrapper over `GrayScaleHash` circuit.
 template SonobeGrayScale(width){
     // ---- Running IVC state ----
-    signal input  ivc_input[2];
-    signal output ivc_output[2];
+    input  IVCState ivc_input;
+    output IVCState ivc_output;
     // ---- Step inputs ----
     signal input  external_inputs[2 * width];
     // ---- Input transformation ----

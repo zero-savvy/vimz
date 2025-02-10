@@ -2,12 +2,13 @@ pragma circom 2.2.0;
 
 include "../src/sharpness_step.circom";
 include "../src/utils/input_transformation.circom";
+include "../src/utils/state.circom";
 
 // Sonobe wrapper over `Sharpen` circuit.
 template SonobeSharpness(width, kernel_size){
     // ---- Running IVC state ----
-    signal input  ivc_input[4];
-    signal output ivc_output[4];
+    input  IVCStateConv(kernel_size) ivc_input;
+    output IVCStateConv(kernel_size) ivc_output;
     // ---- Step inputs ----
     signal input  external_inputs[kernel_size * width + width];
     // ---- Input transformation ----

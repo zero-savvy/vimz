@@ -1,12 +1,13 @@
 pragma circom 2.2.0;
 
 include "../src/sharpness_step.circom";
+include "../src/utils/state.circom";
 
 // NovaSnark wrapper over `Sharpen` circuit.
 template NovaSharpness(width, kernel_size){
     // ---- Running IVC state ----
-    signal input  step_in[4];
-    signal output step_out[4];
+    input  IVCStateConv(kernel_size) step_in;
+    output IVCStateConv(kernel_size) step_out;
     // ---- Step inputs ----
     signal input row_orig[kernel_size][width], row_tran[width];
     // ---- Step computation ----

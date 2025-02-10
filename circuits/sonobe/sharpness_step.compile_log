@@ -5,7 +5,7 @@ public inputs: 4
 private inputs: 512 (128 belong to witness)
 public outputs: 4
 wires: 310377
-labels: 787028
+labels: 787030
 [32mWritten successfully:[0m ./sharpness_step.r1cs
 [32mWritten successfully:[0m ./sharpness_step_js/sharpness_step.wasm
 [32mEverything went okay[0m

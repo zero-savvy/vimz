@@ -7,8 +7,8 @@ include "../src/utils/state.circom";
 // Sonobe wrapper over `BrightnessHash` circuit.
 template SonobeBrightness(width){
     // ---- Running IVC state ----
-    input  IVCStateWithFactor ivc_input;
-    output IVCStateWithFactor ivc_output;
+    input  IVCStateWithInfo ivc_input;
+    output IVCStateWithInfo ivc_output;
     // ---- Step inputs ----
     signal input  external_inputs[2 * width];
     // ---- Input transformation ----

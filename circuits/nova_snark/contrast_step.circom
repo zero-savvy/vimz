@@ -6,8 +6,8 @@ include "../src/utils/state.circom";
 // NovaSnark wrapper over `ContrastHash` circuit.
 template NovaContrast(width){
     // ---- Running IVC state ----
-    input  IVCStateWithFactor step_in;
-    output IVCStateWithFactor step_out;
+    input  IVCStateWithInfo step_in;
+    output IVCStateWithInfo step_out;
     // ---- Step inputs ----
     signal input row_orig[width], row_tran[width];
     // ---- Step computation ----

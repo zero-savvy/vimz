@@ -19,20 +19,32 @@ template UpdateIVCState(width) {
     new.tran_hash <== HeadTailHasher(width)(old.tran_hash, row_tran);
 }
 
-bus IVCStateWithFactor() {
+bus IVCStateWithInfo() {
     IVCState() base;
-    signal     factor;
+    signal     info;
 }
 
-template UpdateIVCStateWithFactor(width) {
-    input IVCStateWithFactor() old;
+template UpdateIVCStateWithInfo(width) {
+    input IVCStateWithInfo() old;
     signal input row_orig [width];
     signal input row_tran [width];
 
-    output IVCStateWithFactor() new;
+    output IVCStateWithInfo() new;
 
-    new.base   <== UpdateIVCState(width)(old.base, row_orig, row_tran);
-    new.factor <== old.factor;
+    new.base <== UpdateIVCState(width)(old.base, row_orig, row_tran);
+    new.info <== old.info;
+}
+
+template UpdateIVCStateWithNewInfo(width) {
+    input IVCStateWithInfo() old;
+    signal input row_orig [width];
+    signal input row_tran [width];
+    signal input new_info;
+
+    output IVCStateWithInfo() new;
+
+    new.base <== UpdateIVCState(width)(old.base, row_orig, row_tran);
+    new.info <== new_info;
 }
 
 bus IVCStateConv(kernel_size) {

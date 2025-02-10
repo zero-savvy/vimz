@@ -8,8 +8,8 @@ include "../node_modules/circomlib/circuits/mux1.circom";
 include "../node_modules/circomlib/circuits/comparators.circom";
 
 template ContrastHash(width){
-    input  IVCStateWithFactor() step_in;
-    output IVCStateWithFactor() step_out;
+    input  IVCStateWithInfo() step_in;
+    output IVCStateWithInfo() step_out;
 
     // Private inputs
     signal input row_orig [width];
@@ -18,7 +18,7 @@ template ContrastHash(width){
     // Execute the step
     Contrast(width)(row_orig, row_tran, step_in.factor);
     // Update IVC state
-    step_out <== UpdateIVCStateWithFactor(width)(step_in, row_orig, row_tran);
+    step_out <== UpdateIVCStateWithInfo(width)(step_in, row_orig, row_tran);
 }
 
 template Contrast(width){

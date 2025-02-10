@@ -1,12 +1,13 @@
 pragma circom 2.2.0;
 
 include "../src/crop_step.circom";
+include "../src/utils/state.circom";
 
 // NovaSnark wrapper over `CropHash` circuit.
 template NovaCrop(widthOrig, widthCrop, heightCrop){
     // ---- Running IVC state ----
-    signal input  step_in[3];
-    signal output step_out[3];
+    input  IVCStateWithInfo step_in;
+    output IVCStateWithInfo step_out;
     // ---- Step inputs ----
     signal input row_orig[widthOrig];
     // ---- Step computation ----

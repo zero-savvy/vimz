@@ -5,8 +5,8 @@ include "utils/pixels.circom";
 include "../node_modules/circomlib/circuits/bitify.circom";
 
 template BrightnessHash(width){
-    input  IVCStateExtended() step_in;
-    output IVCStateExtended() step_out;
+    input  IVCStateWithFactor() step_in;
+    output IVCStateWithFactor() step_out;
 
     // Private inputs
     signal input row_orig [width];
@@ -15,7 +15,7 @@ template BrightnessHash(width){
     // Execute the step
     Brightness(width)(row_orig, row_tran, step_in.factor);
     // Update IVC state
-    step_out <== UpdateIVCStateExtended(width)(step_in, row_orig, row_tran);
+    step_out <== UpdateIVCStateWithFactor(width)(step_in, row_orig, row_tran);
 }
 
 template Brightness(width){

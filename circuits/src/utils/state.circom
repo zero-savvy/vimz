@@ -18,17 +18,17 @@ template UpdateIVCState(width){
     new.tran_hash <== HeadTailHasher(width)(old.tran_hash, row_tran);
 }
 
-bus IVCStateExtended() {
+bus IVCStateWithFactor() {
     IVCState() base;
     signal     factor;
 }
 
-template UpdateIVCStateExtended(width){
-    input IVCStateExtended() old;
+template UpdateIVCStateWithFactor(width){
+    input IVCStateWithFactor() old;
     signal input row_orig [width];
     signal input row_tran [width];
 
-    output IVCStateExtended() new;
+    output IVCStateWithFactor() new;
 
     new.base   <== UpdateIVCState(width)(old.base, row_orig, row_tran);
     new.factor <== old.factor;

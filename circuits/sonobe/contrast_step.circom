@@ -7,8 +7,8 @@ include "../src/utils/state.circom";
 // Sonobe wrapper over `ContrastHash` circuit.
 template SonobeContrast(width){
     // ---- Running IVC state ----
-    input  IVCStateExtended ivc_input;
-    output IVCStateExtended ivc_output;
+    input  IVCStateWithFactor ivc_input;
+    output IVCStateWithFactor ivc_output;
     // ---- Step inputs ----
     signal input  external_inputs[2 * width];
     // ---- Input transformation ----

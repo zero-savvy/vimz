@@ -93,5 +93,3 @@ template IntegrityCheck(width, kernel_size) {
     }
 
 }
-
-// component main { public [step_in] } = IntegrityCheck(128, 3);

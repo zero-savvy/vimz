@@ -3,59 +3,21 @@ pragma circom 2.2.0;
 include "../node_modules/circomlib/circuits/multiplexer.circom";
 include "../node_modules/circomlib/circuits/mux1.circom";
 include "../node_modules/circomlib/circuits/comparators.circom";
-include "utils/pixels.circom";
 include "utils/hashers.circom";
-
-
-template MultiplexerCrop(origSize, cropSize) {
-    signal input inp[origSize];
-    signal input sel;
-    signal output out[cropSize];
-
-    component dec = Decoder(origSize);
-    component ep[cropSize];
-	var selector[cropSize][origSize];
-
-    for (var h=0; h<cropSize; h++) {
-        ep[h] = EscalarProduct(origSize);
-    }
-
-    sel ==> dec.inp;
-
-    for (var h=0; h<cropSize; h++) {
-		for (var k=0; k<h; k++) {
-			selector[h][k] = 0;
-		}
-		for (var k=0; k<origSize - h; k++) {
-        	selector[h][k+h] = dec.out[k];
-		}
-    }
-
-	for (var h=0; h<cropSize; h++) {
-        for (var k=0; k<origSize; k++) {
-            inp[k] ==> ep[h].in1[k];
-            selector[h][k] ==> ep[h].in2[k];
-        }
-        ep[h].out ==> out[h];
-	}
-	dec.success === 1;
-}
-
+include "utils/pixels.circom";
+include "utils/state.circom";
 
 template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized){
-    // public inputs
-    signal input step_in[2];
-    
+    input  IVCState() step_in;
+    output IVCState() step_out;
+
     // private inputs
     signal input row_orig [rowCountOrig][widthOrig];
     signal input row_tran [rowCountResized][widthResized];
 
-    //outputs
-    signal output step_out[2];
-    
     // decoding signals
-    signal prev_orig_hash <== step_in[0];
-    signal prev_resized_hash <== step_in[1];
+    signal prev_orig_hash <== step_in.orig_hash;
+    signal prev_resized_hash <== step_in.tran_hash;
     
     // encoding signals
     signal next_orig_hash;
@@ -146,6 +108,40 @@ template ResizeHash(widthOrig, widthResized, rowCountOrig, rowCountResized){
     }
     next_resized_hash <== hasher_resized[rowCountResized-1].hash;
 
-    step_out[0] <== next_orig_hash;
-    step_out[1] <== next_resized_hash;
+    step_out.orig_hash <== next_orig_hash;
+    step_out.tran_hash <== next_resized_hash;
+}
+
+template MultiplexerCrop(origSize, cropSize) {
+    signal input inp[origSize];
+    signal input sel;
+    signal output out[cropSize];
+
+    component dec = Decoder(origSize);
+    component ep[cropSize];
+	var selector[cropSize][origSize];
+
+    for (var h=0; h<cropSize; h++) {
+        ep[h] = EscalarProduct(origSize);
+    }
+
+    sel ==> dec.inp;
+
+    for (var h=0; h<cropSize; h++) {
+		for (var k=0; k<h; k++) {
+			selector[h][k] = 0;
+		}
+		for (var k=0; k<origSize - h; k++) {
+        	selector[h][k+h] = dec.out[k];
+		}
+    }
+
+	for (var h=0; h<cropSize; h++) {
+        for (var k=0; k<origSize; k++) {
+            inp[k] ==> ep[h].in1[k];
+            selector[h][k] ==> ep[h].in2[k];
+        }
+        ep[h].out ==> out[h];
+	}
+	dec.success === 1;
 }

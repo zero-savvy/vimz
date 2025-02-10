@@ -120,3 +120,11 @@ template BrightnessHash(width){
     checker.transformed <== row_tran;
     checker.bf <== step_in[2];
 }
+<<<<<<<< HEAD:circuits/src/brightness_step.circom
+========
+
+// component main { public [step_in] } = BrightnessHash(128);
+
+
+
+>>>>>>>> master:circuits/src/utils/brightness_step.circom

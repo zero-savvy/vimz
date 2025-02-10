@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:circuits/src/utils/pixels.circom
 pragma circom 2.2.0;
+========
+pragma circom 2.0.0;
+>>>>>>>> master:circuits/src/utils/utils/pixels.circom
 include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/mux1.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";

@@ -128,4 +128,4 @@ template CropHash(widthOrig, widthCrop, heightCrop, x, y){
     
 }
 
-component main { public [step_in] } = CropHash(128, 64, 480, 236, 105);
+// component main { public [step_in] } = CropHash(128, 64, 480, 236, 105);

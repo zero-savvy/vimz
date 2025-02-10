@@ -73,3 +73,11 @@ template GrayScaleHash(width){
     checker.original <== row_orig;
     checker.transformed <== row_tran;
 }
+<<<<<<<< HEAD:circuits/src/grayscale_step.circom
+========
+
+// component main { public [step_in] } = GrayScaleHash(128);
+
+
+
+>>>>>>>> master:circuits/src/utils/grayscale_step.circom

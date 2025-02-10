@@ -7,6 +7,44 @@ include "../node_modules/circomlib/circuits/multiplexer.circom";
 include "../node_modules/circomlib/circuits/mux1.circom";
 include "../node_modules/circomlib/circuits/comparators.circom";
 
+template ContrastHash(width){
+    input  IVCStateExtended() step_in;
+    output IVCStateExtended() step_out;
+
+    // Private inputs
+    signal input row_orig [width];
+    signal input row_tran [width];
+
+    // Execute the step
+    Contrast(width)(row_orig, row_tran, step_in.factor);
+    // Update IVC state
+    step_out <== UpdateIVCStateExtended(width)(step_in, row_orig, row_tran);
+}
+
+template Contrast(width){
+    signal input original[width];
+    signal input transformed[width];
+    signal input cf;   // contrast factor
+
+    component decompressor[width];
+    component decompressor_contrast[width];
+    component contrastchecker[width];
+
+    for (var j=0; j<width; j++) {
+        decompressor[j] = Decompressor();
+        decompressor[j].in <== original[j];
+
+        decompressor_contrast[j] = Decompressor();
+        decompressor_contrast[j].in <== transformed[j];
+
+        contrastchecker[j] = ContrastChecker(10);
+
+        contrastchecker[j].orig <== decompressor[j].out;
+        contrastchecker[j].contrast <== decompressor_contrast[j].out;
+        contrastchecker[j].cf <== cf;
+    }
+
+}
 
 template ContrastChecker(n) {
     signal input orig[n][3];
@@ -58,55 +96,4 @@ template ContrastChecker(n) {
     }
 
     n_check <== n;
-}
-
-template Contrast(width){
-    
-    signal input original[width];
-    signal input transformed[width];
-    signal input cf;   // contrast factor
-
-    component decompressor[width];
-    component decompressor_contrast[width];
-    component contrastchecker[width];
-
-    for (var j=0; j<width; j++) {
-        decompressor[j] = Decompressor();
-        decompressor[j].in <== original[j];
-
-        decompressor_contrast[j] = Decompressor();
-        decompressor_contrast[j].in <== transformed[j];
-        
-        contrastchecker[j] = ContrastChecker(10);
-
-        contrastchecker[j].orig <== decompressor[j].out;
-        contrastchecker[j].contrast <== decompressor_contrast[j].out;
-        contrastchecker[j].cf <== cf;
-    }
-
-}
-
-template ContrastHash(width){
-    signal input step_in[3];
-    // signal input prev_orig_hash;
-    // signal input prev_gray_hash;
-    // contrast factor
-    signal output step_out[3];
-    // signal output next_orig_hash;
-    // signal output next_gray_hash;
-    // contrast factor
-
-    // Private inputs
-    signal input row_orig [width];
-    signal input row_tran [width];
-
-    step_out[0] <== HeadTailHasher(width)(step_in[0], row_orig);
-    step_out[1] <== HeadTailHasher(width)(step_in[1], row_tran);
-    step_out[2] <== step_in[2];
-    
-    // contrast code here ...
-    component checker = Contrast(width);
-    checker.original <== row_orig;
-    checker.transformed <== row_tran;
-    checker.cf <== step_in[2];
 }

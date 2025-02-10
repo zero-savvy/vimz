@@ -2,12 +2,13 @@ pragma circom 2.2.0;
 
 include "../src/contrast_step.circom";
 include "../src/utils/input_transformation.circom";
+include "../src/utils/state.circom";
 
 // Sonobe wrapper over `ContrastHash` circuit.
 template SonobeContrast(width){
     // ---- Running IVC state ----
-    signal input  ivc_input[3];
-    signal output ivc_output[3];
+    input  IVCStateExtended ivc_input;
+    output IVCStateExtended ivc_output;
     // ---- Step inputs ----
     signal input  external_inputs[2 * width];
     // ---- Input transformation ----

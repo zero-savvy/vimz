@@ -4,6 +4,44 @@ include "utils/hashers.circom";
 include "utils/pixels.circom";
 include "../node_modules/circomlib/circuits/bitify.circom";
 
+template BrightnessHash(width){
+    input  IVCStateExtended() step_in;
+    output IVCStateExtended() step_out;
+
+    // Private inputs
+    signal input row_orig [width];
+    signal input row_tran [width];
+
+    // Execute the step
+    Brightness(width)(row_orig, row_tran, step_in.factor);
+    // Update IVC state
+    step_out <== UpdateIVCStateExtended(width)(step_in, row_orig, row_tran);
+}
+
+template Brightness(width){
+    signal input original[width];
+    signal input transformed[width];
+    signal input bf;
+
+    component decompressor[width];
+    component decompressor_brightness[width];
+    component brightnesschecker[width];
+
+    for (var j=0; j<width; j++) {
+        decompressor[j] = Decompressor();
+        decompressor[j].in <== original[j];
+
+        decompressor_brightness[j] = Decompressor();
+        decompressor_brightness[j].in <== transformed[j];
+
+        brightnesschecker[j] = BrightnessChecker(10);
+
+        brightnesschecker[j].orig <== decompressor[j].out;
+        brightnesschecker[j].bright <== decompressor_brightness[j].out;
+        brightnesschecker[j].bf <== bf;
+    }
+
+}
 
 template BrightnessChecker(n) {
     signal input orig[n][3];
@@ -69,54 +107,4 @@ template BrightnessChecker(n) {
     }
 
     n_check <== n;
-}
-
-template Brightness(width){
-    
-    signal input original[width];
-    signal input transformed[width];
-    signal input bf;
-
-    component decompressor[width];
-    component decompressor_brightness[width];
-    component brightnesschecker[width];
-
-    for (var j=0; j<width; j++) {
-        decompressor[j] = Decompressor();
-        decompressor[j].in <== original[j];
-
-        decompressor_brightness[j] = Decompressor();
-        decompressor_brightness[j].in <== transformed[j];
-        
-        brightnesschecker[j] = BrightnessChecker(10);
-
-        brightnesschecker[j].orig <== decompressor[j].out;
-        brightnesschecker[j].bright <== decompressor_brightness[j].out;
-        brightnesschecker[j].bf <== bf;
-    }
-
-}
-
-template BrightnessHash(width){
-    signal input step_in[3];
-    // signal input prev_orig_hash;
-    // signal input prev_gray_hash;
-    // brightness factor
-    signal output step_out[3];
-    // signal output next_orig_hash;
-    // signal output next_gray_hash;
-    // brightness factor
-    
-    // Private inputs
-    signal input row_orig [width];
-    signal input row_tran [width];
-    
-    step_out[0] <== HeadTailHasher(width)(step_in[0], row_orig);
-    step_out[1] <== HeadTailHasher(width)(step_in[1], row_tran);
-    step_out[2] <== step_in[2];
-    
-    component checker = Brightness(width);
-    checker.original <== row_orig;
-    checker.transformed <== row_tran;
-    checker.bf <== step_in[2];
 }

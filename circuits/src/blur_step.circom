@@ -32,8 +32,4 @@ template Blur(width, kernel_size){
     conv_checker.row_conv <== row_tran;
     // conv_checker.kernel <== decompressor_kernel.out;
 }
-<<<<<<<< HEAD:circuits/src/blur_step.circom
-========
 
-// component main { public [step_in] } = Blur(128, 3);
->>>>>>>> master:circuits/src/utils/blur_step.circom

@@ -1,18 +1,10 @@
 pragma circom 2.2.0;
 
-<<<<<<<< HEAD:circuits/src/resize_step.circom
 include "../node_modules/circomlib/circuits/multiplexer.circom";
 include "../node_modules/circomlib/circuits/mux1.circom";
 include "../node_modules/circomlib/circuits/comparators.circom";
 include "utils/pixels.circom";
 include "utils/hashers.circom";
-========
-include "node_modules/circomlib/circuits/multiplexer.circom";
-include "node_modules/circomlib/circuits/mux1.circom";
-include "node_modules/circomlib/circuits/comparators.circom";
-include "utils/utils/pixels.circom";
-include "utils/utils/row_hasher.circom";
->>>>>>>> master:circuits/resize_step_HD.circom
 
 
 template MultiplexerCrop(origSize, cropSize) {

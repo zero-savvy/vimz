@@ -37,8 +37,3 @@ template Sharpen(width, kernel_size){
     conv_checker.row_orig <== row_orig;
     conv_checker.row_conv <== row_tran;
 }
-<<<<<<<< HEAD:circuits/src/sharpness_step.circom
-========
-
-// component main { public [step_in] } = Sharpen(128, 3);
->>>>>>>> master:circuits/src/utils/sharpness_step.circom

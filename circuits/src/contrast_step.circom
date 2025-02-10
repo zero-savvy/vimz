@@ -110,11 +110,3 @@ template ContrastHash(width){
     checker.transformed <== row_tran;
     checker.cf <== step_in[2];
 }
-<<<<<<<< HEAD:circuits/src/contrast_step.circom
-========
-
-// component main { public [step_in] } = ContrastHash(128);
-
-
-
->>>>>>>> master:circuits/src/utils/contrast_step.circom

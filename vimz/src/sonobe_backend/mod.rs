@@ -10,7 +10,7 @@ use crate::{
         decider::{verify_final_proof, Decider},
         folding::{fold_input, prepare_folding, verify_folding},
         input::prepare_input,
-        solidity::{prepare_contract_calldata},
+        solidity::prepare_contract_calldata,
     },
 };
 
@@ -49,9 +49,15 @@ pub fn run(config: &Config) {
     // ========================== Prepare calldata for on-chain verification =======================
 
     if let Some(output_file) = config.output_file() {
-        info_span!("Save calldata").in_scope(|| {
-            fs::write(output_file, prepare_contract_calldata(&folding.F.clone(), decider_vp, &folding, proof))
-                .expect("Failed to write calldata to file");
-        });
+        // Ensure the parent directory exists
+        if let Some(parent_dir) = output_file.parent() {
+            fs::create_dir_all(parent_dir).expect("Failed to create output directory");
+        }
+
+        fs::write(
+            output_file,
+            prepare_contract_calldata(&folding.F.clone(), decider_vp, &folding, proof),
+        )
+        .expect("Failed to write calldata to file");
     }
 }

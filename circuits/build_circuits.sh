@@ -1,52 +1,48 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Set the directory where you want to search for files
-target_directory="."
+set -eou pipefail
 
-# Set the pattern of files you want to process
-file_pattern="*.circom"
+# Display usage instructions
+usage() {
+  echo "Usage: $0 <subfolder> [specific_circuit_file]"
+  echo " - <subfolder>: Required. The subfolder containing the circuit files."
+  echo " - [specific_circuit_file]: Optional. A specific .circom file to rebuild."
+  exit 1
+}
 
-shopt -s nullglob
-
-# If an argument is provided, use it as the specific file
-if [ "$#" -eq 1 ]; then
-    user_provided_file="$1"
-    # Check if the provided file exists
-    if [ -f "$user_provided_file" ]; then
-        file_list=("$user_provided_file")
-    else
-        echo "Error: Provided file '$user_provided_file' not found."
-        exit 1
-    fi
-else
-    # If no argument is provided, use pattern-matching
-    file_list=($target_directory/$file_pattern)
+# Validate arguments
+if [ "$#" -lt 1 ]; then
+  usage
 fi
 
-# Iterate over files matching the pattern and run commands
+# Assign the first argument as the subfolder name
+subfolder="$1"
+
+# Navigate to the subfolder
+cd "$subfolder" || exit
+
+# Set the pattern for files to process
+file_pattern="*.circom"
+
+# Enable nullglob to avoid issues with empty file lists
+shopt -s nullglob
+
+# Determine files to process
+if [ "$#" -eq 2 ]; then
+  specific_file="$2"
+  if [ -f "$specific_file" ]; then
+    file_list=("$specific_file")
+  else
+    echo "Error: File '$specific_file' not found."
+    exit 1
+  fi
+else
+    file_list=($file_pattern)
+fi
+
+# Iterate over and process each file
 for file in "${file_list[@]}"; do
-    # echo "$file"
-    if [ -f "$file" ]; then
-        echo " "
-        echo -e "\033[1;34m==================================================\033[0m"
-        echo -e "\033[1;34mProcessing file: $file\033[0m"
-        echo -e "\033[1;34m==================================================\033[0m"
-
-        # Start timing
-        start_time=$(date +%s.%N)
-
-        circom $file --r1cs --wasm --sym --c --prime vesta
-        filename=$(basename -- "$file")
-        filename_no_extension="${filename%.*}"
-        cpp_directory="${filename_no_extension}_cpp"
-        js_directory="${filename_no_extension}_js"
-        (
-            cd "$cpp_directory" || exit
-            echo -e "\033[1;32mRunning make in $cpp_directory\033[0m"
-            make
-        )
-        end_time=$(date +%s.%N)
-        elapsed_time=$(echo "$end_time - $start_time" | bc)
-        echo -e "\033[1;34mTime taken: $elapsed_time seconds\033[0m"
-    fi
+  echo -e "\033[1mBuilding circuit: ${file}\033[0m"
+  base_name=$(basename "$file" .circom)
+  circom "$file" --O2 --r1cs --wasm > "${base_name}.compile_log"
 done

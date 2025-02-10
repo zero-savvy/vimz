@@ -116,6 +116,26 @@ To obtain the latest version of VIMz, head to directory of your choice and insta
 
 #### II-b) Building Circuits
 
+go to the circuits directory:
+
+`cd vimz/circuits`
+
+build node modules:
+
+`npm install`
+
+build ZK circuits using the provided script in this directory:
+
+`./build_circuits.sh`
+
+## How to Use
+
+```
+vimz --function <FUNCTION>
+--resolution <RESOLUTION> --input <FILE>
+--circuit <R1CS FILE> --output <FILE>
+--witnessgenerator <BINARY/WASM FILE>
+```
   - go to the circuits directory: `cd ../circuits`
   - build node modules: `npm install`
   - build ZK circuits using the provided script in this directory:

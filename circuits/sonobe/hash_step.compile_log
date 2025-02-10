@@ -1,0 +1,11 @@
+[32mtemplate instances[0m: 152
+non-linear constraints: 6672
+linear constraints: 0
+public inputs: 1
+private inputs: 128 (113 belong to witness)
+public outputs: 1
+wires: 6787
+labels: 32873
+[32mWritten successfully:[0m ./hash_step.r1cs
+[32mWritten successfully:[0m ./hash_step_js/hash_step.wasm
+[32mEverything went okay[0m

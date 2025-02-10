@@ -1,0 +1,37 @@
+[package]
+name = "vimz"
+version = "1.4.0"
+edition = "2021"
+
+[[bin]]
+name = "vimz"
+path = "src/bin/main.rs"
+
+[[bin]]
+name = "generate-verifier-contract"
+path = "src/bin/generate_verifier_contract.rs"
+
+[dependencies]
+ark-bn254 = { version = "^0.5.0", features = ["r1cs"] }
+ark-grumpkin = { version = "^0.5.0", features = ["r1cs"] }
+ark-groth16 = { version = "^0.5.0", features = ["parallel"] }
+clap = { version = "4.5.16", features = ["derive"] }
+num-bigint = { version = "0.4.3" }
+num-traits = { version = "0.2.15" }
+rand = { version = "0.8.5" }
+serde = { version = "1.0" }
+serde_json = { version = "1.0.85" }
+tracing = { version = "0.1.26" }
+tracing-subscriber = { version = "0.3.18", features = ["fmt", "json", "env-filter"] }
+
+sonobe = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "1ef933a70707fe08865c88ca71269e87fa887855", package = "folding-schemes" }
+sonobe-frontends = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "1ef933a70707fe08865c88ca71269e87fa887855", package = "experimental-frontends" }
+sonobe-solidity = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "1ef933a70707fe08865c88ca71269e87fa887855", package = "solidity-verifiers" }
+
+nova-scotia = { version = "0.5.0" }
+nova-snark = { version = "0.23.0" }
+
+[features]
+light-test = [
+    "sonobe/light-test",
+]

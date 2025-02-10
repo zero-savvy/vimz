@@ -1,0 +1,11 @@
+[32mtemplate instances[0m: 162
+non-linear constraints: 120864
+linear constraints: 0
+public inputs: 2
+private inputs: 256
+public outputs: 2
+wires: 118307
+labels: 251221
+[32mWritten successfully:[0m ./grayscale_step.r1cs
+[32mWritten successfully:[0m ./grayscale_step_js/grayscale_step.wasm
+[32mEverything went okay[0m

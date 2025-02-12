@@ -4,7 +4,7 @@
 input_data/
 runs/
 
-*.json
+# *.json
 
 circuits/**/*_cpp/
 circuits/**/*_js/

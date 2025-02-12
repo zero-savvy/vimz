@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 const ImageRedactor: React.FC = () => {
   const [image, setImage] = useState<HTMLImageElement | null>(null)
   const [selectedBlocks, setSelectedBlocks] = useState<boolean[][]>([])
+  const [imageData, setImageData] = useState<string[][][]>([])
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const BLOCK_SIZE = 32
@@ -23,14 +24,43 @@ const ImageRedactor: React.FC = () => {
         canvas.height = image.height
         ctx.drawImage(image, 0, 0)
 
-        // Initialize selectedBlocks
         const blocksX = Math.ceil(image.width / BLOCK_SIZE)
         const blocksY = Math.ceil(image.height / BLOCK_SIZE)
+
+        // Initialize selectedBlocks
         setSelectedBlocks(
           Array(blocksY)
             .fill(null)
             .map(() => Array(blocksX).fill(false)),
         )
+
+        // Process image data
+        const newImageData: string[][][] = []
+        for (let y = 0; y < blocksY; y++) {
+          const row: string[][] = []
+          for (let x = 0; x < blocksX; x++) {
+            const blockData: string[] = []
+            for (let i = 0; i < 128; i++) {
+              let hexString = ""
+              for (let j = 0; j < 8; j++) {
+                const pixelX = x * BLOCK_SIZE + j
+                const pixelY = y * BLOCK_SIZE + i
+                if (pixelX < image.width && pixelY < image.height) {
+                  const data = ctx.getImageData(pixelX, pixelY, 1, 1).data
+                  hexString += data[0].toString(16).padStart(2, "0")
+                  hexString += data[1].toString(16).padStart(2, "0")
+                  hexString += data[2].toString(16).padStart(2, "0")
+                } else {
+                  hexString += "000000" // Padding for out-of-bounds pixels
+                }
+              }
+              blockData.push(hexString)
+            }
+            row.push(blockData)
+          }
+          newImageData.push(row)
+        }
+        setImageData(newImageData)
       }
     }
   }, [image])
@@ -95,11 +125,14 @@ const ImageRedactor: React.FC = () => {
       link.click()
 
       // Download JSON file
-      const jsonContent = JSON.stringify(selectedBlocks)
+      const jsonContent = JSON.stringify({
+        selectedBlocks,
+        imageData,
+      })
       const blob = new Blob([jsonContent], { type: "application/json" })
       const url = URL.createObjectURL(blob)
       const jsonLink = document.createElement("a")
-      jsonLink.download = "selected_blocks.json"
+      jsonLink.download = "image_data.json"
       jsonLink.href = url
       jsonLink.click()
       URL.revokeObjectURL(url)

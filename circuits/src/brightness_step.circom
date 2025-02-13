@@ -13,7 +13,7 @@ template BrightnessHash(width){
     signal input row_tran [width];
 
     // Execute the step
-    Brightness(width)(row_orig, row_tran, step_in.factor);
+    Brightness(width)(row_orig, row_tran, step_in.info);
     // Update IVC state
     step_out <== UpdateIVCStateWithInfo(width)(step_in, row_orig, row_tran);
 }

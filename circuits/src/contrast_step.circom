@@ -16,7 +16,7 @@ template ContrastHash(width){
     signal input row_tran [width];
 
     // Execute the step
-    Contrast(width)(row_orig, row_tran, step_in.factor);
+    Contrast(width)(row_orig, row_tran, step_in.info);
     // Update IVC state
     step_out <== UpdateIVCStateWithInfo(width)(step_in, row_orig, row_tran);
 }

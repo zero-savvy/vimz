@@ -1,11 +1,15 @@
-use sonobe::folding::nova::decider_eth::prepare_calldata;
+use ark_bn254::Fr;
+use sonobe::{folding::nova::decider_eth::prepare_calldata, frontend::FCircuit};
 use sonobe_solidity::utils::get_function_selector_for_nova_cyclefold_verifier;
 
 use crate::sonobe_backend::{decider::DeciderProof, folding::Folding};
 
 /// Converts the given Nova folding and proof into calldata that can be used to call the on-chain
 /// verifier.
-pub fn prepare_contract_calldata(nova: &Folding, proof: DeciderProof) -> Vec<u8> {
+pub fn prepare_contract_calldata<Circuit: FCircuit<Fr>>(
+    nova: &Folding<Circuit>,
+    proof: DeciderProof<Circuit>,
+) -> Vec<u8> {
     let function_selector =
         get_function_selector_for_nova_cyclefold_verifier(nova.z_0.len() * 2 + 1);
     prepare_calldata(

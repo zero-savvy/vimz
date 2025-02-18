@@ -43,7 +43,7 @@ impl Transformation {
     }
 
     /// Returns the amount of the input field elements for a single step for the given transformation.
-    pub fn step_input_width(&self) -> usize {
+    pub const fn step_input_width(&self) -> usize {
         match self {
             // Three rows of 128 entries for the kernel input and one for the result.
             Blur | Sharpness => 512,

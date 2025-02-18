@@ -7,25 +7,42 @@ use tracing::info_span;
 use crate::{
     config::Config,
     sonobe_backend::{
+        circuit::{BlurCircuit, SonobeCircuit},
         decider::{verify_final_proof, Decider},
         folding::{fold_input, prepare_folding, verify_folding},
         input::prepare_input,
         solidity::prepare_contract_calldata,
     },
+    transformation::Transformation,
 };
 
+pub mod circuit;
 pub mod decider;
 pub mod folding;
 pub mod input;
 pub mod solidity;
 
 pub fn run(config: &Config) {
+    match config.function {
+        Transformation::Blur => _run::<BlurCircuit>(config),
+        Transformation::Brightness => {}
+        Transformation::Contrast => {}
+        Transformation::Crop => {}
+        Transformation::Grayscale => {}
+        Transformation::Hash => {}
+        Transformation::Resize => {}
+        Transformation::Sharpness => {}
+    }
+}
+
+fn _run<Circuit: SonobeCircuit>(config: &Config) {
     let mut rng = StdRng::from_seed([41; 32]);
 
     // ========================== Prepare input and folding ========================================
 
     let (ivc_step_inputs, initial_state) = prepare_input(config);
-    let (mut folding, folding_params) = prepare_folding(config, initial_state.clone(), &mut rng);
+    let (mut folding, folding_params) =
+        prepare_folding::<Circuit>(config, initial_state.clone(), &mut rng);
 
     // ========================== Fold the input and verify the folding proof ======================
 

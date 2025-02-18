@@ -144,7 +144,7 @@ dependencies = [
  "bytes",
  "cfg-if",
  "const-hex",
- "derive_more 0.99.18",
+ "derive_more 0.99.19",
  "hex-literal 0.4.1",
  "itoa",
  "ruint",
@@ -1634,9 +1634,9 @@ dependencies = [
 
 [[package]]
 name = "derive_more"
-version = "0.99.18"
+version = "0.99.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f33878137e4dafd7fa914ad4e259e18a4e8e532b9617a2d0150262bf53abfce"
+checksum = "3da29a38df43d6f156149c9b43ded5e018ddff2a855cf2cfd62e8cd7d079c69f"
 dependencies = [
  "convert_case",
  "proc-macro2",
@@ -2035,7 +2035,7 @@ checksum = "69dc321eb6be977f44674620ca3aa21703cb20ffbe560e1ae97da08401ffbcad"
 [[package]]
 name = "experimental-frontends"
 version = "0.1.0"
-source = "git+https://github.com/privacy-scaling-explorations/sonobe?rev=1ef933a70707fe08865c88ca71269e87fa887855#1ef933a70707fe08865c88ca71269e87fa887855"
+source = "git+https://github.com/privacy-scaling-explorations/sonobe?rev=c6f1a246e0705582a75de6becf4ad21f325fa5a1#c6f1a246e0705582a75de6becf4ad21f325fa5a1"
 dependencies = [
  "acvm",
  "ark-circom",
@@ -2153,7 +2153,7 @@ checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 [[package]]
 name = "folding-schemes"
 version = "0.1.0"
-source = "git+https://github.com/privacy-scaling-explorations/sonobe?rev=1ef933a70707fe08865c88ca71269e87fa887855#1ef933a70707fe08865c88ca71269e87fa887855"
+source = "git+https://github.com/privacy-scaling-explorations/sonobe?rev=c6f1a246e0705582a75de6becf4ad21f325fa5a1#c6f1a246e0705582a75de6becf4ad21f325fa5a1"
 dependencies = [
  "ark-bn254 0.5.0",
  "ark-crypto-primitives",
@@ -4641,7 +4641,7 @@ checksum = "b7c388c1b5e93756d0c740965c41e8822f866621d41acbdf6336a6a168f8840c"
 [[package]]
 name = "solidity-verifiers"
 version = "0.1.0"
-source = "git+https://github.com/privacy-scaling-explorations/sonobe?rev=1ef933a70707fe08865c88ca71269e87fa887855#1ef933a70707fe08865c88ca71269e87fa887855"
+source = "git+https://github.com/privacy-scaling-explorations/sonobe?rev=c6f1a246e0705582a75de6becf4ad21f325fa5a1#c6f1a246e0705582a75de6becf4ad21f325fa5a1"
 dependencies = [
  "ark-bn254 0.5.0",
  "ark-groth16",
@@ -5256,6 +5256,8 @@ dependencies = [
  "ark-bn254 0.5.0",
  "ark-groth16",
  "ark-grumpkin",
+ "ark-r1cs-std",
+ "ark-relations 0.5.1",
  "clap 4.5.23",
  "experimental-frontends",
  "folding-schemes",

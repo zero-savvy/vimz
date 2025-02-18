@@ -8,10 +8,12 @@ use vimz::{
     config::{Backend, Config},
     logging::init_logging,
     sonobe_backend::{
+        circuit::{BlurCircuit, SonobeCircuit},
         decider::{Decider, DeciderVerifierParam},
         folding::prepare_folding,
         input::prepare_input,
     },
+    transformation::Transformation,
 };
 
 fn main() {
@@ -22,7 +24,20 @@ fn main() {
         panic!("NovaSnark does not support verifier contract generation");
     }
 
-    let decider_vp = prepare_decider_verification_parameters(&config);
+    match config.function {
+        Transformation::Blur => run::<BlurCircuit>(&config),
+        Transformation::Brightness => {}
+        Transformation::Contrast => {}
+        Transformation::Crop => {}
+        Transformation::Grayscale => {}
+        Transformation::Hash => {}
+        Transformation::Resize => {}
+        Transformation::Sharpness => {}
+    }
+}
+
+fn run<Circuit: SonobeCircuit>(config: &Config) {
+    let decider_vp = prepare_decider_verification_parameters::<Circuit>(config);
 
     let nova_cyclefold_vk =
         NovaCycleFoldVerifierKey::from((decider_vp, config.function.ivc_state_len()));
@@ -35,12 +50,14 @@ fn main() {
     fs::write(output_file, code).expect("Failed to write the verifier contract");
 }
 
-fn prepare_decider_verification_parameters(config: &Config) -> DeciderVerifierParam {
+fn prepare_decider_verification_parameters<Circuit: SonobeCircuit>(
+    config: &Config,
+) -> DeciderVerifierParam<Circuit> {
     // TODO: USE THE SAME RNG EVERYWHERE
     let mut rng = StdRng::from_seed([41; 32]);
 
     let (_, initial_state) = prepare_input(config);
-    let (folding, folding_params) = prepare_folding(config, initial_state, &mut rng);
+    let (folding, folding_params) = prepare_folding::<Circuit>(config, initial_state, &mut rng);
 
     Decider::preprocess(&mut rng, folding_params, folding)
         .expect("Failed to preprocess decider")

@@ -1,42 +1,65 @@
 use ark_bn254::Fr;
 use ark_r1cs_std::fields::fp::FpVar;
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
+use paste::paste;
 use sonobe::{frontend::FCircuit, utils::PathOrBin, Error};
 use sonobe_frontends::{circom::CircomFCircuit, utils::VecF};
+
+use crate::transformation::Transformation;
 
 pub trait SonobeCircuit: FCircuit<Fr, Params = (PathOrBin, PathOrBin, usize)> {
     fn format_input(input: Vec<Fr>) -> Self::ExternalInputs;
 }
 
-#[derive(Clone, Debug)]
-pub struct BlurCircuit(CircomFCircuit<Fr, 2>);
-impl FCircuit<Fr> for BlurCircuit {
-    type Params = <CircomFCircuit<Fr, 2> as FCircuit<Fr>>::Params;
-    type ExternalInputs = <CircomFCircuit<Fr, 2> as FCircuit<Fr>>::ExternalInputs;
-    type ExternalInputsVar = <CircomFCircuit<Fr, 2> as FCircuit<Fr>>::ExternalInputsVar;
+macro_rules! declare_circuit {
+    ($transformation: ident) => {
+        declare_circuit!($transformation, {
+            Transformation::$transformation.step_input_width()
+        });
+    };
+    ($transformation: ident, $eil: expr) => {
+        paste! {
+        #[derive(Clone, Debug)]
+        pub struct [<$transformation Circuit>] (CircomFCircuit<Fr, $eil>);
+        impl FCircuit<Fr> for [<$transformation Circuit>] {
+            type Params = <CircomFCircuit<Fr, $eil> as FCircuit<Fr>>::Params;
+            type ExternalInputs = <CircomFCircuit<Fr, $eil> as FCircuit<Fr>>::ExternalInputs;
+            type ExternalInputsVar = <CircomFCircuit<Fr, $eil> as FCircuit<Fr>>::ExternalInputsVar;
 
-    fn new(params: Self::Params) -> Result<Self, Error> {
-        CircomFCircuit::<Fr, 2>::new(params).map(BlurCircuit)
-    }
+            fn new(params: Self::Params) -> Result<Self, Error> {
+                CircomFCircuit::<Fr, $eil>::new(params).map([<$transformation Circuit>])
+            }
 
-    fn state_len(&self) -> usize {
-        self.0.state_len
-    }
+            fn state_len(&self) -> usize {
+                self.0.state_len
+            }
 
-    fn generate_step_constraints(
-        &self,
-        cs: ConstraintSystemRef<Fr>,
-        i: usize,
-        z_i: Vec<FpVar<Fr>>,
-        external_inputs: Self::ExternalInputsVar,
-    ) -> Result<Vec<FpVar<Fr>>, SynthesisError> {
-        self.0
-            .generate_step_constraints(cs, i, z_i, external_inputs)
-    }
+            fn generate_step_constraints(
+                &self,
+                cs: ConstraintSystemRef<Fr>,
+                i: usize,
+                z_i: Vec<FpVar<Fr>>,
+                external_inputs: Self::ExternalInputsVar,
+            ) -> Result<Vec<FpVar<Fr>>, SynthesisError> {
+                self.0
+                    .generate_step_constraints(cs, i, z_i, external_inputs)
+            }
+        }
+
+        impl SonobeCircuit for [<$transformation Circuit>] {
+            fn format_input(input: Vec<Fr>) -> Self::ExternalInputs {
+                VecF(input)
+            }
+        }
+        }
+    };
 }
 
-impl SonobeCircuit for BlurCircuit {
-    fn format_input(input: Vec<Fr>) -> Self::ExternalInputs {
-        VecF(input)
-    }
-}
+declare_circuit!(Blur);
+declare_circuit!(Brightness);
+declare_circuit!(Contrast);
+declare_circuit!(Crop);
+declare_circuit!(Grayscale);
+declare_circuit!(Hash);
+declare_circuit!(Resize);
+declare_circuit!(Sharpness);

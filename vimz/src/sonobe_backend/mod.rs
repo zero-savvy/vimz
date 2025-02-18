@@ -7,7 +7,7 @@ use tracing::info_span;
 use crate::{
     config::Config,
     sonobe_backend::{
-        circuit::{BlurCircuit, SonobeCircuit},
+        circuit::*,
         decider::{verify_final_proof, Decider},
         folding::{fold_input, prepare_folding, verify_folding},
         input::prepare_input,
@@ -25,13 +25,13 @@ pub mod solidity;
 pub fn run(config: &Config) {
     match config.function {
         Transformation::Blur => _run::<BlurCircuit>(config),
-        Transformation::Brightness => {}
-        Transformation::Contrast => {}
-        Transformation::Crop => {}
-        Transformation::Grayscale => {}
-        Transformation::Hash => {}
-        Transformation::Resize => {}
-        Transformation::Sharpness => {}
+        Transformation::Brightness => _run::<BrightnessCircuit>(config),
+        Transformation::Contrast => _run::<ContrastCircuit>(config),
+        Transformation::Crop => _run::<CropCircuit>(config),
+        Transformation::Grayscale => _run::<GrayscaleCircuit>(config),
+        Transformation::Hash => _run::<HashCircuit>(config),
+        Transformation::Resize => _run::<ResizeCircuit>(config),
+        Transformation::Sharpness => _run::<SharpnessCircuit>(config),
     }
 }
 

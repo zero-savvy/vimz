@@ -20,6 +20,7 @@ ark-relations = { version = "^0.5.0" }
 clap = { version = "4.5.16", features = ["derive"] }
 num-bigint = { version = "0.4.3" }
 num-traits = { version = "0.2.15" }
+paste = { version = "1.0.15" }
 rand = { version = "0.8.5" }
 serde = { version = "1.0" }
 serde_json = { version = "1.0.85" }

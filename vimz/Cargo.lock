@@ -5265,6 +5265,7 @@ dependencies = [
  "nova-snark",
  "num-bigint 0.4.6",
  "num-traits",
+ "paste",
  "rand 0.8.5",
  "serde",
  "serde_json",

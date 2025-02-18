@@ -8,7 +8,10 @@ use vimz::{
     config::{Backend, Config},
     logging::init_logging,
     sonobe_backend::{
-        circuit::{BlurCircuit, SonobeCircuit},
+        circuit::{
+            BlurCircuit, BrightnessCircuit, ContrastCircuit, CropCircuit, GrayscaleCircuit,
+            HashCircuit, ResizeCircuit, SharpnessCircuit, SonobeCircuit,
+        },
         decider::{Decider, DeciderVerifierParam},
         folding::prepare_folding,
         input::prepare_input,
@@ -26,13 +29,13 @@ fn main() {
 
     match config.function {
         Transformation::Blur => run::<BlurCircuit>(&config),
-        Transformation::Brightness => {}
-        Transformation::Contrast => {}
-        Transformation::Crop => {}
-        Transformation::Grayscale => {}
-        Transformation::Hash => {}
-        Transformation::Resize => {}
-        Transformation::Sharpness => {}
+        Transformation::Brightness => run::<BrightnessCircuit>(&config),
+        Transformation::Contrast => run::<ContrastCircuit>(&config),
+        Transformation::Crop => run::<CropCircuit>(&config),
+        Transformation::Grayscale => run::<GrayscaleCircuit>(&config),
+        Transformation::Hash => run::<HashCircuit>(&config),
+        Transformation::Resize => run::<ResizeCircuit>(&config),
+        Transformation::Sharpness => run::<SharpnessCircuit>(&config),
     }
 }
 

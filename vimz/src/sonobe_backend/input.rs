@@ -51,7 +51,7 @@ fn prepare_input_for_transformation(
         }
 
         // Simply rewrite the input data.
-        Hash | Crop => input.original,
+        Hash | Crop | Redact => input.original,  // TODO: Redact!!!
 
         // Concatenate the batches of original and transformed rows.
         Resize => {
@@ -68,5 +68,6 @@ fn prepare_input_for_transformation(
 
             prepared
         }
+
     }
 }

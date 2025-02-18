@@ -84,7 +84,9 @@ fn prepare_step_input(
                     input.transformed[step * t_range..(step + 1) * t_range]
                 )),
             )
-        }
+        },
+
+        Redact => block_input(json!(input.original[step]), input.extra[step]),
     }
 }
 
@@ -94,5 +96,13 @@ fn row_input(row_orig: Value, row_tran: Option<Value>) -> HashMap<String, Value>
     if let Some(row_tran) = row_tran {
         map.insert("row_tran".to_string(), row_tran);
     }
+    map
+}
+
+
+fn block_input(block_orig: Value, redact: Value) -> HashMap<String, Value> {
+    let mut map = HashMap::new();
+    map.insert("row_orig".to_string(), block_orig);
+    map.insert("redact".to_string(), redact);
     map
 }

@@ -32,6 +32,7 @@ pub fn run(config: &Config) {
         Transformation::Hash => _run::<HashCircuit>(config),
         Transformation::Resize => _run::<ResizeCircuit>(config),
         Transformation::Sharpness => _run::<SharpnessCircuit>(config),
+        Transformation::Redact => {},
     }
 }
 

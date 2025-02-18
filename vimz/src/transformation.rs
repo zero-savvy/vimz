@@ -13,6 +13,7 @@ pub enum Transformation {
     Hash,
     Resize,
     Sharpness,
+    Redact
 }
 
 use Transformation::*;
@@ -28,7 +29,7 @@ impl Transformation {
             Brightness | Contrast => zzv(input.factor()),
             Crop => zzv(input.info()),
             Grayscale | Resize => vec![zero; 2],
-            Hash => vec![zero],
+            Hash | Redact => vec![zero],
         }
     }
 
@@ -38,7 +39,7 @@ impl Transformation {
             Blur | Sharpness => 4,
             Brightness | Contrast | Crop => 3,
             Grayscale | Resize => 2,
-            Hash => 1,
+            Hash | Redact => 1,
         }
     }
 
@@ -53,6 +54,8 @@ impl Transformation {
             Crop | Hash => 128,
             // Three rows of 128 entries for the original image and two of 64 entries for the transformed.
             Resize => 128 * 3 + 64 * 2,
+            // 32 x 32 blocks ---> 8-pixel compression (instead of 10 pixel in row-by-row method)
+            Redact => 128,
         }
     }
 }

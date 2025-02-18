@@ -48,6 +48,8 @@ pub enum Extra {
     Factor { factor: u64 },
     /// An optional scalar info.
     Info { info: u64 },
+    /// An option for redaction.
+    Redact { redact: Vec<u64> },
     /// No extra information.
     None {},
 }
@@ -64,6 +66,13 @@ impl Extra {
         match self {
             Extra::Info { info } => *info,
             _ => unreachable!("No info provided"),
+        }
+    }
+
+    pub fn redact(&self) -> Vec<u64> {
+        match self {
+            Extra::Redact { redact } => redact.clone(),
+            _ => unreachable!("No redact provided"),
         }
     }
 }

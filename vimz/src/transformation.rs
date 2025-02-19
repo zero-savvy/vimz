@@ -28,8 +28,8 @@ impl Transformation {
             Blur | Sharpness => vec![zero; 4],
             Brightness | Contrast => zzv(input.factor()),
             Crop => zzv(input.info()),
-            Grayscale | Resize => vec![zero; 2],
-            Hash | Redact => vec![zero],
+            Grayscale | Resize | Redact => vec![zero; 2],
+            Hash => vec![zero],
         }
     }
 
@@ -38,8 +38,8 @@ impl Transformation {
         match self {
             Blur | Sharpness => 4,
             Brightness | Contrast | Crop => 3,
-            Grayscale | Resize => 2,
-            Hash | Redact => 1,
+            Grayscale | Resize | Redact => 2,
+            Hash => 1,
         }
     }
 
@@ -55,7 +55,7 @@ impl Transformation {
             // Three rows of 128 entries for the original image and two of 64 entries for the transformed.
             Resize => 128 * 3 + 64 * 2,
             // 32 x 32 blocks ---> 8-pixel compression (instead of 10 pixel in row-by-row method)
-            Redact => 128,
+            Redact => 128 + 1,
         }
     }
 }
@@ -97,6 +97,18 @@ impl Resolution {
             Resolution::_8K => (2, 1),
         }
     }
+
+    /// Returns the number of iterations in block-based transformations.
+    pub fn iteration_count_block_based(&self) -> usize {
+        match self {
+            Resolution::SD => 0,   // TODO
+            Resolution::HD => 300,
+            Resolution::FHD => 0,  // TODO
+            Resolution::_4K => 0,  // TODO
+            Resolution::_8K => 0,  // TODO
+        }
+    }
+
 }
 
 #[cfg(test)]

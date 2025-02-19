@@ -17,6 +17,9 @@ pub struct VIMzInput<FieldRepr> {
     #[serde(flatten)]
     /// Extra information for the transformation.
     pub extra: Extra,
+    /// For row-by-row transformations, the apply is not provided and thus empty.
+    #[serde(default)]
+    pub apply: Vec<FieldRepr>,
 }
 
 impl VIMzInput<String> {
@@ -36,6 +39,7 @@ impl VIMzInput<Fr> {
             original: string_2d_seq_to_fr_2d_seq(&self_string.original),
             transformed: string_2d_seq_to_fr_2d_seq(&self_string.transformed),
             extra: self_string.extra,
+            apply: string_seq_to_fr_seq(&self_string.apply),
         }
     }
 }
@@ -48,8 +52,6 @@ pub enum Extra {
     Factor { factor: u64 },
     /// An optional scalar info.
     Info { info: u64 },
-    /// An option for redaction.
-    Redact { redact: Vec<u64> },
     /// No extra information.
     None {},
 }
@@ -66,13 +68,6 @@ impl Extra {
         match self {
             Extra::Info { info } => *info,
             _ => unreachable!("No info provided"),
-        }
-    }
-
-    pub fn redact(&self) -> Vec<u64> {
-        match self {
-            Extra::Redact { redact } => redact.clone(),
-            _ => unreachable!("No redact provided"),
         }
     }
 }

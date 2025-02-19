@@ -36,6 +36,7 @@ fn main() {
         Transformation::Hash => run::<HashCircuit>(&config),
         Transformation::Resize => run::<ResizeCircuit>(&config),
         Transformation::Sharpness => run::<SharpnessCircuit>(&config),
+        Transformation::Redact => {},
     }
 }
 

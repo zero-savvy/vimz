@@ -41,7 +41,7 @@ const ImageRedactor: React.FC = () => {
           for (let x = 0; x < blocksX; x++) {
             const blockData: string[] = []
             for (let i = 0; i < 128; i++) {
-              let hexString = ""
+              let hexString = "0x"
               for (let j = 0; j < 8; j++) {
                 const pixelX = x * BLOCK_SIZE + j
                 const pixelY = y * BLOCK_SIZE + i
@@ -125,9 +125,11 @@ const ImageRedactor: React.FC = () => {
       link.click()
 
       // Download JSON file
+      const apply = selectedBlocks.flatMap(row => row.map(b => b ? "1" : "0"));
+      const original = imageData.flatMap(subArray => subArray)
       const jsonContent = JSON.stringify({
-        selectedBlocks,
-        imageData,
+        apply,
+        original,
       })
       const blob = new Blob([jsonContent], { type: "application/json" })
       const url = URL.createObjectURL(blob)

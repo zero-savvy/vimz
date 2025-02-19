@@ -1,11 +1,11 @@
 [32mtemplate instances[0m: 154
 non-linear constraints: 7150
 linear constraints: 0
-public inputs: 3
+public inputs: 2
 private inputs: 129 (114 belong to witness)
-public outputs: 3
-wires: 7269
-labels: 34431
+public outputs: 2
+wires: 7267
+labels: 34427
 [32mWritten successfully:[0m ./redact_step.r1cs
 [32mWritten successfully:[0m ./redact_step_js/redact_step.wasm
 [32mEverything went okay[0m

@@ -5,14 +5,14 @@ include "utils/pixels.circom";
 include "utils/hashers.circom";
 
 template RedactHash(blockSize) {
-    input  IVCStateWithInfo() step_in;
-    output IVCStateWithInfo() step_out;
+    input  IVCState() step_in;
+    output IVCState() step_out;
 
     // Private inputs
     signal input row_orig [blockSize];
     signal input redact;
 
-    var prev_redact_hash = step_in.base.tran_hash;
+    var prev_redact_hash = step_in.tran_hash;
 
     component block_hasher = ArrayHasher(blockSize);
     for (var i=0; i<blockSize; i++) {
@@ -25,6 +25,6 @@ template RedactHash(blockSize) {
     selector.s <== redact;
 
     // Update IVC state
-    step_out.base.orig_hash <== PairHasher()(step_in.base.orig_hash, block_hasher.hash);
-    step_out.base.tran_hash <== selector.out;
+    step_out.orig_hash <== PairHasher()(step_in.orig_hash, block_hasher.hash);
+    step_out.tran_hash <== selector.out;
 }

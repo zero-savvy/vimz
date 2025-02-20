@@ -7,31 +7,33 @@ use sonobe_frontends::{circom::CircomFCircuit, utils::VecF};
 
 use crate::transformation::Transformation;
 
-pub trait SonobeCircuit: FCircuit<Fr, Params = (PathOrBin, PathOrBin, usize)> {
+pub trait SonobeCircuit: FCircuit<Fr, Params = (PathOrBin, PathOrBin)> {
     fn format_input(input: Vec<Fr>) -> Self::ExternalInputs;
 }
 
 macro_rules! declare_circuit {
     ($transformation: ident) => {
-        declare_circuit!($transformation, {
-            Transformation::$transformation.step_input_width()
-        });
+        declare_circuit!(
+            $transformation,
+            {Transformation::$transformation.ivc_state_len()},
+            {Transformation::$transformation.step_input_width()},
+        );
     };
-    ($transformation: ident, $eil: expr) => {
+    ($transformation: ident, $sl: expr, $eil: expr $(,)?) => {
         paste! {
         #[derive(Clone, Debug)]
-        pub struct [<$transformation Circuit>] (CircomFCircuit<Fr, $eil>);
+        pub struct [<$transformation Circuit>] (CircomFCircuit<Fr, $sl, $eil>);
         impl FCircuit<Fr> for [<$transformation Circuit>] {
-            type Params = <CircomFCircuit<Fr, $eil> as FCircuit<Fr>>::Params;
-            type ExternalInputs = <CircomFCircuit<Fr, $eil> as FCircuit<Fr>>::ExternalInputs;
-            type ExternalInputsVar = <CircomFCircuit<Fr, $eil> as FCircuit<Fr>>::ExternalInputsVar;
+            type Params = <CircomFCircuit<Fr, $sl, $eil> as FCircuit<Fr>>::Params;
+            type ExternalInputs = <CircomFCircuit<Fr, $sl, $eil> as FCircuit<Fr>>::ExternalInputs;
+            type ExternalInputsVar = <CircomFCircuit<Fr, $sl, $eil> as FCircuit<Fr>>::ExternalInputsVar;
 
             fn new(params: Self::Params) -> Result<Self, Error> {
-                CircomFCircuit::<Fr, $eil>::new(params).map([<$transformation Circuit>])
+                CircomFCircuit::<Fr, $sl, $eil>::new(params).map([<$transformation Circuit>])
             }
 
             fn state_len(&self) -> usize {
-                self.0.state_len
+                $sl
             }
 
             fn generate_step_constraints(

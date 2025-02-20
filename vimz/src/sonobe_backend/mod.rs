@@ -52,7 +52,7 @@ fn _run<Circuit: SonobeCircuit>(config: &Config) {
     // ========================== Prepare decider and compress the proof ===========================
 
     let (decider_pp, decider_vp) = info_span!("Prepare decider").in_scope(|| {
-        Decider::preprocess(&mut rng, folding_params, folding.clone())
+        Decider::<Circuit>::preprocess(&mut rng, (folding_params, initial_state.len()))
             .expect("Failed to preprocess decider")
     });
     let proof = info_span!("Generate decider proof").in_scope(|| {

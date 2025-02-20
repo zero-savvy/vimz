@@ -60,9 +60,10 @@ fn prepare_decider_verification_parameters<Circuit: SonobeCircuit>(
     let mut rng = StdRng::from_seed([41; 32]);
 
     let (_, initial_state) = prepare_input(config);
-    let (folding, folding_params) = prepare_folding::<Circuit>(config, initial_state, &mut rng);
+    let initial_state_len = initial_state.len();
+    let (_, folding_params) = prepare_folding::<Circuit>(config, initial_state, &mut rng);
 
-    Decider::preprocess(&mut rng, folding_params, folding)
+    Decider::<Circuit>::preprocess(&mut rng, (folding_params, initial_state_len))
         .expect("Failed to preprocess decider")
         .1
 }

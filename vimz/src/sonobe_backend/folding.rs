@@ -26,7 +26,7 @@ pub fn prepare_folding<Circuit: SonobeCircuit>(
     initial_state: Vec<Fr>,
     rng: &mut (impl RngCore + CryptoRng),
 ) -> (Folding<Circuit>, FoldingParams<Circuit>) {
-    let f_circuit = create_circuit::<Circuit>(config, initial_state.len());
+    let f_circuit = create_circuit::<Circuit>(config);
 
     let nova_params = info_span!("Preprocess Nova").in_scope(|| {
         let nova_preprocess_params =
@@ -42,11 +42,10 @@ pub fn prepare_folding<Circuit: SonobeCircuit>(
 
 /// Create a new `CircomFCircuit` for the given configuration.
 #[tracing::instrument(name = "Create circuit", skip_all)]
-fn create_circuit<Circuit: SonobeCircuit>(config: &Config, ivc_state_width: usize) -> Circuit {
+fn create_circuit<Circuit: SonobeCircuit>(config: &Config) -> Circuit {
     let f_circuit_params = (
         config.circuit_file().into(),
         config.witness_generator_file().into(),
-        ivc_state_width,
     );
     Circuit::new(f_circuit_params).expect("Failed to create circuit")
 }

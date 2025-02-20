@@ -27,12 +27,15 @@ serde_json = { version = "1.0.85" }
 tracing = { version = "0.1.26" }
 tracing-subscriber = { version = "0.3.18", features = ["fmt", "json", "env-filter"] }
 
-sonobe = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "c6f1a246e0705582a75de6becf4ad21f325fa5a1", package = "folding-schemes" }
-sonobe-frontends = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "c6f1a246e0705582a75de6becf4ad21f325fa5a1", package = "experimental-frontends" }
-sonobe-solidity = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "c6f1a246e0705582a75de6becf4ad21f325fa5a1", package = "solidity-verifiers" }
+sonobe = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "fc91430", package = "folding-schemes" }
+sonobe-frontends = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "fc91430", package = "experimental-frontends" }
+sonobe-solidity = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "fc91430", package = "solidity-verifiers" }
 
 nova-scotia = { version = "0.5.0" }
 nova-snark = { version = "0.23.0" }
+
+[patch.crates-io]
+ark-r1cs-std = { git = "https://github.com/yelhousni/r1cs-std", rev = "440ca3" } # "perf/sw" branch
 
 [features]
 light-test = [

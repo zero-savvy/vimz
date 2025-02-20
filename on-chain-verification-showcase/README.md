@@ -56,6 +56,21 @@ All transformations are implemented as **Circom circuits**, located in the [`cir
 
 ---
 
+## Deployment
+
+All the contracts have been deployed to Aleph Zero EVM Testnet:
+ - [ChallengeHub contract](https://evm-explorer-testnet.alephzero.org/address/0x5Bd9Bad14616C56a83f81e5888bCe48A2816E9B3?tab=contract)
+ - [Blur verifier contract](https://evm-explorer-testnet.alephzero.org/address/0x65cC5C680994a53c0075A3AbDB6c93c9Abf743Db?tab=contract)
+ - [Contrast verifier contract](https://evm-explorer-testnet.alephzero.org/address/0x25ba50DE21C502BCfb0e5889C8e565a8571D9d50?tab=contract)
+
+The scenario has been run successfully on these contracts and corresponding transactions can be investigated:
+ - [challenge creation](https://evm-explorer-testnet.alephzero.org/tx/0x8063ebb1beaa059ecafdba8c90ec8d485c1a98196c9a744a7841a325ac0332b8)
+ - [solution submission](https://evm-explorer-testnet.alephzero.org/tx/0xbeab3cf18d6014dd5506dce36c285d2c2d78ca8a582eec6ce4554e501244969b)
+
+In order to play with the contracts on your own, you can obtain TZERO (native token) using [faucet](https://drpc.org/faucet/alephzero).
+
+---
+
 ## Running the scenario locally
 
 ### Requirements

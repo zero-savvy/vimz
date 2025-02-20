@@ -85,9 +85,9 @@ After running `./scenario.sh`, you should see output similar to the following:
 You can also connect some frontend explorer.
 For example, investigating the chain with Ethernal gives you a nice overview of the transactions and the contract state:
 
-![create-challenge-event.png](create-challenge-event.png)
-![submit-solution-1.png](submit-solution-1.png)
-![submit-solution-2.png](submit-solution-2.png)
+![create-challenge-event.png](screenshots/create-challenge-event.png)
+![submit-solution-1.png](screenshots/submit-solution-1.png)
+![submit-solution-2.png](screenshots/submit-solution-2.png)
 
 ## Known issues
 

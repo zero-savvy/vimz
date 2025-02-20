@@ -33,7 +33,7 @@ impl Transformation {
     }
 
     /// Returns the size of the IVC state.
-    pub fn ivc_state_len(&self) -> usize {
+    pub const fn ivc_state_len(&self) -> usize {
         match self {
             Blur | Sharpness => 4,
             Brightness | Contrast | Crop => 3,
@@ -74,7 +74,7 @@ pub enum Resolution {
 impl Resolution {
     /// Returns the number of iterations for the given resolution (i.e. the number of rows in the
     /// image).
-    pub fn iteration_count(&self) -> usize {
+    pub const fn iteration_count(&self) -> usize {
         match self {
             Resolution::SD => 480,
             Resolution::HD => 720,
@@ -85,7 +85,7 @@ impl Resolution {
     }
 
     /// Returns the ratio of the current resolution to the lower resolution.
-    pub fn ratio_to_lower(&self) -> (usize, usize) {
+    pub const fn ratio_to_lower(&self) -> (usize, usize) {
         match self {
             Resolution::SD => panic!("Cannot lower resolution from SD"),
             Resolution::HD => (3, 2),

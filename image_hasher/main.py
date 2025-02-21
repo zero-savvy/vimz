@@ -1,5 +1,6 @@
 import json
 import subprocess
+import sys
 import tempfile
 from os import path
 
@@ -14,7 +15,6 @@ CIRCUIT_DIR = "./circuits"
 CIRCUIT_FILE = f"{CIRCUIT_DIR}/image_running_hash.circom"
 CPP_DIR = f"{CIRCUIT_DIR}/image_running_hash_cpp"
 WITNESS_GENERATOR = f"{CPP_DIR}/image_running_hash"
-INPUT_IMAGE = "source_image/HD.png"
 
 
 def log(message, **kwargs):
@@ -126,9 +126,14 @@ def compute_hash(image):
 ########################################################################################################################
 
 if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        log("Usage: python3 main.py <image_path>")
+        sys.exit(1)
+    image_path = sys.argv[1]
+
     try:
         prepare_witness_generator()
-        image_data = process_image(INPUT_IMAGE)
+        image_data = process_image(image_path)
         final_hash = compute_hash(image_data)
 
         log("")

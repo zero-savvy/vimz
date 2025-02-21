@@ -18,17 +18,21 @@ INPUT_IMAGE = "source_image/HD.png"
 
 
 def log(message, **kwargs):
+    """Prints a formatted log message."""
     print(f"\033[1m{message}\033[0m", **kwargs)
 
 
 def clear_current_log_line():
+    """Clears the current line in the terminal (for progress updates)."""
     print("\r\033[K", end="")
 
 
 ########################################################################################################################
 ####### Compile the Circom circuit and build the C++ witness generator #################################################
 ########################################################################################################################
+
 def prepare_witness_generator():
+    """Compiles the Circom circuit and builds the C++ witness generator if it doesn't already exist."""
     if path.exists(WITNESS_GENERATOR):
         log(f"Witness generator already exists at {WITNESS_GENERATOR}.")
     else:
@@ -37,12 +41,14 @@ def prepare_witness_generator():
 
 
 def _compile_circuit():
+    """Compiles the Circom circuit."""
     log("Compiling Circom circuit...", end="", flush=True)
     subprocess.run(["circom", CIRCUIT_FILE, "--O2", "-c", "-o", CIRCUIT_DIR], check=True, stdout=subprocess.DEVNULL)
     log(" Done ✅")
 
 
 def _build_witness_generator():
+    """Builds the C++ witness generator using Make."""
     log("Building C++ witness generator...", end="", flush=True)
     subprocess.run(["make", "-C", CPP_DIR], check=True, stdout=subprocess.DEVNULL)
     log(" Done ✅")
@@ -53,21 +59,24 @@ def _build_witness_generator():
 ########################################################################################################################
 
 def process_image(image_path):
+    """Loads an image and converts it into a compressed row-by-row format suitable for witness generation."""
     image = _load_image(image_path)
-    return _image_row_by_row_compressed(image)
+    return _compress_image(image)
 
 
 def _load_image(image_path):
+    """Loads an image from file."""
     log("Loading image...", end="", flush=True)
     with Image.open(image_path) as image:
         log(" Done ✅")
-        return image.copy()
+        return np.array(image)
 
 
-def _image_row_by_row_compressed(image_in):
+def _compress_image(image):
+    """Processes image row-by-row and compresses pixel data into hex format."""
     log("Processing image for hash computation...", end="", flush=True)
     output_array = []
-    for row in np.array(image_in):
+    for row in image:
         compressed_row = []
         hex_value = ''
         for col, pixel in enumerate(row):
@@ -88,25 +97,28 @@ def _image_row_by_row_compressed(image_in):
 ########################################################################################################################
 
 def compute_hash(image):
+    """Computes the running hash for an image row-by-row using the Circom witness generator."""
     accumulator = "0"  # Initial hash
 
-    input_file = tempfile.NamedTemporaryFile("w+")
-    witness_file = tempfile.NamedTemporaryFile()
+    with tempfile.NamedTemporaryFile("w+", delete=True) as input_file, \
+            tempfile.NamedTemporaryFile(delete=True) as witness_file:
+        for i, row in enumerate(image):
+            log(f"\rProcessing row {i + 1}/{len(image)}...", end="", flush=True)
 
-    for i, row in enumerate(image):
-        log(f"\rProcessing row {i + 1}/{len(image)}...", end="", flush=True)
+            # Write the current row and accumulator to the input file
+            json.dump({"row": row, "accumulator": accumulator}, input_file)
+            input_file.seek(0)
 
-        # Write the current row and accumulator to the input file and reset the file pointer
-        json.dump({"row": row, "accumulator": accumulator}, input_file)
-        input_file.seek(0)
+            # Generate the witness and read output hash
+            result = subprocess.run(
+                [WITNESS_GENERATOR, input_file.name, witness_file.name],
+                check=True, capture_output=True, text=True
+            )
+            accumulator = result.stdout.strip()
 
-        # Generate the witness for the current row. Read the hash from the logs.
-        accumulator = subprocess.run([WITNESS_GENERATOR, input_file.name, witness_file.name],
-                                     check=True, capture_output=True, text=True).stdout.strip()
-
-    clear_current_log_line()
-    log("Processed full image ✅")
-    return accumulator
+        clear_current_log_line()
+        log("Processed full image ✅")
+        return accumulator
 
 
 ########################################################################################################################
@@ -114,10 +126,14 @@ def compute_hash(image):
 ########################################################################################################################
 
 if __name__ == "__main__":
-    prepare_witness_generator()
-    image = process_image(INPUT_IMAGE)
-    hash = compute_hash(image)
+    try:
+        prepare_witness_generator()
+        image_data = process_image(INPUT_IMAGE)
+        final_hash = compute_hash(image_data)
 
-    log("")
-    log(f"Computed hash:       {hash}")
-    log(f"Computed hash (hex): {hex(int(hash))}")
+        log("")
+        log(f"Computed hash:       {final_hash}")
+        log(f"Computed hash (hex): {hex(int(final_hash))}")
+
+    except Exception as e:
+        log(f"❌ Error: {e}")

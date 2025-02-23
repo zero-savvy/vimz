@@ -14,5 +14,9 @@ dependencies = [
 ]
 
 [project.scripts]
+# Image manipulation and processing
 image-editor = "pyvimz.image_editor:main"
 image-hasher = "pyvimz.image_hasher:main"
+# Circuits analysis
+analyze-circuits = "pyvimz.circuits.analyze_circuits:main"
+compare-circuits = "pyvimz.circuits.compare_circuits:main"

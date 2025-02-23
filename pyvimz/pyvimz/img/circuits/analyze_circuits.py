@@ -30,7 +30,7 @@ def gather_circuit_parameters(backend):
     return parse_logs_to_dataframe(files)
 
 
-if __name__ == '__main__':
+def main():
     if len(sys.argv) != 2:
         raise ValueError("Invalid number of arguments. Usage: python analyze_circuits.py <backend>")
     backend = sys.argv[1]

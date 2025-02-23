@@ -53,8 +53,8 @@ circuits/%_step.r1cs circuits/%_step_js/%_step.wasm circuits/%_step.compile_log:
 
 .PHONY: report-circuit-parameters
 report-circuit-parameters: build-circuits
-	@python3 analysis_utils/analyze_circuits.py sonobe > /dev/null
-	@python3 analysis_utils/analyze_circuits.py nova_snark > /dev/null
+	@analyze-circuits sonobe > /dev/null
+	@analyze-circuits nova_snark > /dev/null
 
 .PHONY: clean-circuits
 clean-circuits:

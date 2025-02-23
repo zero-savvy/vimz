@@ -5,7 +5,7 @@ from tabulate import tabulate
 
 from analyze_circuits import parameters
 
-if __name__ == '__main__':
+def main():
     if len(sys.argv) != 3:
         raise ValueError("Invalid number of arguments. Usage: python compare_circuits.py <param_file_1> <param_file_2>")
     params_1, params_2 = pd.read_csv(sys.argv[1]), pd.read_csv(sys.argv[2])

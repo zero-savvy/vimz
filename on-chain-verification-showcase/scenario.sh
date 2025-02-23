@@ -31,9 +31,9 @@ log_progress() {
 ##### ENVIRONMENT ######################################################################################################
 ########################################################################################################################
 prepare_env() {
-  log_progress "✅ Checking requirements and installing dependencies"
   ./check-env.sh > /dev/null
   npm install &>> /dev/null
+  log_progress "✅ Checked requirements and installing dependencies"
 }
 
 ########################################################################################################################
@@ -129,7 +129,7 @@ fetch_challenge() {
 
 process_image() {
   if [ ! -f "./blur.json" ]; then
-    python3 ../image_editor/main.py --image-path challenge.png --output-dir ./ blur &>> /dev/null
+    image-editor --image-path challenge.png --output-dir ./ blur &>> /dev/null
     log_progress "  ✅ Image processed"
   else
     log_progress "  ❕ Found processed image - have you cleared artifacts from previous runs?"

@@ -23,7 +23,7 @@ generate-input-data: $(patsubst %, $(INPUT_TARGET_DIR)%.json, $(TRANSFORMATIONS)
 
 $(INPUT_TARGET_DIR)%.json:
 	@mkdir -p $(INPUT_TARGET_DIR)
-	@python3 image_editor/main.py $* $(INPUT_SOURCE) $(INPUT_TARGET) $(EXTRA_ARGS_$*)
+	@image-editor $* $(INPUT_SOURCE) $(INPUT_TARGET) $(EXTRA_ARGS_$*)
 
 ########################################################################################################################
 ########################### CIRCUIT COMPILATION ########################################################################

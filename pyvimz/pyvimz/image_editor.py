@@ -4,134 +4,11 @@ import tkinter as tk
 from os import path
 from tkinter import filedialog
 
-import numpy as np
 from PIL import Image
-from pyvimz.img_utils import compress, conv2d
+
+from pyvimz.img.ops import compress
+from pyvimz.img.transformations import *
 from pyvimz.plotting import plot_images_side_by_side
-
-
-def sharpen_image(image_path):
-    kernel = np.array([
-        [0, -1, 0],
-        [-1, 5, -1],
-        [0, -1, 0]
-    ])
-    with Image.open(image_path) as image:
-        image_np = np.array(image)
-        r_channel, g_channel, b_channel = np.rollaxis(image_np, axis=-1)
-        r_adjusted = conv2d(r_channel, kernel)
-        g_adjusted = conv2d(g_channel, kernel)
-        b_adjusted = conv2d(b_channel, kernel)
-        adjusted_image = np.dstack((r_adjusted, g_adjusted, b_adjusted))
-
-        return adjusted_image, [["0x00"] * (len(image_np[0]) // 10)]
-
-
-def blur_image(image_path):
-    kernel = np.array([
-        [1, 1, 1],
-        [1, 1, 1],
-        [1, 1, 1]
-    ])
-    with Image.open(image_path) as image:
-        image_np = np.array(image)
-        r_channel, g_channel, b_channel = np.rollaxis(image_np, axis=-1)
-
-        r_adjusted = conv2d(r_channel, kernel, 9)
-        g_adjusted = conv2d(g_channel, kernel, 9)
-        b_adjusted = conv2d(b_channel, kernel, 9)
-        adjusted_image = np.dstack((r_adjusted, g_adjusted, b_adjusted))
-
-        return adjusted_image, [["0x00"] * (len(image_np[0]) // 10)]
-
-
-def convert_to_grayscale(image_path):
-    with Image.open(image_path) as image:
-        return image.convert('L')
-
-
-def adjust_contrast(image_path, desired_contrast):
-    with Image.open(image_path) as image:
-        image_np = np.array(image)
-        r_channel, g_channel, b_channel = np.rollaxis(image_np, axis=-1)
-        r_mean = int(128 * 1000)
-        b_mean = int(128 * 1000)
-        g_mean = int(128 * 1000)
-        r_adjusted = ((r_channel - float(r_mean) / 1000) * desired_contrast + float(r_mean) / 1000).clip(0, 255).astype(
-            np.uint8)
-        g_adjusted = ((g_channel - float(g_mean) / 1000) * desired_contrast + float(g_mean) / 1000).clip(0, 255).astype(
-            np.uint8)
-        b_adjusted = ((b_channel - float(b_mean) / 1000) * desired_contrast + float(b_mean) / 1000).clip(0, 255).astype(
-            np.uint8)
-        return np.dstack((r_adjusted, g_adjusted, b_adjusted))
-
-
-def adjust_brightness(image_path, brightness_factor):
-    with Image.open(image_path) as image:
-        image_np = np.array(image)
-        np_image_float = image_np.astype(float)
-        adjusted_image_float = np_image_float * brightness_factor
-        return np.clip(adjusted_image_float, 0, 255).astype(np.uint8)
-
-
-def crop_image(image_path, x: int, y: int, new_width: int, new_height: int):
-    with Image.open(image_path) as image:
-        image_np = np.array(image)
-        return image_np[y:y + new_height, x:x + new_width]
-
-
-def resize_image(image_path, new_height: int, new_width: int):
-    with Image.open(image_path) as image:
-        img_array = np.array(image)
-
-        # Get the dimensions of the original image
-        height, width, channels = img_array.shape
-
-        # Calculate the scaling factors for each dimension
-        x_ratio = float(width) / float(new_width)
-        y_ratio = float(height) / float(new_height)
-
-        # Initialize the new image array
-        new_img_array = np.zeros((new_height, new_width, channels), dtype=np.uint8)
-
-        if height == 720:
-            # Perform bilinear interpolation
-            for i in range(new_height):
-                for j in range(new_width):
-                    x_l = int(j * x_ratio)
-                    x_h = int(j * x_ratio) + 1
-                    y_l = int(i * y_ratio)
-                    y_h = int(i * y_ratio) + 1
-
-                    a = img_array[y_l, x_l]
-                    b = img_array[y_l, x_h]
-                    c = img_array[y_h, x_l]
-                    d = img_array[y_h, x_h]
-
-                    weight = 2 if i % 2 == 0 else 1
-                    weight = float(weight) / 3
-                    summ = a * weight + b * weight \
-                           + c * (1 - weight) + d * (1 - weight)
-                    new_img_array[i, j] = summ / 2
-        else:
-            # Perform bilinear interpolation
-            for i in range(new_height):
-                for j in range(new_width):
-                    x_l = int(j * x_ratio)
-                    x_h = int(j * x_ratio) + 1
-                    y_l = int(i * y_ratio)
-                    y_h = int(i * y_ratio) + 1
-
-                    a = img_array[y_l, x_l]
-                    b = img_array[y_l, x_h]
-                    c = img_array[y_h, x_l]
-                    d = img_array[y_h, x_h]
-
-                    weight = float(1) / 2
-                    summ = a * weight + b * weight + c * weight + d * weight
-                    new_img_array[i, j] = summ / 2
-
-        return new_img_array
 
 
 def get_image_path(args):
@@ -200,20 +77,23 @@ def main():
     # Initialize the output dictionary
     out = {"original": compress(original_image)}
 
+    with Image.open(image_path) as image:
+        workspace_image = image.copy()
+
     if operation == "hash":
         # nothing to do here for now (currently, we don't check public input)
         transformed = None
 
     elif operation == "grayscale":
-        transformed = operations[operation](image_path)
+        transformed = operations[operation](workspace_image)
 
     elif operation in {"brightness", "contrast"}:
         factor = args.factor
-        transformed = operations[operation](image_path, factor)
+        transformed = operations[operation](workspace_image, factor)
         out["factor"] = int(factor * 10)
 
     elif operation in {"sharpness", "blur"}:
-        transformed_image, zeros = operations[operation](image_path)
+        transformed_image, zeros = operations[operation](workspace_image)
         # Extend the original image with zero-padding
         out["original"] = zeros + compress(original_image) + zeros
         transformed = transformed_image
@@ -224,7 +104,7 @@ def main():
         size_map = {"sd": (640, 480), "hd": (1280, 720), "fhd": (1920, 1080)}
         w, h = size_map[crop_size.lower()]
 
-        transformed = operations[operation](image_path, x, y, w, h)
+        transformed = operations[operation](workspace_image, x, y, w, h)
         out["info"] = x * 2 ** 24 + y * 2 ** 12
 
     elif operation == "resize":
@@ -233,7 +113,7 @@ def main():
 
         if resize_option in size_map:
             w, h = size_map[resize_option]
-            transformed = operations[operation](image_path, h, w)
+            transformed = operations[operation](workspace_image, h, w)
         else:
             raise Exception("Invalid resize option.")
 

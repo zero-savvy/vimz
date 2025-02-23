@@ -1,20 +1,20 @@
 import numpy as np
 
 
-def compress(image_in):
+def compress(image):
     """
     Compress an image array by packing batches of 10 pixels into field elements
     (represented as hexadecimal strings).
 
     Args:
-        image_in (array-like): The input image, typically a 2D (grayscale) or 3D (RGB) array.
+        image (array-like): The input image, typically a 2D (grayscale) or 3D (RGB) array.
 
     Returns:
-        list: A 2D list of hexadecimal strings representing chunks of the image.
+        A 2D list of hexadecimal strings representing chunks of the image.
     """
-    output_array = []
+    output = []
 
-    for row in np.array(image_in):
+    for row in np.array(image):
         compressed_row = []
         hex_value = ''
         for col, pixel in enumerate(row):
@@ -28,9 +28,9 @@ def compress(image_in):
                 compressed_row.append("0x" + hex_value)
                 hex_value = ''
 
-        output_array.append(compressed_row)
+        output.append(compressed_row)
 
-    return output_array
+    return output
 
 
 def conv2d(array: np.ndarray, kernel: np.ndarray, weight: int = 1) -> np.ndarray:

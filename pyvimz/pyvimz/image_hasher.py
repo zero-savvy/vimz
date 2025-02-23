@@ -117,7 +117,7 @@ def compute_hash(image):
 
 def main():
     if len(sys.argv) != 2:
-        log("Usage: python3 main.py <image_path>")
+        log("Usage: image-hasher <image_path>")
         sys.exit(1)
     image_path = sys.argv[1]
 

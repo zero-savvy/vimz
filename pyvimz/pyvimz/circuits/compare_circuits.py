@@ -3,7 +3,8 @@ import sys
 import pandas as pd
 from tabulate import tabulate
 
-from analyze_circuits import parameters
+from pyvimz.circuits.analyze_circuits import parameters
+
 
 def main():
     if len(sys.argv) != 3:

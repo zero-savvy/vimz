@@ -8,7 +8,7 @@ from PIL import Image
 
 from pyvimz.img.ops import compress
 from pyvimz.img.transformations import *
-from pyvimz.plotting import plot_images_side_by_side
+from pyvimz.img.plotting import plot_images_side_by_side
 
 
 def get_image_path(args):

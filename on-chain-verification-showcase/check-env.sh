@@ -2,8 +2,8 @@
 
 # List of required tools and installation hints
 declare -A requirements=(
-    ["image-editor"]="Install it using 'make build-aux-tools' from the repo root or 'pip install pyvimz'"
-    ["image-hasher"]="Install it using 'make build-aux-tools' from the repo root or 'pip install pyvimz'"
+    ["image-editor"]="Install it using 'make build-pyvimz' from the repo root or 'pip install pyvimz'"
+    ["image-hasher"]="Install it using 'make build-pyvimz' from the repo root or 'pip install pyvimz'"
     ["jq"]="Install it using: sudo apt install jq, sudo yum install jq, or brew install jq"
     ["xxd"]="Install it using: sudo apt install xxd, sudo yum install vim-common, or brew install vim"
     ["cut"]="This is part of coreutils, install it using: sudo apt install coreutils, sudo yum install coreutils, or brew install coreutils"

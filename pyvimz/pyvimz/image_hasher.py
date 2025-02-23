@@ -7,6 +7,8 @@ from os import path
 import numpy as np
 from PIL import Image
 
+from pyvimz.img.ops import compress
+
 ########################################################################################################################
 ####### Environment ####################################################################################################
 ########################################################################################################################
@@ -75,21 +77,9 @@ def _load_image(image_path):
 def _compress_image(image):
     """Processes image row-by-row and compresses pixel data into hex format."""
     log("Processing image for hash computation...", end="", flush=True)
-    output_array = []
-    for row in image:
-        compressed_row = []
-        hex_value = ''
-        for col, pixel in enumerate(row):
-            if np.isscalar(pixel):  # Grayscale image
-                hex_value = hex(int(pixel))[2:].zfill(6) + hex_value
-            else:  # RGB image
-                hex_value = ''.join(hex(int(channel))[2:].zfill(2) for channel in reversed(pixel)) + hex_value
-            if (col + 1) % 10 == 0 or col == len(row) - 1:
-                compressed_row.append("0x" + hex_value)
-                hex_value = ''
-        output_array.append(compressed_row)
+    result = compress(image)
     log(" Done ✅")
-    return output_array
+    return result
 
 
 ########################################################################################################################
@@ -125,7 +115,7 @@ def compute_hash(image):
 ####### Launch #########################################################################################################
 ########################################################################################################################
 
-if __name__ == "__main__":
+def main():
     if len(sys.argv) != 2:
         log("Usage: python3 main.py <image_path>")
         sys.exit(1)

@@ -15,3 +15,4 @@ dependencies = [
 
 [project.scripts]
 image-editor = "pyvimz.image_editor:main"
+image-hasher = "pyvimz.image_hasher:main"

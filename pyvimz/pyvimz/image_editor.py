@@ -6,9 +6,8 @@ from tkinter import filedialog
 
 import numpy as np
 from PIL import Image
-
-from img_utils import compress, conv2d
-from plotting import plot_images_side_by_side
+from pyvimz.img_utils import compress, conv2d
+from pyvimz.plotting import plot_images_side_by_side
 
 
 def sharpen_image(image_path):
@@ -248,7 +247,3 @@ def main():
     with open(output_path, "w") as fp:
         json.dump(out, fp, indent=4)
     print(f"Transformation {operation} applied successfully. Data saved to {output_path}.")
-
-
-if __name__ == "__main__":
-    main()

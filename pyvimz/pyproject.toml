@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyvimz"
+version = "0.1.0"
+dependencies = [
+    "matplotlib==3.8.1",
+    "numpy==1.26.4",
+    "pandas==2.2.3",
+    "Pillow==10.3.0",
+    "tabulate==0.9.0",
+]
+
+[project.scripts]
+image-editor = "pyvimz.image_editor:main"

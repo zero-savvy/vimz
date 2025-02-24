@@ -13,7 +13,7 @@ template RedactHash(blockSize) {
     signal input redact;
 
     signal prev_redact_hash <== step_in.tran_hash;
-    signal block_hash = ArrayHasher(blockSize)(block);
+    signal block_hash <== ArrayHasher(blockSize)(block);
 
     component selector = Mux1();
     selector.c[0] <== PairHasher()(prev_redact_hash, block_hash);

@@ -68,6 +68,13 @@ def crop_image(image, x: int, y: int, new_width: int, new_height: int):
     return image_np[y:y + new_height, x:x + new_width]
 
 
+def random_image_redaction(image):
+    image = np.array(image)
+    height, width = image.shape[:2]
+    num_blocks = (height // 40) * (width // 40)
+    return ["0x0" if i % 2 == 0 else "0x1" for i in range(num_blocks)]
+
+
 def resize_image(image, new_height: int, new_width: int):
     img_array = np.array(image)
 

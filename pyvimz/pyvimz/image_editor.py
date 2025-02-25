@@ -6,8 +6,9 @@ from tkinter import filedialog
 
 from PIL import Image
 
-from pyvimz.img.ops import compress
+from pyvimz.img.ops import compress_by_rows, compress_by_blocks
 from pyvimz.img.transformations import *
+
 from pyvimz.img.plotting import plot_images_side_by_side
 
 
@@ -34,6 +35,7 @@ operations = {
     "crop": crop_image,
     "grayscale": convert_to_grayscale,
     "hash": None,
+    "redact": None,
     "resize": resize_image,
     "sharpness": sharpen_image,
 }
@@ -75,14 +77,15 @@ def main():
         original_image = image.copy()
 
     # Initialize the output dictionary
-    out = {"original": compress(original_image)}
+    out = {"original": compress_by_rows(original_image)}
 
     with Image.open(image_path) as image:
         workspace_image = image.copy()
 
+    transformed = None
+
     if operation == "hash":
-        # nothing to do here for now (currently, we don't check public input)
-        transformed = None
+        pass
 
     elif operation == "grayscale":
         transformed = operations[operation](workspace_image)
@@ -95,7 +98,7 @@ def main():
     elif operation in {"sharpness", "blur"}:
         transformed_image, zeros = operations[operation](workspace_image)
         # Extend the original image with zero-padding
-        out["original"] = zeros + compress(original_image) + zeros
+        out["original"] = zeros + compress_by_rows(original_image) + zeros
         transformed = transformed_image
 
     elif operation == "crop":
@@ -106,6 +109,12 @@ def main():
 
         transformed = operations[operation](workspace_image, x, y, w, h)
         out["info"] = x * 2 ** 24 + y * 2 ** 12
+
+    elif operation == "redact":
+        print(
+            "WARNING: This tool is not suitable for redaction - use GUI instead. Applying some fixed random redaction.")
+        out["original"] = compress_by_blocks(original_image)
+        out["redact"] = random_image_redaction(original_image)
 
     elif operation == "resize":
         resize_option = args.resize_option.lower()
@@ -118,7 +127,7 @@ def main():
             raise Exception("Invalid resize option.")
 
     if transformed is not None:
-        out["transformed"] = compress(transformed)
+        out["transformed"] = compress_by_rows(transformed)
         if args.render:
             plot_images_side_by_side(np.array(original_image), transformed)
 

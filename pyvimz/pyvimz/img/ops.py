@@ -1,9 +1,9 @@
 import numpy as np
 
 
-def compress(image):
+def compress_by_rows(image):
     """
-    Compress an image array by packing batches of 10 pixels into field elements
+    Compress an image array, row by row, by packing batches of 10 pixels into field elements
     (represented as hexadecimal strings).
 
     Args:
@@ -29,6 +29,43 @@ def compress(image):
                 hex_value = ''
 
         output.append(compressed_row)
+
+    return output
+
+
+def compress_by_blocks(image):
+    """
+    Compress an image by iterating over 40x40 blocks, compressing pixels into hex strings.
+
+    Args:
+        image (array-like): The input image, typically a 2D (grayscale) or 3D (RGB) array.
+
+    Returns:
+        A 2D list where each sublist corresponds to a 40x40 block compressed into 160 hex strings.
+    """
+    image = np.array(image)
+    h, w = image.shape[:2]
+    output = []
+
+    for block_row in range(0, h, 40):
+        for block_col in range(0, w, 40):
+            compressed_block = []
+            for row in range(block_row, min(block_row + 40, h)):  # Process row within the block
+                hex_value = ''
+                for col in range(block_col, min(block_col + 40, w)):  # Process column within the block
+                    pixel = image[row, col]
+
+                    if np.isscalar(pixel):  # Grayscale image
+                        hex_value = hex(int(pixel))[2:].zfill(6) + hex_value
+                    else:  # RGB image
+                        hex_value = ''.join(hex(int(channel))[2:].zfill(2) for channel in reversed(pixel)) + hex_value
+
+                    # Append every 10 pixels as a single chunk
+                    if (col - block_col + 1) % 10 == 0 or col == min(block_col + 40, w) - 1:
+                        compressed_block.append("0x" + hex_value)
+                        hex_value = ''
+
+            output.append(compressed_block)  # Each block results in 160 hex values
 
     return output
 

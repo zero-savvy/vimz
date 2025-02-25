@@ -45,6 +45,7 @@ pub fn prepare_input_for_transformation(
     resolution: Resolution,
 ) -> Vec<HashMap<String, Value>> {
     let iter_count = match transformation {
+        Redact => resolution.iteration_count_block_based(),
         Resize => resolution.iteration_count() / resolution.ratio_to_lower().0,
         _ => resolution.iteration_count(),
     };
@@ -75,6 +76,12 @@ fn prepare_step_input(
         // Handle transformations that only need the original row.
         Crop | Hash => row_input(json!(input.original[step]), None),
 
+        // Handle the Redact transformation with blocks and additional step input.
+        Redact => block_input(
+            json!(input.original[step]),
+            json!(input.extra.redact()[step]),
+        ),
+
         // Handle the Resize transformation with ranges.
         Resize => {
             let (o_range, t_range) = resolution.ratio_to_lower();
@@ -95,4 +102,11 @@ fn row_input(row_orig: Value, row_tran: Option<Value>) -> HashMap<String, Value>
         map.insert("row_tran".to_string(), row_tran);
     }
     map
+}
+
+fn block_input(block_orig: Value, redact: Value) -> HashMap<String, Value> {
+    HashMap::from([
+        ("row_orig".to_string(), block_orig),
+        ("redact".to_string(), redact),
+    ])
 }

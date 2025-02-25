@@ -63,5 +63,6 @@ declare_circuit!(Contrast);
 declare_circuit!(Crop);
 declare_circuit!(Grayscale);
 declare_circuit!(Hash);
+declare_circuit!(Redact);
 declare_circuit!(Resize);
 declare_circuit!(Sharpness);

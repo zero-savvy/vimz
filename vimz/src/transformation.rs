@@ -11,6 +11,7 @@ pub enum Transformation {
     Crop,
     Grayscale,
     Hash,
+    Redact,
     Resize,
     Sharpness,
 }
@@ -19,7 +20,10 @@ use Transformation::*;
 
 impl Transformation {
     /// Returns the initial state of the IVC for the given transformation, based on the input.
-    pub fn ivc_initial_state<ValueOut: From<u64> + Copy>(&self, input: &Extra) -> Vec<ValueOut> {
+    pub fn ivc_initial_state<ValueOut: From<u64> + Copy, FieldRepr>(
+        &self,
+        input: &Extra<FieldRepr>,
+    ) -> Vec<ValueOut> {
         let zero = ValueOut::from(0);
         let zzv = |v| vec![zero, zero, ValueOut::from(v)];
 
@@ -27,7 +31,7 @@ impl Transformation {
             Blur | Sharpness => vec![zero; 4],
             Brightness | Contrast => zzv(input.factor()),
             Crop => zzv(input.info()),
-            Grayscale | Resize => vec![zero; 2],
+            Grayscale | Redact | Resize => vec![zero; 2],
             Hash => vec![zero],
         }
     }
@@ -37,7 +41,7 @@ impl Transformation {
         match self {
             Blur | Sharpness => 4,
             Brightness | Contrast | Crop => 3,
-            Grayscale | Resize => 2,
+            Grayscale | Redact | Resize => 2,
             Hash => 1,
         }
     }
@@ -51,6 +55,8 @@ impl Transformation {
             Brightness | Contrast | Grayscale => 256,
             // Single row of 128 entries.
             Crop | Hash => 128,
+            // 40 x 40 blocks (with 10-pixel compression) + 1 input indicating whether the block is redacted.
+            Redact => 160 + 1,
             // Three rows of 128 entries for the original image and two of 64 entries for the transformed.
             Resize => 128 * 3 + 64 * 2,
         }
@@ -81,6 +87,17 @@ impl Resolution {
             Resolution::FHD => 1080,
             Resolution::_4K => 2160,
             Resolution::_8K => 4320,
+        }
+    }
+
+    /// Returns the number of iterations in block-based transformations.
+    pub fn iteration_count_block_based(&self) -> usize {
+        match self {
+            Resolution::SD => 0, // TODO
+            Resolution::HD => 576,
+            Resolution::FHD => 0, // TODO
+            Resolution::_4K => 0, // TODO
+            Resolution::_8K => 0, // TODO
         }
     }
 

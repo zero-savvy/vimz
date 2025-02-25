@@ -30,6 +30,7 @@ pub fn run(config: &Config) {
         Transformation::Crop => _run::<CropCircuit>(config),
         Transformation::Grayscale => _run::<GrayscaleCircuit>(config),
         Transformation::Hash => _run::<HashCircuit>(config),
+        Transformation::Redact => _run::<RedactCircuit>(config),
         Transformation::Resize => _run::<ResizeCircuit>(config),
         Transformation::Sharpness => _run::<SharpnessCircuit>(config),
     }

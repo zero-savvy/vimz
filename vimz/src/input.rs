@@ -16,7 +16,7 @@ pub struct VIMzInput<FieldRepr> {
     pub transformed: Vec<Vec<FieldRepr>>,
     #[serde(flatten)]
     /// Extra information for the transformation.
-    pub extra: Extra,
+    pub extra: Extra<FieldRepr>,
 }
 
 impl VIMzInput<String> {
@@ -35,7 +35,14 @@ impl VIMzInput<Fr> {
         Self {
             original: string_2d_seq_to_fr_2d_seq(&self_string.original),
             transformed: string_2d_seq_to_fr_2d_seq(&self_string.transformed),
-            extra: self_string.extra,
+            extra: match self_string.extra {
+                Extra::Redact { redact } => Extra::Redact {
+                    redact: string_seq_to_fr_seq(&redact),
+                },
+                Extra::Factor { factor } => Extra::Factor { factor },
+                Extra::Info { info } => Extra::Info { info },
+                Extra::None {} => Extra::None {},
+            },
         }
     }
 }
@@ -43,16 +50,18 @@ impl VIMzInput<Fr> {
 /// Extra information for the VIMz input.
 #[derive(Deserialize)]
 #[serde(untagged)]
-pub enum Extra {
-    /// An optional factor for tuning the transformation.
+pub enum Extra<FieldRepr> {
+    /// A factor for tuning the transformation.
     Factor { factor: u64 },
-    /// An optional scalar info.
+    /// A scalar info.
     Info { info: u64 },
+    /// A list of redaction indicators.
+    Redact { redact: Vec<FieldRepr> },
     /// No extra information.
     None {},
 }
 
-impl Extra {
+impl<FieldRepr> Extra<FieldRepr> {
     pub fn factor(&self) -> u64 {
         match self {
             Extra::Factor { factor } => *factor,
@@ -64,6 +73,15 @@ impl Extra {
         match self {
             Extra::Info { info } => *info,
             _ => unreachable!("No info provided"),
+        }
+    }
+}
+
+impl<FieldRepr: Clone> Extra<FieldRepr> {
+    pub fn redact(&self) -> Vec<FieldRepr> {
+        match self {
+            Extra::Redact { redact } => redact.clone(),
+            _ => unreachable!("No redact provided"),
         }
     }
 }
@@ -114,6 +132,7 @@ mod tests {
     test_input!(crop, Extra::Info { .. });
     test_input!(grayscale, Extra::None {});
     test_input!(hash, Extra::None {});
+    test_input!(redact, Extra::Redact { .. });
     test_input!(resize, Extra::None {});
     test_input!(sharpness, Extra::None {});
 }

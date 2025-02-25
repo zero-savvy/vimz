@@ -53,6 +53,17 @@ fn prepare_input_for_transformation(
         // Simply rewrite the input data.
         Hash | Crop => input.original,
 
+        // Concatenate the original block with redaction indicator.
+        Redact => input
+            .original
+            .into_iter()
+            .zip(input.extra.redact())
+            .map(|(mut block, redact)| {
+                block.push(redact);
+                block
+            })
+            .collect(),
+
         // Concatenate the batches of original and transformed rows.
         Resize => {
             let mut prepared = vec![];

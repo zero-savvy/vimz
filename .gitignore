@@ -4,8 +4,6 @@
 input_data/
 runs/
 
-# *.json
-
 circuits/**/*_cpp/
 circuits/**/*_js/
 circuits/**/*.r1cs

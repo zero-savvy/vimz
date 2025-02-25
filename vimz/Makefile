@@ -64,6 +64,11 @@ hash: # Run the hash transformation.
 hash: TRANSFORMATION=hash
 hash: run-transformation
 
+.PHONY: redact
+redact: # Run the redact transformation.
+redact: TRANSFORMATION=redact
+redact: run-transformation
+
 .PHONY: resize
 resize: # Run the resize transformation.
 resize: TRANSFORMATION=resize
@@ -83,6 +88,7 @@ all-transformations:
 	@$(MAKE) crop
 	@$(MAKE) grayscale
 	@$(MAKE) hash
+	@$(MAKE) redact
 	@$(MAKE) resize
 	@$(MAKE) sharpness
 
@@ -105,5 +111,6 @@ generate-verifier-contracts:
 	@$(MAKE) generate-contract TRANSFORMATION=crop
 	@$(MAKE) generate-contract TRANSFORMATION=grayscale
 	@$(MAKE) generate-contract TRANSFORMATION=hash
+	@$(MAKE) generate-contract TRANSFORMATION=redact
 	@$(MAKE) generate-contract TRANSFORMATION=resize
 	@$(MAKE) generate-contract TRANSFORMATION=sharpness

@@ -106,7 +106,7 @@ fn row_input(row_orig: Value, row_tran: Option<Value>) -> HashMap<String, Value>
 
 fn block_input(block_orig: Value, redact: Value) -> HashMap<String, Value> {
     HashMap::from([
-        ("row_orig".to_string(), block_orig),
+        ("block".to_string(), block_orig),
         ("redact".to_string(), redact),
     ])
 }

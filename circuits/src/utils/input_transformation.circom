@@ -74,3 +74,23 @@ template ResizeInput(widthOrig, widthResized, rowCountOrig, rowCountResized) {
         }
     }
 }
+
+// Splits a combined input array into an array and a scalar.
+//
+// Parameters:
+// - `arraySize`: Number of elements in the output array (hence, expected input should have `arraySize` + 1 entries).
+//
+// Signals:
+// - `input full_input[arraySize + 1]`: Combined input array.
+// - `output array[arraySize]`: The first `arraySize` elements of `full_input`.
+// - `output scalar`: The last element of `full_input`.
+template ArrayWithScalarInput(arraySize) {
+    signal input  full_input [arraySize + 1];
+
+    signal output array [arraySize];
+    for (var i = 0; i < arraySize; i++) {
+        array[i] <== full_input[i];
+    }
+
+    signal output scalar <== full_input[arraySize];
+}

@@ -2,6 +2,7 @@ use std::fs;
 
 use nova_scotia::S;
 use nova_snark::CompressedSNARK;
+use serde_json::to_string_pretty;
 use tracing::info_span;
 
 use crate::{
@@ -68,12 +69,12 @@ pub fn run(config: &Config) {
     // ========================== Save final proof =================================================
 
     if let Some(output_file) = config.output_file() {
-        info_span!("Save proof").in_scope(|| {
-            fs::write(
-                output_file,
-                serde_json::to_string_pretty(&compressed_proof).unwrap(),
-            )
+        // Ensure the parent directory exists
+        if let Some(parent_dir) = output_file.parent() {
+            fs::create_dir_all(parent_dir).expect("Failed to create output directory");
+        }
+
+        fs::write(output_file, to_string_pretty(&compressed_proof).unwrap())
             .expect("Failed to write proof to file");
-        });
     }
 }

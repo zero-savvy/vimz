@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef, useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -13,7 +13,7 @@ const ImageRedactor: React.FC = () => {
   const [imageData, setImageData] = useState<string[][][]>([])
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  const BLOCK_SIZE = 32
+  const BLOCK_SIZE = 40
 
   useEffect(() => {
     if (image && canvasRef.current) {
@@ -40,21 +40,27 @@ const ImageRedactor: React.FC = () => {
           const row: string[][] = []
           for (let x = 0; x < blocksX; x++) {
             const blockData: string[] = []
-            for (let i = 0; i < 128; i++) {
-              let hexString = "0x"
-              for (let j = 0; j < 8; j++) {
+            // Iterate over rows inside the 40x40 block
+            for (let i = 0; i < BLOCK_SIZE; i++) {
+              let hexString = ""
+              // Iterate over pixels in groups of 10
+              for (let j = 0; j < BLOCK_SIZE; j++) {
                 const pixelX = x * BLOCK_SIZE + j
                 const pixelY = y * BLOCK_SIZE + i
                 if (pixelX < image.width && pixelY < image.height) {
                   const data = ctx.getImageData(pixelX, pixelY, 1, 1).data
-                  hexString += data[0].toString(16).padStart(2, "0")
-                  hexString += data[1].toString(16).padStart(2, "0")
-                  hexString += data[2].toString(16).padStart(2, "0")
+                  hexString = data[2].toString(16).padStart(2, "0") +
+                    data[1].toString(16).padStart(2, "0") +
+                    data[0].toString(16).padStart(2, "0") + hexString
                 } else {
-                  hexString += "000000" // Padding for out-of-bounds pixels
+                  hexString = "000000" + hexString // Padding for out-of-bounds pixels
+                }
+                // Every 10 pixels, store the compressed chunk
+                if ((j + 1) % 10 === 0 || j === BLOCK_SIZE - 1) {
+                  blockData.push("0x" + hexString)
+                  hexString = ""
                 }
               }
-              blockData.push(hexString)
             }
             row.push(blockData)
           }
@@ -125,16 +131,16 @@ const ImageRedactor: React.FC = () => {
       link.click()
 
       // Download JSON file
-      const apply = selectedBlocks.flatMap(row => row.map(b => b ? "1" : "0"));
+      const redact = selectedBlocks.flatMap(block => block.map(b => b ? "0x1" : "0x0"));
       const original = imageData.flatMap(subArray => subArray)
       const jsonContent = JSON.stringify({
-        apply,
+        redact,
         original,
       })
-      const blob = new Blob([jsonContent], { type: "application/json" })
+      const blob = new Blob([jsonContent], {type: "application/json"})
       const url = URL.createObjectURL(blob)
       const jsonLink = document.createElement("a")
-      jsonLink.download = "image_data.json"
+      jsonLink.download = "redact.json"
       jsonLink.href = url
       jsonLink.click()
       URL.revokeObjectURL(url)
@@ -146,12 +152,12 @@ const ImageRedactor: React.FC = () => {
       <CardContent className="p-6">
         <div className="mb-4">
           <Label htmlFor="image-upload">Upload Image</Label>
-          <Input id="image-upload" type="file" accept="image/*" onChange={handleImageUpload} className="mt-1" />
+          <Input id="image-upload" type="file" accept="image/*" onChange={handleImageUpload} className="mt-1"/>
         </div>
         {image && (
           <div className="space-y-4">
-            <div className="border rounded-lg overflow-auto" style={{ maxHeight: "70vh" }}>
-              <canvas ref={canvasRef} onClick={handleCanvasClick} style={{ cursor: "pointer" }} />
+            <div className="border rounded-lg overflow-auto" style={{maxHeight: "70vh"}}>
+              <canvas ref={canvasRef} onClick={handleCanvasClick} style={{cursor: "pointer"}}/>
             </div>
             <Button onClick={handleDownload} className="w-full">
               Download Redacted Image and JSON

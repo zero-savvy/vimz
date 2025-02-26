@@ -1,11 +1,11 @@
 # Image Redactor
 
-A Next.js application that allows users to upload images and redact specific areas by clicking on 32x32 pixel blocks. The application supports both light and dark themes and provides downloads for both the redacted image and a JSON file containing the redaction data.
+A Next.js application that allows users to upload images and redact specific areas by clicking on 40x40 pixel blocks. The application supports both light and dark themes and provides downloads for both the redacted image and a JSON file containing the redaction data.
 
 ## Features
 
 - 🖼️ Image upload and display
-- ⬛ Block-by-block redaction (32x32 pixels)
+- ⬛ Block-by-block redaction (40x40 pixels)
 - 🌓 Dark/Light theme support
 - 💾 Download redacted images
 - 📄 Export redaction data as JSON

@@ -3,17 +3,13 @@ pragma solidity ^0.8.0;
 
 // ====================================== VERIFIER API =============================================================
 
+/// @dev A subset of the `OpaqueDecider` interface from Sonobe.
 interface ISnarkVerifier {
-    function verifyNovaProof(
-        uint256[9] calldata i_z0_zi,
-        uint256[4] calldata U_i_cmW_U_i_cmE,
-        uint256[2] calldata u_i_cmW,
-        uint256[3] calldata cmT_r,
-        uint256[2] calldata pA,
-        uint256[2][2] calldata pB,
-        uint256[2] calldata pC,
-        uint256[4] calldata challenge_W_challenge_E_kzg_evals,
-        uint256[2][2] calldata kzg_proof
+    function verifyOpaqueNovaProofWithInputs(
+        uint256 steps,
+        uint256[4] calldata initial_state,
+        uint256[4] calldata final_state,
+        uint256[25] calldata proof
     ) external view returns (bool);
 }
 
@@ -95,15 +91,10 @@ contract ChallengeHub {
 
     /// @dev Solves a challenge by submitting a solution. The caller must provide a valid proof.
     function submitSolution(
-        uint256[9] calldata i_z0_zi,
-        uint256[4] calldata U_i_cmW_U_i_cmE,
-        uint256[2] calldata u_i_cmW,
-        uint256[3] calldata cmT_r,
-        uint256[2] calldata pA,
-        uint256[2][2] calldata pB,
-        uint256[2] calldata pC,
-        uint256[4] calldata challenge_W_challenge_E_kzg_evals,
-        uint256[2][2] calldata kzg_proof,
+        uint256 steps,
+        uint256[4] calldata initial_state,
+        uint256[4] calldata final_state,
+        uint256[25] calldata proof,
         uint256 challengeId,
         string memory solutionID
     ) external {
@@ -117,17 +108,7 @@ contract ChallengeHub {
             verifier = contrastVerifier;
         }
 
-        bool isValid = verifier.verifyNovaProof(
-            i_z0_zi,
-            U_i_cmW_U_i_cmE,
-            u_i_cmW,
-            cmT_r,
-            pA,
-            pB,
-            pC,
-            challenge_W_challenge_E_kzg_evals,
-            kzg_proof
-        );
+        bool isValid = verifier.verifyOpaqueNovaProofWithInputs(steps, initial_state, final_state, proof);
         require(isValid, "Invalid proof");
 
         challenge.solved = true;

@@ -160,7 +160,7 @@ compute_proof() {
 }
 
 send_solution() {
-  SELECTOR="cf2c8294"
+  SELECTOR="fe116709"
   PROOF=$(xxd -p -c 10000 < "../calldata/proof" | cut -c 9-)
   SUFFIX=$(cast abi-encode "f(uint256,string memory)" "0" "$SOLUTION_ID" | cut -c 3-)
 

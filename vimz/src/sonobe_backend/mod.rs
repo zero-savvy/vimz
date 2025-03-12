@@ -72,7 +72,7 @@ fn _run<Circuit: SonobeCircuit>(config: &Config) {
             fs::create_dir_all(parent_dir).expect("Failed to create output directory");
         }
 
-        fs::write(output_file, prepare_contract_calldata(&folding, proof))
+        fs::write(output_file, prepare_contract_calldata(&folding, &proof))
             .expect("Failed to write calldata to file");
     }
 }

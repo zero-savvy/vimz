@@ -7,7 +7,7 @@
 
 ## **PETS 2025 Artifact**
 > [!NOTE]
-> **ATTENTION:** If you want to check and confirm results of our papaer, please checkout this branch: [**pets-2025-artifact**](https://github.com/zero-savvy/vimz/tree/pets-2025-artifact).
+> **ATTENTION:** If you want to check and confirm results of our paper, please checkout this branch: [**pets-2025-artifact**](https://github.com/zero-savvy/vimz/tree/pets-2025-artifact).
 > Our current master branch has multiple developements going on, including the integration with Sonobe, support for Solidity-based verifiers, support for additional folding backends, and a web-based editor.
 
 ## **Brief Description:**
@@ -113,7 +113,7 @@ Once you have installed dependencies, you can proceed with setting up and runnin
 To obtain the latest version of VIMz, head to directory of your choice and install VIMz using the following command:
 
   - Clone: `git clone https://github.com/zero-savvy/vimz.git`
-  - Head to the `nova` directory: `cd vimz/nova`
+  - Head to the `vimz` directory: `cd vimz`
   - build and install `vimz` using `cargo`:
     - `cargo build`
     - `cargo install --path .`

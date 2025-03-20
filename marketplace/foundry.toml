@@ -1,0 +1,12 @@
+[profile.default]
+src = "contracts"
+
+remappings = [
+    "forge-std/=node_modules/forge-std/src",
+]
+
+[rpc_endpoints]
+anvil = "http://localhost:8545"
+
+[doc]
+out = "contract-docs"

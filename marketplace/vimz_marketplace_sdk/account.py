@@ -20,8 +20,6 @@ def get_cornucopia() -> Actor:
 
 
 def get_actor(name: str, endowment: Wei = STANDARD_ENDOWMENT) -> Actor:
-    name = name.lower()  # be case-insensitive
-
     actor = ACTORS.get(name)
     if actor:
         return actor
@@ -31,8 +29,13 @@ def get_actor(name: str, endowment: Wei = STANDARD_ENDOWMENT) -> Actor:
         new_actor = Actor(name, Account.from_key(cornucopia_key))
     else:
         new_actor = Actor(name, Account.create())
-        print(f"⏳ Endowing new actor '{name}' with {endowment} wei...")
-        send_eth(get_cornucopia(), new_actor, endowment)
+        if endowment > 0:
+            print(f"⏳ Endowing new actor '{name}' with {endowment} wei...")
+            send_eth(get_cornucopia(), new_actor, endowment)
 
     ACTORS[name] = new_actor
     return new_actor
+
+
+def get_device(name: str) -> Actor:
+    return get_actor(name, Wei(0))

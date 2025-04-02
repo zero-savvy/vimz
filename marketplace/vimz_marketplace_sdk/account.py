@@ -31,7 +31,7 @@ def get_actor(name: str, endowment: Wei = STANDARD_ENDOWMENT) -> Actor:
         new_actor = Actor(name, Account.from_key(cornucopia_key))
     else:
         new_actor = Actor(name, Account.create())
-        print(f"Endowing new actor '{name}' with {endowment} wei...")
+        print(f"⏳ Endowing new actor '{name}' with {endowment} wei...")
         send_eth(get_cornucopia(), new_actor, endowment)
 
     ACTORS[name] = new_actor

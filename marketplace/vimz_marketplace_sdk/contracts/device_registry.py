@@ -1,42 +1,20 @@
-from vimz_marketplace_sdk.web3_client import get_web3
+from eth_typing import ChecksumAddress
+from web3.contract import Contract
+
 from vimz_marketplace_sdk.artifacts import load_artifact
-from vimz_marketplace_sdk.chain import send_transaction
+from vimz_marketplace_sdk.chain import deploy_contract, get_web3
+from vimz_marketplace_sdk.types import Actor
 
-def load_contract(contract_address, contract_name):
-    """
-    Loads a deployed contract instance using its address and the contract name.
-    """
-    artifact = load_artifact(contract_name)
-    web3 = get_web3()
-    contract = web3.eth.contract(address=contract_address, abi=artifact["abi"])
-    return contract
 
-def register_device_manufacturer(contract, registrar_account, manufacturer_address, gas=200000, gasPrice_gwei=20):
-    """
-    Calls the contract method to register a device manufacturer.
-    """
-    web3 = get_web3()
-    nonce = web3.eth.get_transaction_count(registrar_account["address"])
-    tx = contract.functions.registerRegistrar(manufacturer_address).buildTransaction({
-        'from': registrar_account["address"],
-        'nonce': nonce,
-        'gas': gas,
-        'gasPrice': web3.toWei(gasPrice_gwei, 'gwei')
-    })
-    receipt = send_transaction(tx, registrar_account["private_key"])
-    return receipt
+def deploy(admin: Actor) -> Contract:
+    return deploy_contract("DeviceRegistry", admin)
 
-def register_device(contract, registrar_account, device_public_key, signature_scheme, gas=200000, gasPrice_gwei=20):
-    """
-    Calls the contract method to register a device.
-    """
-    web3 = get_web3()
-    nonce = web3.eth.get_transaction_count(registrar_account["address"])
-    tx = contract.functions.registerDevice(device_public_key, signature_scheme).buildTransaction({
-        'from': registrar_account["address"],
-        'nonce': nonce,
-        'gas': gas,
-        'gasPrice': web3.toWei(gasPrice_gwei, 'gwei')
-    })
-    receipt = send_transaction(tx, registrar_account["private_key"])
-    return receipt
+
+def register_brand(registry_address: ChecksumAddress, admin: Actor, brand: Actor):
+    w3 = get_web3(admin)
+    registry = w3.eth.contract(address=registry_address, abi=load_artifact("DeviceRegistry")["abi"])
+
+    tx_hash = registry.functions.registerRegistrar(brand.address()).transact()
+    w3.eth.wait_for_transaction_receipt(tx_hash)
+
+    print(f"✅ Brand '{brand.name()}' registered with DeviceRegistry.")

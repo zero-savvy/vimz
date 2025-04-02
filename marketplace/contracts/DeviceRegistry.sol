@@ -11,7 +11,7 @@ contract DeviceRegistry {
     /// @notice Address of the contract administrator (the deployer)
     address public admin;
 
-    /// @notice Mapping of approved registrars (trusted manufacturers)
+    /// @notice Set of approved registrars (trusted manufacturers)
     /// @dev Only admin can add a registrar, and only registrars can register devices.
     mapping(address => bool) public registrars;
 

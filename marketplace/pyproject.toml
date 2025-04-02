@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["vimz_marketplace_sdk", "scenarios"]
+
+[project]
+name = "vimz_marketplace_sdk"
+version = "0.1.0"
+dependencies = [
+    "web3==7.10.0",
+]
+
+[project.scripts]
+register-devices = "scenarios.register_devices:main"

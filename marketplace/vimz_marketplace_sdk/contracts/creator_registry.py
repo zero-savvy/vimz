@@ -14,10 +14,5 @@ class CreatorRegistry(VimzContract):
         return "CreatorRegistry"
 
     def register_creator(self, admin: Actor, creator: Creator):
-        self.set_caller(admin)
-
-        function = self._contract.functions.registerCreator
-        tx_hash = (function(creator.address(), creator.kyc_expiration(), creator.email()).transact())
-        self._contract.w3.eth.wait_for_transaction_receipt(tx_hash)
-
+        self.call(admin, "registerCreator", creator.address(), creator.kyc_expiration(), creator.email())
         print(f"✅ Creator '{creator.name()}' registered in CreatorRegistry.")

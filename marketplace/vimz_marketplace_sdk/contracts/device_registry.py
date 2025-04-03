@@ -11,17 +11,9 @@ class DeviceRegistry(VimzContract):
         return "DeviceRegistry"
 
     def register_brand(self, admin: Actor, brand: Actor):
-        self.set_caller(admin)
-
-        tx_hash = self._contract.functions.registerRegistrar(brand.address()).transact()
-        self._contract.w3.eth.wait_for_transaction_receipt(tx_hash)
-
+        self.call(admin, "registerRegistrar", brand.address())
         print(f"✅ Brand '{brand.name()}' registered in DeviceRegistry.")
 
     def register_device(self, brand: Actor, device: Address):
-        self.set_caller(brand)
-
-        tx_hash = self._contract.functions.registerDevice(device).transact()
-        self._contract.w3.eth.wait_for_transaction_receipt(tx_hash)
-
+        self.call(brand, "registerDevice", device)
         print(f"✅ Device '{device}' (by '{brand.name()}') registered in DeviceRegistry.")

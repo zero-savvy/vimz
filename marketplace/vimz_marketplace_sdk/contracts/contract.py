@@ -28,3 +28,10 @@ class VimzContract(ABC):
         self._contract.w3.middleware_onion.inject(SignAndSendRawMiddlewareBuilder.build(caller.key()), "signer",
                                                   layer=0)
         self._contract.w3.eth.default_account = caller.address()
+
+    def call(self, caller: Actor, function: str, *args):
+        self.set_caller(caller)
+        function = getattr(self._contract.functions, function)
+        calldata = function(*args)
+        tx_hash = calldata.transact()
+        self._contract.w3.eth.wait_for_transaction_receipt(tx_hash)

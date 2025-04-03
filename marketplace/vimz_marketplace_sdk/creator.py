@@ -1,0 +1,48 @@
+import random
+from datetime import datetime, UTC, timedelta
+from typing import List
+
+from eth_account import Account
+
+from vimz_marketplace_sdk.account import get_actor
+from vimz_marketplace_sdk.types import Actor
+
+
+class Creator(Actor):
+    def __init__(self, name: str, email: str, kyc_expiration: datetime, account: Account):
+        super().__init__(name, account)
+        self._email = email
+        self._kyc_expiration = kyc_expiration
+
+    def email(self) -> str:
+        return self._email
+
+    def kyc_expiration(self) -> int:
+        return int(self._kyc_expiration.timestamp())
+
+
+def get_creator(name: str, mail: str, kyc_expiry: datetime) -> Creator:
+    actor = get_actor(name)
+    return Creator(name, mail, kyc_expiry, actor.account())
+
+
+def default_creators() -> List[Creator]:
+    data = [
+        ("Ada Lovelace", "ada.lovelace@analyticalengine.fun",),
+        ("Alan Turing", "alan.turing@bombe.io"),
+        ("Grace Hopper", "grace.hopper@debugging.de"),
+        ("John von Neumann", "john.vonneumann@gameoflife.party"),
+        ("Claude Shannon", "claude.shannon@bitwise.buzz"),
+        ("George Boole", "george.boole@boolean.boo"),
+        ("Blaise Pascal", "blaise.pascal@pascal.pie"),
+        ("Leonardo Fibonacci", "leonardo.fibonacci@fibonacci.farm"),
+        ("Carl Friedrich Gauss", "carl.friedrich.gauss@gauss.guru"),
+        ("René Descartes", "rene.descartes@cogito.cool")
+    ]
+
+    now = datetime.now(UTC)
+
+    return [
+        get_creator(name, mail, now + timedelta(days=random.randint(2, 10)))
+        for (name, mail) in data
+    ]

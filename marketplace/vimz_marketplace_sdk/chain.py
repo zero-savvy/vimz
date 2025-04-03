@@ -51,7 +51,7 @@ def get_web3(actor: Actor = None) -> Web3:
         raise ConnectionError(f"Unable to connect to RPC endpoint: {rpc_endpoint}")
 
     if actor is not None:
-        w3.middleware_onion.inject(SignAndSendRawMiddlewareBuilder.build(actor.key()), layer=0)
+        w3.middleware_onion.inject(SignAndSendRawMiddlewareBuilder.build(actor.key()), "signer", layer=0)
         w3.eth.default_account = actor.address()
 
     return w3

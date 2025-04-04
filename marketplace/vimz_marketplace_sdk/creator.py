@@ -1,6 +1,6 @@
 import random
 from datetime import datetime, UTC, timedelta
-from typing import List
+from typing import Generator
 
 from eth_account import Account
 
@@ -26,7 +26,7 @@ def get_creator(name: str, mail: str, kyc_expiry: datetime) -> Creator:
     return Creator(name, mail, kyc_expiry, actor.account())
 
 
-def default_creators() -> List[Creator]:
+def default_creators() -> Generator[Creator, None, None]:
     data = [
         ("Ada Lovelace", "ada.lovelace@analyticalengine.fun",),
         ("Alan Turing", "alan.turing@bombe.io"),
@@ -42,7 +42,5 @@ def default_creators() -> List[Creator]:
 
     now = datetime.now(UTC)
 
-    return [
-        get_creator(name, mail, now + timedelta(days=random.randint(2, 10)))
-        for (name, mail) in data
-    ]
+    for (name, mail) in data:
+        yield get_creator(name, mail, now + timedelta(days=random.randint(2, 10)))

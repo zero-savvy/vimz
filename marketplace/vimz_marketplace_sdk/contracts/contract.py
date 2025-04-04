@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from eth_typing import ChecksumAddress
 from web3.contract import Contract
 from web3.middleware import SignAndSendRawMiddlewareBuilder
 
@@ -16,12 +17,12 @@ class VimzContract(ABC):
     def contract_name(cls) -> str:
         pass
 
-    def address(self):
+    def address(self) -> ChecksumAddress:
         return self._contract.address
 
     @classmethod
-    def deploy(cls, deployer: Actor) -> "VimzContract":
-        return cls(deploy_contract(cls.contract_name(), deployer))
+    def deploy(cls, deployer: Actor, *args) -> "VimzContract":
+        return cls(deploy_contract(cls.contract_name(), deployer, *args))
 
     def set_caller(self, caller: Actor):
         self._contract.w3.middleware_onion.remove("signer")

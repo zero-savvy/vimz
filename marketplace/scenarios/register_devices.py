@@ -1,5 +1,6 @@
-from vimz_marketplace_sdk.account import get_actor, get_device
+from vimz_marketplace_sdk.account import get_actor
 from vimz_marketplace_sdk.contracts.device_registry import DeviceRegistry
+from vimz_marketplace_sdk.device import get_device
 
 
 def main():

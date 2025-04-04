@@ -35,7 +35,3 @@ def get_actor(name: str, endowment: Wei = STANDARD_ENDOWMENT) -> Actor:
 
     ACTORS[name] = new_actor
     return new_actor
-
-
-def get_device(name: str) -> Actor:
-    return get_actor(name, Wei(0))

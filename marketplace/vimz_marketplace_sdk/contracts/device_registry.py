@@ -1,8 +1,7 @@
-from eth_typing import ChecksumAddress, Address
+from eth_typing import ChecksumAddress
 
-from vimz_marketplace_sdk.chain import get_web3
+from vimz_marketplace_sdk.chain import Actor
 from vimz_marketplace_sdk.contracts.contract import VimzContract
-from vimz_marketplace_sdk.types import Actor
 
 
 class DeviceRegistry(VimzContract):
@@ -14,6 +13,6 @@ class DeviceRegistry(VimzContract):
         self.call(admin, "registerRegistrar", brand.address())
         print(f"✅ Brand '{brand.name()}' registered in DeviceRegistry.")
 
-    def register_device(self, brand: Actor, device: Address):
+    def register_device(self, brand: Actor, device: ChecksumAddress):
         self.call(brand, "registerDevice", device)
         print(f"✅ Device '{device}' (by '{brand.name()}') registered in DeviceRegistry.")

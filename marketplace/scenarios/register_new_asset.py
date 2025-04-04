@@ -1,12 +1,12 @@
 from datetime import datetime, UTC
 
-from vimz_marketplace_sdk.account import get_actor
+from vimz_marketplace_sdk.chain import get_actor, Actor
 from vimz_marketplace_sdk.contracts.asset_gateway import AssetGateway
 from vimz_marketplace_sdk.contracts.creator_registry import CreatorRegistry
 from vimz_marketplace_sdk.contracts.device_registry import DeviceRegistry
 from vimz_marketplace_sdk.creator import default_creators
 from vimz_marketplace_sdk.device import get_device, Device
-from vimz_marketplace_sdk.types import Actor, License
+from vimz_marketplace_sdk.types import License
 
 
 def prepare_device_registry() -> (DeviceRegistry, Device):

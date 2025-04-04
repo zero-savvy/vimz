@@ -1,17 +1,16 @@
 from datetime import datetime
 
 import web3
-from eth_account import Account
 from eth_account.datastructures import SignedMessage
+from eth_account.signers.local import LocalAccount
 from web3.types import Wei
 
-from vimz_marketplace_sdk.account import get_actor
+from vimz_marketplace_sdk.chain import Actor, get_actor
 from vimz_marketplace_sdk.creator import Creator
-from vimz_marketplace_sdk.types import Actor
 
 
 class Device(Actor):
-    def __init__(self, name: str, account: Account):
+    def __init__(self, name: str, account: LocalAccount):
         super().__init__(name, account)
 
     def sign(self, creator: Creator, image_hash: int, capture_time: datetime) -> SignedMessage:

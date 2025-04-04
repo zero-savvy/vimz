@@ -2,10 +2,11 @@ from datetime import datetime
 
 from eth_typing import ChecksumAddress
 
+from vimz_marketplace_sdk.chain import Actor
 from vimz_marketplace_sdk.contracts.contract import VimzContract
 from vimz_marketplace_sdk.creator import Creator
 from vimz_marketplace_sdk.device import Device
-from vimz_marketplace_sdk.types import Actor, License
+from vimz_marketplace_sdk.types import License
 
 
 class AssetGateway(VimzContract):

@@ -4,8 +4,7 @@ from eth_typing import ChecksumAddress
 from web3.contract import Contract
 from web3.middleware import SignAndSendRawMiddlewareBuilder
 
-from vimz_marketplace_sdk.chain import deploy_contract
-from vimz_marketplace_sdk.types import Actor
+from vimz_marketplace_sdk.chain import deploy_contract, Actor
 
 
 class VimzContract(ABC):

@@ -2,14 +2,13 @@ import random
 from datetime import datetime, UTC, timedelta
 from typing import Generator
 
-from eth_account import Account
+from eth_account.signers.local import LocalAccount
 
-from vimz_marketplace_sdk.account import get_actor
-from vimz_marketplace_sdk.types import Actor
+from vimz_marketplace_sdk.chain import Actor, get_actor
 
 
 class Creator(Actor):
-    def __init__(self, name: str, email: str, kyc_expiration: datetime, account: Account):
+    def __init__(self, name: str, email: str, kyc_expiration: datetime, account: LocalAccount):
         super().__init__(name, account)
         self._email = email
         self._kyc_expiration = kyc_expiration

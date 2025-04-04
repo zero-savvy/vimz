@@ -1,4 +1,5 @@
 import os
+from decimal import Decimal
 
 from eth_account import Account
 from eth_account.signers.local import LocalAccount
@@ -9,7 +10,6 @@ from web3.middleware import SignAndSendRawMiddlewareBuilder
 from web3.types import Wei
 
 from vimz_marketplace_sdk.artifacts import load_artifact
-
 
 CORNUCOPIA_NAME = "cornucopia"
 
@@ -42,6 +42,10 @@ def get_cornucopia() -> Actor:
     return get_actor(CORNUCOPIA_NAME)
 
 
+def _eth(value: Wei) -> Decimal:
+    return Web3.from_wei(value, 'ether')
+
+
 def get_actor(name: str, endowment: Wei = STANDARD_ENDOWMENT) -> Actor:
     actor = ACTORS.get(name)
     if actor:
@@ -53,7 +57,7 @@ def get_actor(name: str, endowment: Wei = STANDARD_ENDOWMENT) -> Actor:
     else:
         new_actor = Actor(name, Account.create())
         if endowment > 0:
-            print(f"⏳ Endowing new actor '{name}' with {endowment} wei...")
+            print(f"⏳ Endowing new actor '{name}' with {_eth(endowment)} ETH...")
             send_eth(get_cornucopia(), new_actor, endowment)
 
     ACTORS[name] = new_actor
@@ -89,9 +93,11 @@ def send_eth(from_actor: Actor, to_actor: Actor, value_wei: Wei):
     tx_hash = w3.eth.send_transaction(tx)
     w3.eth.wait_for_transaction_receipt(tx_hash)
 
+    current_balance = get_web3().eth.get_balance(to_actor.address())
+
     print(
-        f"✅ Sent {value_wei} wei from '{from_actor.name()}' to '{to_actor.name()}' with tx hash: '{tx_hash.to_0x_hex()}'. "
-        f"Current balance of '{to_actor.name()}': {get_web3().eth.get_balance(to_actor.address())} wei.")
+        f"✅ Sent {_eth(value_wei)} ETH from '{from_actor.name()}' to '{to_actor.name()}' with tx hash: '{tx_hash.to_0x_hex()}'. "
+        f"Current balance of '{to_actor.name()}': {_eth(current_balance)} ETH.")
 
 
 def get_web3(actor: Actor = None) -> Web3:

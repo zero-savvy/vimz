@@ -2,6 +2,12 @@
 
 set -euo pipefail
 
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BOLD='\033[1m'
+NC='\033[0m'  # No Color
+
 cleanup() {
     if [ -n "${ANVIL_PID-}" ] && kill -0 "$ANVIL_PID" 2>/dev/null; then
         echo "Stopping Anvil node (PID $ANVIL_PID)..."
@@ -12,12 +18,12 @@ trap cleanup EXIT
 
 source_env_file() {
     if [ -f ".local.env" ]; then
-        echo "Sourcing .local.env file..."
+        echo "Sourcing .local.env file and exporting variables..."
         set -a
         source .local.env
         set +a
     else
-        echo "Warning: .local.env file not found!"
+        echo -e "${YELLOW}Warning: .local.env file not found!${NC}"
     fi
 }
 
@@ -31,30 +37,32 @@ start_anvil() {
 run_scenario_script() {
     local script="$1"
     if [ ! -f "$script" ]; then
-        echo "Error: Scenario script '$script' not found."
+        echo -e "${RED}Error: Scenario script '$script' not found.${NC}"
         exit 1
     fi
-    echo "Running scenario: $script..."
-    local script_dir
-    script_dir=$(dirname "$script")
-    local script_file
-    script_file=$(basename "$script")
-    # Change directory to the scenario's folder and ensure PYTHONPATH includes the parent directory
-    pushd "$script_dir" > /dev/null
-    PYTHONPATH=.. python3 "$script_file"
+    local scenario_name
+    scenario_name=$(basename "$script" .py)
+    echo -e "${BOLD}Running scenario: ${scenario_name}...${NC}"
+
+    pushd "$(dirname "$script")" > /dev/null
+    PYTHONPATH=.. SCENARIO_NAME="${scenario_name}" python3 "$(basename "$script")"
     popd > /dev/null
 }
 
 run_all_scenarios() {
     local found=0
     for script in scenarios/*.py; do
+        if [ "$(basename "$script")" = "__init__.py" ]; then
+            continue
+        fi
         if [ -f "$script" ]; then
             run_scenario_script "$script"
+            echo -e "\n\n\n"
             found=1
         fi
     done
     if [ "$found" -eq 0 ]; then
-        echo "No scenario scripts found."
+        echo -e "${RED}No scenario scripts found.${NC}"
     fi
 }
 
@@ -69,7 +77,7 @@ main() {
         run_all_scenarios
     fi
 
-    echo "All scenarios completed successfully."
+    echo -e "${GREEN}${BOLD}All scenarios completed successfully.${NC}${NC}"
 }
 
 main "$@"

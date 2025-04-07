@@ -10,6 +10,7 @@ from web3.middleware import SignAndSendRawMiddlewareBuilder
 from web3.types import Wei
 
 from vimz_marketplace_sdk.artifacts import load_artifact
+from vimz_marketplace_sdk.logging_config import logger
 
 CORNUCOPIA_NAME = "cornucopia"
 
@@ -57,7 +58,7 @@ def get_actor(name: str, endowment: Wei = STANDARD_ENDOWMENT) -> Actor:
     else:
         new_actor = Actor(name, Account.create())
         if endowment > 0:
-            print(f"⏳ Endowing new actor '{name}' with {_eth(endowment)} ETH...")
+            logger.debug(f"⏳ Endowing new actor '{name}' with {_eth(endowment)} ETH...")
             send_eth(get_cornucopia(), new_actor, endowment)
 
     ACTORS[name] = new_actor
@@ -65,7 +66,7 @@ def get_actor(name: str, endowment: Wei = STANDARD_ENDOWMENT) -> Actor:
 
 
 def deploy_contract(contract_name: str, deployer: Actor, *constructor_args) -> Contract:
-    print(f"⏳ Deploying contract '{contract_name}'...")
+    logger.debug(f"⏳ Deploying contract '{contract_name}'...")
     artifact = load_artifact(contract_name)
 
     w3 = get_web3(deployer)
@@ -74,7 +75,7 @@ def deploy_contract(contract_name: str, deployer: Actor, *constructor_args) -> C
     tx_hash = ContractCls.constructor(*constructor_args).transact()
     receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 
-    print(f"✅ Contract '{contract_name}' deployed at address: {receipt["contractAddress"]}")
+    logger.info(f"✅ Contract '{contract_name}' deployed at address: {receipt["contractAddress"]}")
 
     return w3.eth.contract(
         address=receipt["contractAddress"],
@@ -95,7 +96,7 @@ def send_eth(from_actor: Actor, to_actor: Actor, value_wei: Wei):
 
     current_balance = get_web3().eth.get_balance(to_actor.address())
 
-    print(
+    logger.info(
         f"✅ Sent {_eth(value_wei)} ETH from '{from_actor.name()}' to '{to_actor.name()}' with tx hash: '{tx_hash.to_0x_hex()}'. "
         f"Current balance of '{to_actor.name()}': {_eth(current_balance)} ETH.")
 

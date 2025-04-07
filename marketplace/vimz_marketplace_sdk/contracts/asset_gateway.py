@@ -6,6 +6,7 @@ from vimz_marketplace_sdk.chain import Actor
 from vimz_marketplace_sdk.contracts.contract import VimzContract
 from vimz_marketplace_sdk.creator import Creator
 from vimz_marketplace_sdk.device import Device
+from vimz_marketplace_sdk.logging_config import logger
 from vimz_marketplace_sdk.types import License
 
 
@@ -32,4 +33,4 @@ class AssetGateway(VimzContract):
                   license.value,
                   device.address(),
                   device.sign(creator, image_hash, capture_time))
-        print(f"✅ Asset {image_hash} registered")
+        logger.info(f"✅ Asset {image_hash} registered")

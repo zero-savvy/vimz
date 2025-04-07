@@ -1,6 +1,7 @@
 from vimz_marketplace_sdk.chain import Actor
 from vimz_marketplace_sdk.contracts.contract import VimzContract
 from vimz_marketplace_sdk.creator import Creator
+from vimz_marketplace_sdk.logging_config import logger
 
 
 class CreatorRegistry(VimzContract):
@@ -10,4 +11,4 @@ class CreatorRegistry(VimzContract):
 
     def register_creator(self, admin: Actor, creator: Creator):
         self.call(admin, "registerCreator", creator.address(), creator.kyc_expiration(), creator.email())
-        print(f"✅ Creator '{creator.name()}' registered in CreatorRegistry.")
+        logger.info(f"✅ Creator '{creator.name()}' registered in CreatorRegistry.")

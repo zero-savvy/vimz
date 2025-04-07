@@ -26,3 +26,6 @@ image-editor \
 # 4. Compute hash of the transformed images
 image-hasher "$SCRIPT_DIR/img1-grayscale.png" "$SCRIPT_DIR/img1-grayscale.hash"
 image-hasher "$SCRIPT_DIR/img1-blur.png" "$SCRIPT_DIR/img1-blur.hash"
+
+# 5. Come back to the original directory
+popd > /dev/null

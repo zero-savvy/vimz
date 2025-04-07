@@ -38,7 +38,7 @@ def blur_image(image):
 
 
 def convert_to_grayscale(image):
-    return image.convert('L')
+    return np.array(image.convert('L'))
 
 
 def adjust_contrast(image, desired_contrast):

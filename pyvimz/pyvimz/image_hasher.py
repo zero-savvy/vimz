@@ -7,7 +7,7 @@ from os import path
 import numpy as np
 from PIL import Image
 
-from pyvimz.img.ops import compress
+from pyvimz.img.ops import compress_by_rows
 
 ########################################################################################################################
 ####### Environment ####################################################################################################
@@ -77,7 +77,7 @@ def _load_image(image_path):
 def _compress_image(image):
     """Processes image row-by-row and compresses pixel data into hex format."""
     log("Processing image for hash computation...", end="", flush=True)
-    result = compress(image)
+    result = compress_by_rows(image)
     log(" Done ✅")
     return result
 
@@ -116,10 +116,11 @@ def compute_hash(image):
 ########################################################################################################################
 
 def main():
-    if len(sys.argv) != 2:
-        log("Usage: image-hasher <image_path>")
+    if len(sys.argv) not in [2, 3]:
+        log("Usage: image-hasher <image_path> [<output_path>]")
         sys.exit(1)
     image_path = sys.argv[1]
+    output_path = sys.argv[2] if len(sys.argv) == 3 else None
 
     try:
         prepare_witness_generator()
@@ -129,6 +130,11 @@ def main():
         log("")
         log(f"Computed hash:       {final_hash}")
         log(f"Computed hash (hex): {hex(int(final_hash))}")
+
+        if output_path:
+            with open(output_path, "w") as output_file:
+                output_file.write(final_hash)
+            log(f"Hash saved to: {output_path}")
 
     except Exception as e:
         log(f"❌ Error: {e}")

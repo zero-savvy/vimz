@@ -1,5 +1,6 @@
 import argparse
 import json
+import os.path
 import tkinter as tk
 from os import path
 from tkinter import filedialog
@@ -50,8 +51,9 @@ def parse_args():
         "--image-path", "-i",
         default=None, help="Path to the input image. If not provided, an interactive file dialog will open."
     )
-    parser.add_argument("--output-dir", "-o", default="./",
-                        help="Directory to save the output image. Default is the current directory.")
+    parser.add_argument("--output", "-o", default="./",
+                        help="Where to save data, either a file or a directory. Default is `<operation>.json` in the current directory.")
+    parser.add_argument("--save-png", help="Save the transformed image as a PNG file.")
 
     # ====================================== RENDERING ======================================
     parser.add_argument("--render", action="store_true", help="Render the result")
@@ -132,7 +134,16 @@ def main():
             plot_images_side_by_side(np.array(original_image), transformed)
 
     # Save the output to a JSON file
-    output_path = path.join(args.output_dir, f"{operation}.json")
+    if os.path.isdir(args.output):
+        output_path = path.join(args.output_dir, f"{operation}.json")
+    else:
+        output_path = args.output
     with open(output_path, "w") as fp:
         json.dump(out, fp, indent=4)
     print(f"Transformation {operation} applied successfully. Data saved to {output_path}.")
+
+    # Save the transformed image as a PNG file if specified
+    if args.save_png and transformed is not None:
+        transformed_image = Image.fromarray(transformed)
+        transformed_image.save(args.save_png)
+        print(f"Transformed image saved as {args.save_png}")

@@ -31,7 +31,7 @@ log_progress() {
 ##### ENVIRONMENT ######################################################################################################
 ########################################################################################################################
 prepare_env() {
-  ./check-env.sh > /dev/null
+  ../check-env.sh > /dev/null
   npm install &>> /dev/null
   log_progress "✅ Checked requirements and installing dependencies"
 }

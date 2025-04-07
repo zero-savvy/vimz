@@ -1,24 +1,22 @@
 from vimz_marketplace_sdk.chain import get_actor
 from vimz_marketplace_sdk.contracts.device_registry import DeviceRegistry
-from vimz_marketplace_sdk.device import get_device
+from vimz_marketplace_sdk.device import get_brand, default_brands
 
 
 def main():
     device_registry_admin = get_actor("device_registry_admin")
-
     registry = DeviceRegistry.deploy(device_registry_admin)
 
-    leica = get_actor("Leica")
-    canon = get_actor("Canon")
-
+    # Create and register custom brand and devices
+    leica = get_brand("Leica", ['SL3-S'])
     registry.register_brand(device_registry_admin, leica)
-    registry.register_brand(device_registry_admin, canon)
+    registry.register_device(leica, leica.get_new_device())
 
-    for leica_camera in [get_device("Leica SL3-S #1"), get_device("Leica SL3-S #2"), get_device("Leica M11-D #1")]:
-        registry.register_device(leica, leica_camera.address())
-
-    for canon_camera in [get_device("Canon EOS R1 #1"), get_device("Canon EOS R1 #2")]:
-        registry.register_device(canon, canon_camera.address())
+    # or use default brands
+    for brand in default_brands():
+        registry.register_brand(device_registry_admin, brand)
+        for _ in range(6):
+            registry.register_device(brand, brand.get_new_device())
 
 
 if __name__ == "__main__":

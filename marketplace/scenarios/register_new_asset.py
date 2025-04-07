@@ -5,7 +5,7 @@ from vimz_marketplace_sdk.contracts.asset_gateway import AssetGateway
 from vimz_marketplace_sdk.contracts.creator_registry import CreatorRegistry
 from vimz_marketplace_sdk.contracts.device_registry import DeviceRegistry
 from vimz_marketplace_sdk.creator import default_creators
-from vimz_marketplace_sdk.device import get_device, Device
+from vimz_marketplace_sdk.device import get_device, Device, default_brands
 from vimz_marketplace_sdk.types import License
 
 
@@ -13,11 +13,11 @@ def prepare_device_registry() -> (DeviceRegistry, Device):
     device_registry_admin = get_actor("device_registry_admin")
     registry = DeviceRegistry.deploy(device_registry_admin)
 
-    leica = get_actor("Leica")
-    registry.register_brand(device_registry_admin, leica)
+    brand = next(default_brands())
+    registry.register_brand(device_registry_admin, brand)
 
-    device = get_device("Leica SL3-S #1")
-    registry.register_device(leica, device.address())
+    device = brand.get_new_device()
+    registry.register_device(brand, device)
 
     return registry, device
 

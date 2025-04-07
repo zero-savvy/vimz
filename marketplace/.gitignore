@@ -5,3 +5,4 @@ broadcast/
 node_modules/
 marketplace_sdk.egg-info/
 build/
+anvil.log

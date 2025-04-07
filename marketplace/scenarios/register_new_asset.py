@@ -5,7 +5,7 @@ from vimz_marketplace_sdk.contracts.asset_gateway import AssetGateway
 from vimz_marketplace_sdk.contracts.creator_registry import CreatorRegistry
 from vimz_marketplace_sdk.contracts.device_registry import DeviceRegistry
 from vimz_marketplace_sdk.creator import default_creators
-from vimz_marketplace_sdk.device import get_device, Device, default_brands
+from vimz_marketplace_sdk.device import Device, default_brands
 from vimz_marketplace_sdk.types import License
 
 

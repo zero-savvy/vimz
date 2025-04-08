@@ -1,6 +1,7 @@
 from datetime import datetime, UTC
 
 from scenarios import prepare_device_registry, prepare_creator_registry
+from vimz_marketplace_sdk.artifacts import get_image_hash
 from vimz_marketplace_sdk.chain import get_actor
 from vimz_marketplace_sdk.contracts.asset_gateway import AssetGateway
 from vimz_marketplace_sdk.types import License
@@ -16,7 +17,7 @@ def main():
 
     gateway.register_new_asset(
         creator,
-        41,
+        get_image_hash("img1"),
         datetime.now(UTC),
         License.FULLY_FREE,
         device

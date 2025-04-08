@@ -1,0 +1,1 @@
+../../contracts/GrayscaleVerifier.sol

@@ -43,7 +43,6 @@ class AssetGateway(VimzContract):
         self.call(
             creator,
             "registerNewAsset",
-            creator.address(),
             image_hash,
             int(capture_time.timestamp()),
             license.value,
@@ -57,7 +56,6 @@ class AssetGateway(VimzContract):
         self.call(
             creator,
             "registerEditedAsset",
-            creator.address(),
             image_hash,
             source_id,
             transformation.value,

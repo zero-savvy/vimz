@@ -97,7 +97,6 @@ contract AssetGateway {
 
     /**
      * @notice Registers a new original asset captured by a verified device.
-     * @param creator The address of the asset creator.
      * @param imageHash The uint256 hash of the original image.
      * @param captureTime Unix timestamp when the image was captured.
      * @param license The licensing details for the asset.
@@ -105,7 +104,6 @@ contract AssetGateway {
      * @param deviceSignature The device’s signature over (creator, imageHash, captureTime).
      */
     function registerNewAsset(
-        address creator,
         uint256 imageHash,
         uint256 captureTime,
         License license,
@@ -113,6 +111,7 @@ contract AssetGateway {
         bytes calldata deviceSignature
     ) external {
         // 1. Ensure the creator is verified.
+        address creator = msg.sender;
         require(creatorRegistry.verifyCreator(creator), "Creator not verified");
 
         // 2. Create a message hash for device signature verification and vaildate it.
@@ -148,7 +147,6 @@ contract AssetGateway {
     }
 
     function registerEditedAsset(
-        address creator,
         uint256 editedImageHash,
         uint256 sourceAssetId,
         Transformation transformation,
@@ -156,6 +154,7 @@ contract AssetGateway {
         License license
     ) external {
         // 1. Ensure the creator is verified.
+        address creator = msg.sender;
         require(creatorRegistry.verifyCreator(creator), "Creator not verified");
 
         // 2. Ensure the source asset exists.

@@ -10,7 +10,7 @@ from vimz_marketplace_sdk.contracts.verifiers import BrightnessVerifier, RedactV
 from vimz_marketplace_sdk.creator import Creator
 from vimz_marketplace_sdk.device import Device
 from vimz_marketplace_sdk.logging_config import logger
-from vimz_marketplace_sdk.types import License
+from vimz_marketplace_sdk.types import License, Transformation
 
 
 class AssetGateway(VimzContract):
@@ -40,12 +40,27 @@ class AssetGateway(VimzContract):
 
     def register_new_asset(self, creator: Creator, image_hash: int, capture_time: datetime, license: License,
                            device: Device):
-        self.call(creator,
-                  "registerNewAsset",
-                  creator.address(),
-                  image_hash,
-                  int(capture_time.timestamp()),
-                  license.value,
-                  device.address(),
-                  device.sign(creator, image_hash, capture_time))
+        self.call(
+            creator,
+            "registerNewAsset",
+            creator.address(),
+            image_hash,
+            int(capture_time.timestamp()),
+            license.value,
+            device.address(),
+            device.sign(creator, image_hash, capture_time)
+        )
+        logger.info(f"✅ Asset {image_hash} registered")
+
+    def register_edited_asset(self, creator: Creator, image_hash: int, source_id: int, transformation: Transformation,
+                              license: License):
+        self.call(
+            creator,
+            "registerEditedAsset",
+            creator.address(),
+            image_hash,
+            source_id,
+            transformation.value,
+            license.value
+        )
         logger.info(f"✅ Asset {image_hash} registered")

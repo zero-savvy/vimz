@@ -182,7 +182,7 @@ contract AssetGateway {
         assets[assetCount] = Asset({
             creator: creator,
             imageHash: editedImageHash,
-            captureTime: 0, // TODO
+            captureTime: assets[sourceAssetId].captureTime,
             license: license,
             timestamp: block.timestamp,
             sourceAssetId: sourceAssetId,

@@ -11,7 +11,7 @@ from web3.contract import Contract
 from web3.middleware import SignAndSendRawMiddlewareBuilder
 from web3.types import Wei
 
-from vimz_marketplace_sdk.artifacts import load_contract_artifact
+from vimz_marketplace_sdk.artifacts import get_contract_artifact
 from vimz_marketplace_sdk.logging_config import logger
 
 CORNUCOPIA_NAME = "cornucopia"
@@ -75,7 +75,7 @@ def deploy_contract(contract: (Union[str, typing.Tuple[str, str]]), deployer: Ac
         contract_file_name, contract_name = contract, contract
 
     logger.debug(f"⏳ Deploying contract '{contract_file_name}'...")
-    artifact = load_contract_artifact(contract_file_name, contract_name)
+    artifact = get_contract_artifact(contract_file_name, contract_name)
 
     w3 = get_web3(deployer)
     ContractCls = w3.eth.contract(abi=artifact["abi"], bytecode=artifact["bytecode"]["object"])

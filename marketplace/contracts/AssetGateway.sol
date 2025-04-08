@@ -12,14 +12,14 @@ import "./Licensing.sol";
  * describe the edit. Proofs are not stored.
  */
 struct Asset {
-    address creator;       // Creator's address.
-    uint256 imageHash;     // Hash of the asset data.
-    uint256 captureTime;   // Unix timestamp when the image was captured (for originals).
-    License license;       // Licensing details.
-    address device;        // Capturing device address (for originals).
-    uint256 timestamp;     // Registration timestamp.
-    uint256 sourceAssetId; // For edited assets: pointer to the source asset; 0 if not applicable.
-    string transformation; // For edited assets: description of the applied transformation.
+    address creator;               // Creator's address.
+    uint256 imageHash;             // Hash of the asset data.
+    uint256 captureTime;           // Unix timestamp when the image was captured (for originals).
+    License license;               // Licensing details.
+    address device;                // Capturing device address (for originals).
+    uint256 timestamp;             // Registration timestamp.
+    uint256 sourceAssetId;         // For edited assets: pointer to the source asset; 0 if not applicable.
+    Transformation transformation; // For edited assets: description of the applied transformation.
 }
 
 /**
@@ -34,7 +34,8 @@ enum Transformation {
     Grayscale,
     Redact,
     Resize,
-    Sharpness
+    Sharpness,
+    NoTransformation // Used for original assets.
 }
 
 /**
@@ -72,7 +73,7 @@ contract AssetGateway {
         License license,
         address device,
         uint256 sourceAssetId,
-        string transformation,
+        Transformation transformation,
         uint256 timestamp
     );
 
@@ -112,19 +113,17 @@ contract AssetGateway {
         address deviceId,
         bytes calldata deviceSignature
     ) external {
-        // Ensure the creator is verified.
+        // 1. Ensure the creator is verified.
         require(creatorRegistry.verifyCreator(creator), "Creator not verified");
 
-        // Create a message hash for signature verification.
+        // 2. Create a message hash for device signature verification and vaildate it.
         bytes32 messageHash = keccak256(abi.encodePacked(creator, imageHash, captureTime));
-
-        // Verify the device's signature.
         require(
             deviceRegistry.verifyDeviceSignature(messageHash, deviceSignature, deviceId),
             "Invalid device signature"
         );
 
-        // Increment asset count and store the original asset.
+        // 3. Increment asset count and store the original asset.
         assetCount++;
         assets[assetCount] = Asset({
             creator: creator,
@@ -133,8 +132,8 @@ contract AssetGateway {
             license: license,
             device: deviceId,
             timestamp: block.timestamp,
-            sourceAssetId: 0,        // Not applicable for originals.
-            transformation: ""       // No transformation description.
+            sourceAssetId: 0,
+            transformation: Transformation.NoTransformation
         });
 
         emit AssetRegistered(
@@ -145,7 +144,51 @@ contract AssetGateway {
             license,
             deviceId,
             0,
-            "",
+            Transformation.NoTransformation,
+            block.timestamp
+        );
+    }
+
+    function registerEditedAsset(
+        address creator,
+        uint256 editedImageHash,
+        uint256 sourceAssetId,
+        Transformation transformation,
+//        uint256[25] calldata proof,
+        License license
+    ) external {
+        // 1. Ensure the creator is verified.
+        require(creatorRegistry.verifyCreator(creator), "Creator not verified");
+
+        // 2. Ensure the source asset exists.
+        require(sourceAssetId > 0 && sourceAssetId <= assetCount, "Source asset does not exist");
+
+        // 3. Ensure the transformation is valid.
+        require(transformation != Transformation.NoTransformation, "Invalid transformation");
+        // TODO
+
+        // 3. Increment asset count and store the asset.
+        assetCount++;
+        assets[assetCount] = Asset({
+            creator: creator,
+            imageHash: editedImageHash,
+            captureTime: 0, // TODO
+            license: license,
+            device: address(0), // TODO
+            timestamp: block.timestamp,
+            sourceAssetId: sourceAssetId,
+            transformation: transformation
+        });
+
+        emit AssetRegistered(
+            assetCount,
+            creator,
+            editedImageHash,
+            0, // TODO
+            license,
+            address(0), // TODO
+            sourceAssetId,
+            transformation,
             block.timestamp
         );
     }

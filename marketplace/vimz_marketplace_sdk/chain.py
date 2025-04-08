@@ -1,5 +1,7 @@
 import os
+import typing
 from decimal import Decimal
+from typing import Union
 
 from eth_account import Account
 from eth_account.signers.local import LocalAccount
@@ -65,9 +67,15 @@ def get_actor(name: str, endowment: Wei = STANDARD_ENDOWMENT) -> Actor:
     return new_actor
 
 
-def deploy_contract(contract_name: str, deployer: Actor, *constructor_args) -> Contract:
-    logger.debug(f"⏳ Deploying contract '{contract_name}'...")
-    artifact = load_artifact(contract_name)
+def deploy_contract(contract: (Union[str, typing.Tuple[str, str]]), deployer: Actor, *constructor_args) -> Contract:
+    if isinstance(contract, tuple):
+        assert len(contract) == 2, "Contract tuple must contain exactly two elements: (file_name, contract_name)"
+        contract_file_name, contract_name = contract
+    else:
+        contract_file_name, contract_name = contract, contract
+
+    logger.debug(f"⏳ Deploying contract '{contract_file_name}'...")
+    artifact = load_artifact(contract_file_name, contract_name)
 
     w3 = get_web3(deployer)
     ContractCls = w3.eth.contract(abi=artifact["abi"], bytecode=artifact["bytecode"]["object"])
@@ -75,7 +83,7 @@ def deploy_contract(contract_name: str, deployer: Actor, *constructor_args) -> C
     tx_hash = ContractCls.constructor(*constructor_args).transact()
     receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 
-    logger.info(f"✅ Contract '{contract_name}' deployed at address: {receipt["contractAddress"]}")
+    logger.info(f"✅ Contract '{contract_file_name}' deployed at address: {receipt["contractAddress"]}")
 
     return w3.eth.contract(
         address=receipt["contractAddress"],

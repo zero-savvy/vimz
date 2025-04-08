@@ -6,7 +6,7 @@ from vimz_marketplace_sdk.logging_config import logger
 
 class CreatorRegistry(VimzContract):
     @classmethod
-    def contract_name(cls) -> str:
+    def contract_file_name(cls) -> str:
         return "CreatorRegistry"
 
     def register_creator(self, admin: Actor, creator: Creator):

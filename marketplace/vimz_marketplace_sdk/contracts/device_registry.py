@@ -6,7 +6,7 @@ from vimz_marketplace_sdk.logging_config import logger
 
 class DeviceRegistry(VimzContract):
     @classmethod
-    def contract_name(cls) -> str:
+    def contract_file_name(cls) -> str:
         return "DeviceRegistry"
 
     def register_brand(self, admin: Actor, brand: Actor):

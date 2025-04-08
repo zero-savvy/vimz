@@ -13,15 +13,19 @@ class VimzContract(ABC):
 
     @classmethod
     @abstractmethod
-    def contract_name(cls) -> str:
+    def contract_file_name(cls) -> str:
         pass
+
+    @classmethod
+    def contract_name(cls) -> str:
+        return cls.contract_file_name()
 
     def address(self) -> ChecksumAddress:
         return self._contract.address
 
     @classmethod
     def deploy(cls, deployer: Actor, *args) -> "VimzContract":
-        return cls(deploy_contract(cls.contract_name(), deployer, *args))
+        return cls(deploy_contract((cls.contract_file_name(), cls.contract_name()), deployer, *args))
 
     def set_caller(self, caller: Actor):
         self._contract.w3.middleware_onion.remove("signer")

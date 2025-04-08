@@ -64,15 +64,23 @@ contract AssetGateway {
     // Mapping from asset ID to Asset details.
     mapping(uint256 => Asset) public assets;
 
-    event AssetRegistered(
+    event NewAssetRegistered(
         uint256 indexed assetId,
         address indexed creator,
         uint256 imageHash,
         uint256 captureTime,
-        License license,
         address device,
+        License license,
+        uint256 timestamp
+    );
+
+    event EditedAssetRegistered(
+        uint256 indexed assetId,
+        address indexed creator,
+        uint256 imageHash,
         uint256 sourceAssetId,
         Transformation transformation,
+        License license,
         uint256 timestamp
     );
 
@@ -133,19 +141,24 @@ contract AssetGateway {
             transformation: Transformation.NoTransformation
         });
 
-        emit AssetRegistered(
+        emit NewAssetRegistered(
             assetCount,
             creator,
             imageHash,
             captureTime,
-            license,
             deviceId,
-            0,
-            Transformation.NoTransformation,
+            license,
             block.timestamp
         );
     }
 
+    /**
+     * @notice Registers an edited asset based on a source asset.
+     * @param editedImageHash The uint256 hash of the edited image.
+     * @param sourceAssetId The ID of the original asset being edited.
+     * @param transformation The transformation applied to the original asset.
+     * @param license The licensing details for the edited asset.
+     */
     function registerEditedAsset(
         uint256 editedImageHash,
         uint256 sourceAssetId,
@@ -176,15 +189,13 @@ contract AssetGateway {
             transformation: transformation
         });
 
-        emit AssetRegistered(
+        emit EditedAssetRegistered(
             assetCount,
             creator,
             editedImageHash,
-            0, // TODO
-            license,
-            address(0), // TODO
             sourceAssetId,
             transformation,
+            license,
             block.timestamp
         );
     }

@@ -16,7 +16,6 @@ struct Asset {
     uint256 imageHash;             // Hash of the asset data.
     uint256 captureTime;           // Unix timestamp when the image was captured (for originals).
     License license;               // Licensing details.
-    address device;                // Capturing device address (for originals).
     uint256 timestamp;             // Registration timestamp.
     uint256 sourceAssetId;         // For edited assets: pointer to the source asset; 0 if not applicable.
     Transformation transformation; // For edited assets: description of the applied transformation.
@@ -130,7 +129,6 @@ contract AssetGateway {
             imageHash: imageHash,
             captureTime: captureTime,
             license: license,
-            device: deviceId,
             timestamp: block.timestamp,
             sourceAssetId: 0,
             transformation: Transformation.NoTransformation
@@ -174,7 +172,6 @@ contract AssetGateway {
             imageHash: editedImageHash,
             captureTime: 0, // TODO
             license: license,
-            device: address(0), // TODO
             timestamp: block.timestamp,
             sourceAssetId: sourceAssetId,
             transformation: transformation

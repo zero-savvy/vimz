@@ -3,6 +3,7 @@ from typing import List, cast
 
 from eth_typing import ChecksumAddress
 
+from vimz_marketplace_sdk.artifacts import ProofData
 from vimz_marketplace_sdk.chain import Actor
 from vimz_marketplace_sdk.contracts.contract import VimzContract
 from vimz_marketplace_sdk.contracts.verifiers import BrightnessVerifier, RedactVerifier, ResizeVerifier, \
@@ -52,13 +53,14 @@ class AssetGateway(VimzContract):
         logger.info(f"✅ Asset {image_hash} registered")
 
     def register_edited_asset(self, creator: Creator, image_hash: int, source_id: int, transformation: Transformation,
-                              license: License):
+                              proof: ProofData, license: License):
         self.call(
             creator,
             "registerEditedAsset",
             image_hash,
             source_id,
             transformation.value,
+            proof.proof,
             license.value
         )
         logger.info(f"✅ Asset {image_hash} registered")

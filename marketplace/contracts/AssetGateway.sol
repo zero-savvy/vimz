@@ -126,13 +126,14 @@ contract AssetGateway {
      * @param editedImageHash The uint256 hash of the edited image.
      * @param sourceAssetId The ID of the original asset being edited.
      * @param transformation The transformation applied to the original asset.
+     * @param proof The SNARK proof for the transformation.
      * @param license The licensing details for the edited asset.
      */
     function registerEditedAsset(
         uint256 editedImageHash,
         uint256 sourceAssetId,
         Transformation transformation,
-//        uint256[25] calldata proof,
+        uint256[25] calldata proof,
         License license
     ) external {
         // 1. Ensure the creator is verified.
@@ -141,17 +142,27 @@ contract AssetGateway {
 
         // 2. Ensure the source asset exists.
         require(sourceAssetId > 0 && sourceAssetId <= assetCount, "Source asset does not exist");
+        Asset storage source = assets[sourceAssetId];
 
         // 3. Ensure the transformation is valid.
         require(transformation != Transformation.NoTransformation, "Invalid transformation");
+        bool validProof = verifiers[transformation].verifyOpaqueNovaProofWithInputs(
+            720, // Number of steps for HD-preserving transformations
+            [uint256(0), uint256(0)], // Initial state: empty hashes
+            [source.imageHash, editedImageHash], // Final state: source and edited image hashes
+            proof
+        );
+        require(validProof, "Invalid transformation proof");
+
+        // 4. Ensure license is not violated.
         // TODO
 
-        // 3. Increment asset count and store the asset.
+        // 5. Increment asset count and store the asset.
         assetCount++;
         assets[assetCount] = Asset({
             creator: creator,
             imageHash: editedImageHash,
-            captureTime: assets[sourceAssetId].captureTime,
+            captureTime: source.captureTime,
             license: license,
             timestamp: block.timestamp,
             sourceAssetId: sourceAssetId,

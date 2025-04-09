@@ -4,7 +4,7 @@ from eth_typing import ChecksumAddress
 from web3.contract import Contract
 from web3.middleware import SignAndSendRawMiddlewareBuilder
 
-from vimz_marketplace_sdk.chain import deploy_contract, Actor
+from vimz_marketplace_sdk.chain import Actor, deploy_contract
 
 
 class VimzContract(ABC):
@@ -25,12 +25,15 @@ class VimzContract(ABC):
 
     @classmethod
     def deploy(cls, deployer: Actor, *args) -> "VimzContract":
-        return cls(deploy_contract((cls.contract_file_name(), cls.contract_name()), deployer, *args))
+        return cls(
+            deploy_contract((cls.contract_file_name(), cls.contract_name()), deployer, *args)
+        )
 
     def set_caller(self, caller: Actor):
         self._contract.w3.middleware_onion.remove("signer")
-        self._contract.w3.middleware_onion.inject(SignAndSendRawMiddlewareBuilder.build(caller.key()), "signer",
-                                                  layer=0)
+        self._contract.w3.middleware_onion.inject(
+            SignAndSendRawMiddlewareBuilder.build(caller.key()), "signer", layer=0
+        )
         self._contract.w3.eth.default_account = caller.address()
 
     def call(self, caller: Actor, function: str, *args):

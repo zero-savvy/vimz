@@ -1,5 +1,5 @@
 import random
-from datetime import datetime, UTC, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Generator
 
 from eth_account.signers.local import LocalAccount
@@ -27,7 +27,10 @@ def get_creator(name: str, mail: str, kyc_expiry: datetime) -> Creator:
 
 def default_creators() -> Generator[Creator, None, None]:
     data = [
-        ("Ada Lovelace", "ada.lovelace@analyticalengine.fun",),
+        (
+            "Ada Lovelace",
+            "ada.lovelace@analyticalengine.fun",
+        ),
         ("Alan Turing", "alan.turing@bombe.io"),
         ("Grace Hopper", "grace.hopper@debugging.de"),
         ("John von Neumann", "john.vonneumann@gameoflife.party"),
@@ -36,10 +39,10 @@ def default_creators() -> Generator[Creator, None, None]:
         ("Blaise Pascal", "blaise.pascal@pascal.pie"),
         ("Leonardo Fibonacci", "leonardo.fibonacci@fibonacci.farm"),
         ("Carl Friedrich Gauss", "carl.friedrich.gauss@gauss.guru"),
-        ("René Descartes", "rene.descartes@cogito.cool")
+        ("René Descartes", "rene.descartes@cogito.cool"),
     ]
 
     now = datetime.now(UTC)
 
-    for (name, mail) in data:
+    for name, mail in data:
         yield get_creator(name, mail, now + timedelta(days=random.randint(2, 10)))

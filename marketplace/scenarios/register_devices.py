@@ -1,6 +1,6 @@
 from vimz_marketplace_sdk.chain import get_actor
 from vimz_marketplace_sdk.contracts.device_registry import DeviceRegistry
-from vimz_marketplace_sdk.device import get_brand, default_brands
+from vimz_marketplace_sdk.device import default_brands, get_brand
 
 
 def main():
@@ -8,7 +8,7 @@ def main():
     registry = DeviceRegistry.deploy(device_registry_admin)
 
     # Create and register custom brand and devices
-    leica = get_brand("Leica", ['SL3-S'])
+    leica = get_brand("Leica", ["SL3-S"])
     registry.register_brand(device_registry_admin, leica)
     registry.register_device(leica, leica.get_new_device())
 

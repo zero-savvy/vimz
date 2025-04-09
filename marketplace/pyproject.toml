@@ -14,3 +14,11 @@ dependencies = [
 
 [project.scripts]
 register-devices = "scenarios.register_devices:main"
+
+[tool.black]
+line-length = 100
+target-version = ['py38']
+
+[tool.isort]
+profile = "black"
+line_length = 100

@@ -1,4 +1,4 @@
-from vimz_marketplace_sdk.chain import get_actor, Actor
+from vimz_marketplace_sdk.chain import Actor, get_actor
 from vimz_marketplace_sdk.contracts.creator_registry import CreatorRegistry
 from vimz_marketplace_sdk.contracts.device_registry import DeviceRegistry
 from vimz_marketplace_sdk.creator import default_creators

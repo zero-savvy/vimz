@@ -10,5 +10,11 @@ class CreatorRegistry(VimzContract):
         return "CreatorRegistry"
 
     def register_creator(self, admin: Actor, creator: Creator):
-        self.call(admin, "registerCreator", creator.address(), creator.kyc_expiration(), creator.email())
+        self.call(
+            admin,
+            "registerCreator",
+            creator.address(),
+            creator.kyc_expiration(),
+            creator.email(),
+        )
         logger.info(f"✅ Creator '{creator.name()}' registered in CreatorRegistry.")

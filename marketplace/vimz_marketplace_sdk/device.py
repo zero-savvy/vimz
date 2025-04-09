@@ -1,7 +1,7 @@
 import random
 from collections import defaultdict
 from datetime import datetime
-from typing import cast, Generator
+from typing import Generator, cast
 
 import web3
 from eth_account.datastructures import SignedMessage
@@ -19,7 +19,7 @@ class Device(Actor):
     def sign(self, creator: Creator, image_hash: int, capture_time: datetime) -> SignedMessage:
         message_hash = web3.Web3.solidity_keccak(
             ["address", "uint256", "uint256"],
-            [creator.address(), image_hash, int(capture_time.timestamp())]
+            [creator.address(), image_hash, int(capture_time.timestamp())],
         )
         return self.account().unsafe_sign_hash(message_hash)["signature"]
 
@@ -30,6 +30,7 @@ def get_device(name: str) -> Device:
 
 ########################################################################################################################
 
+
 class Brand(Actor):
     def __init__(self, name: str, models: list[str], account: LocalAccount):
         super().__init__(name, account)
@@ -39,7 +40,7 @@ class Brand(Actor):
     def get_new_device(self) -> Device:
         model = random.choice(self._models)
         self._devices[model] += 1
-        return get_device(f'{self.name()} {model} #{self._devices[model]}')
+        return get_device(f"{self.name()} {model} #{self._devices[model]}")
 
 
 def get_brand(name: str, models: list[str]) -> Brand:

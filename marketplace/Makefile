@@ -21,3 +21,11 @@ serve-contract-docs: # Serve documentation locally using MkDocs
 format-contracts: # Format Solidity code
 	@forge fmt
 
+####################################################################################################
+################################# PYTHON ###########################################################
+####################################################################################################
+
+.PHONY: lint-python
+lint-python: # Format and lint Python code
+	@black scenarios/ vimz_marketplace_sdk/
+	@isort scenarios/ vimz_marketplace_sdk/

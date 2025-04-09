@@ -17,7 +17,7 @@ from vimz_marketplace_sdk.logging_config import logger
 CORNUCOPIA_NAME = "cornucopia"
 
 # Standard endowment: 1 Ether (in wei)
-STANDARD_ENDOWMENT = Web3.to_wei(1, 'ether')
+STANDARD_ENDOWMENT = Web3.to_wei(1, "ether")
 
 # Global dictionary to store actor accounts.
 ACTORS = {}
@@ -46,7 +46,7 @@ def get_cornucopia() -> Actor:
 
 
 def _eth(value: Wei) -> Decimal:
-    return Web3.from_wei(value, 'ether')
+    return Web3.from_wei(value, "ether")
 
 
 def get_actor(name: str, endowment: Wei = STANDARD_ENDOWMENT) -> Actor:
@@ -67,9 +67,13 @@ def get_actor(name: str, endowment: Wei = STANDARD_ENDOWMENT) -> Actor:
     return new_actor
 
 
-def deploy_contract(contract: (Union[str, typing.Tuple[str, str]]), deployer: Actor, *constructor_args) -> Contract:
+def deploy_contract(
+    contract: Union[str, typing.Tuple[str, str]], deployer: Actor, *constructor_args
+) -> Contract:
     if isinstance(contract, tuple):
-        assert len(contract) == 2, "Contract tuple must contain exactly two elements: (file_name, contract_name)"
+        assert (
+            len(contract) == 2
+        ), "Contract tuple must contain exactly two elements: (file_name, contract_name)"
         contract_file_name, contract_name = contract
     else:
         contract_file_name, contract_name = contract, contract
@@ -83,19 +87,18 @@ def deploy_contract(contract: (Union[str, typing.Tuple[str, str]]), deployer: Ac
     tx_hash = ContractCls.constructor(*constructor_args).transact()
     receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 
-    logger.info(f"✅ Contract '{contract_file_name}' deployed at address: {receipt["contractAddress"]}")
-
-    return w3.eth.contract(
-        address=receipt["contractAddress"],
-        abi=artifact["abi"]
+    logger.info(
+        f"✅ Contract '{contract_file_name}' deployed at address: {receipt["contractAddress"]}"
     )
+
+    return w3.eth.contract(address=receipt["contractAddress"], abi=artifact["abi"])
 
 
 def send_eth(from_actor: Actor, to_actor: Actor, value_wei: Wei):
     tx = {
-        'from': from_actor.address(),
-        'to': to_actor.address(),
-        'value': value_wei,
+        "from": from_actor.address(),
+        "to": to_actor.address(),
+        "value": value_wei,
     }
 
     w3 = get_web3(from_actor)
@@ -106,18 +109,21 @@ def send_eth(from_actor: Actor, to_actor: Actor, value_wei: Wei):
 
     logger.info(
         f"✅ Sent {_eth(value_wei)} ETH from '{from_actor.name()}' to '{to_actor.name()}' with tx hash: '{tx_hash.to_0x_hex()}'. "
-        f"Current balance of '{to_actor.name()}': {_eth(current_balance)} ETH.")
+        f"Current balance of '{to_actor.name()}': {_eth(current_balance)} ETH."
+    )
 
 
 def get_web3(actor: Actor = None) -> Web3:
     # Use an environment variable if available; default to localhost Anvil endpoint.
-    rpc_endpoint = os.getenv('RPC_ENDPOINT', 'http://localhost:8545')
+    rpc_endpoint = os.getenv("RPC_ENDPOINT", "http://localhost:8545")
     w3 = Web3(Web3.HTTPProvider(rpc_endpoint))
     if not w3.is_connected():
         raise ConnectionError(f"Unable to connect to RPC endpoint: {rpc_endpoint}")
 
     if actor is not None:
-        w3.middleware_onion.inject(SignAndSendRawMiddlewareBuilder.build(actor.key()), "signer", layer=0)
+        w3.middleware_onion.inject(
+            SignAndSendRawMiddlewareBuilder.build(actor.key()), "signer", layer=0
+        )
         w3.eth.default_account = actor.address()
 
     return w3

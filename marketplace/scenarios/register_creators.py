@@ -1,8 +1,8 @@
-from datetime import datetime, UTC, timedelta
+from datetime import UTC, datetime, timedelta
 
 from vimz_marketplace_sdk.chain import get_actor
 from vimz_marketplace_sdk.contracts.creator_registry import CreatorRegistry
-from vimz_marketplace_sdk.creator import get_creator, default_creators
+from vimz_marketplace_sdk.creator import default_creators, get_creator
 
 
 def main():

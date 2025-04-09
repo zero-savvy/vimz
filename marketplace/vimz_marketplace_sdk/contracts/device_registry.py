@@ -15,4 +15,6 @@ class DeviceRegistry(VimzContract):
 
     def register_device(self, brand: Actor, device: Device):
         self.call(brand, "registerDevice", device.address())
-        logger.info(f"✅ Device '{device.name()}' (by '{brand.name()}') registered in DeviceRegistry.")
+        logger.info(
+            f"✅ Device '{device.name()}' (by '{brand.name()}') registered in DeviceRegistry."
+        )

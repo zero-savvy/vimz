@@ -3,7 +3,9 @@ import os
 
 
 def get_contract_artifact(contract_file_name: str, contract_name: str) -> dict:
-    path = os.path.join(_contract_artifacts_dir(), f"{contract_file_name}.sol", f"{contract_name}.json")
+    path = os.path.join(
+        _contract_artifacts_dir(), f"{contract_file_name}.sol", f"{contract_name}.json"
+    )
     with open(path, "r") as f:
         return json.load(f)
 
@@ -24,16 +26,20 @@ class ProofData:
 
         # last 32 bytes are the proof itself
         proof_len = 32 * 25
-        self.proof = [int.from_bytes(bytes[s:s + 32])
-                      for s in range(len(bytes) - proof_len, len(bytes), 32)]
+        self.proof = [
+            int.from_bytes(bytes[s : s + 32]) for s in range(len(bytes) - proof_len, len(bytes), 32)
+        ]
 
         # the rest is the state encoding (initial and final state)
         state_encoding_len = (len(bytes) - proof_len - 32) // 2
         self.state_len = state_encoding_len // 32
-        self.initial_state = [int.from_bytes(bytes[s:s + 32])
-                              for s in range(32, 32 + state_encoding_len, 32)]
-        self.final_state = [int.from_bytes(bytes[s:s + 32])
-                            for s in range(32 + state_encoding_len, 32 + 2 * state_encoding_len, 32)]
+        self.initial_state = [
+            int.from_bytes(bytes[s : s + 32]) for s in range(32, 32 + state_encoding_len, 32)
+        ]
+        self.final_state = [
+            int.from_bytes(bytes[s : s + 32])
+            for s in range(32 + state_encoding_len, 32 + 2 * state_encoding_len, 32)
+        ]
 
 
 def get_proof(edited_img: str) -> ProofData:

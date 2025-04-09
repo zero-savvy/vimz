@@ -17,14 +17,14 @@ def main():
         device_registry.address(),
     )
 
-    gateway.register_new_asset(
+    original_asset_id = gateway.register_new_asset(
         creator, get_image_hash("img1"), datetime.now(UTC), License.FULLY_FREE, device
     )
 
     gateway.register_edited_asset(
         creator,
         get_image_hash("img1-grayscale"),
-        1,  # TODO - get from event
+        original_asset_id,
         Transformation.GRAYSCALE,
         get_proof("img1-grayscale"),
         License.FULLY_FREE,

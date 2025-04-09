@@ -64,17 +64,18 @@ class AssetGateway(VimzContract):
         capture_time: datetime,
         license: License,
         device: Device,
-    ):
-        self.call(
+    ) -> int:
+        event = self.call_and_get_event(
             creator,
             "registerNewAsset",
+            "NewAssetRegistered",
             image_hash,
             int(capture_time.timestamp()),
             license.value,
             device.address(),
             device.sign(creator, image_hash, capture_time),
         )
-        logger.info(f"✅ Asset {image_hash} registered")
+        return self._handle_creation_event(image_hash, event)
 
     def register_edited_asset(
         self,
@@ -85,13 +86,20 @@ class AssetGateway(VimzContract):
         proof: ProofData,
         license: License,
     ):
-        self.call(
+        event = self.call_and_get_event(
             creator,
             "registerEditedAsset",
+            "EditedAssetRegistered",
             image_hash,
             source_id,
             transformation.value,
             proof.proof,
             license.value,
         )
-        logger.info(f"✅ Asset {image_hash} registered")
+        return self._handle_creation_event(image_hash, event)
+
+    @staticmethod
+    def _handle_creation_event(image_hash: int, event: dict) -> int:
+        asset_id = event["assetId"]
+        logger.info(f"✅ Asset {image_hash} registered with ID {asset_id}")
+        return asset_id

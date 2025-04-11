@@ -25,3 +25,7 @@ ch = logging.StreamHandler(sys.stdout)
 formatter = ColorFormatter("[%(name)s] %(levelname)s: %(message)s")
 ch.setFormatter(formatter)
 logger.addHandler(ch)
+
+logger.start_section = lambda name: logger.info(
+    f"\n\n==================== {name} ======================\n"
+)

@@ -7,13 +7,16 @@ from vimz_marketplace_sdk.artifacts import get_image_hash, get_proof
 from vimz_marketplace_sdk.chain import get_actor
 from vimz_marketplace_sdk.contracts.asset_gateway import AssetGateway
 from vimz_marketplace_sdk.contracts.photography_contest import PhotographyContest
+from vimz_marketplace_sdk.logging_config import logger
 from vimz_marketplace_sdk.types import License, Transformation
 
 
 def main():
+    logger.start_section("Prepare device and creator registries")
     device_registry, device = prepare_device_registry()
     creator_registry, creator = prepare_creator_registry()
 
+    logger.start_section("Prepare asset gateway and register assets")
     gateway = AssetGateway.deploy(
         get_actor("gateway_deployer"),
         creator_registry.address(),
@@ -32,6 +35,8 @@ def main():
         get_proof("img1-grayscale"),
         License.FULLY_FREE,
     )
+
+    logger.start_section("Photography Contest")
 
     contest_admin = get_actor("contest_admin")
     contest = PhotographyContest.deploy(

@@ -11,68 +11,76 @@ interface IAssetRegistry {
 /// @notice Implements a photography contest scenario.
 /// Contest admin deploys the contract, funding it with the contest reward. Submissions are accepted during the contest
 /// window. For each submission, the asset registry is called to check that the chain of editions (from submitted asset
-/// to its original source) contains only the allowed transformations. After the deadline the admin may announce a
-/// winner, at which point the reward is transferred to the chosen participant.
+/// to its original source) contains only the allowed transformations. After the contest is closed the admin may
+/// announce a winner, at which point the reward is transferred to the chosen participant.
 contract PhotographyContest {
-    address public admin;
-    uint256 public deadline;
-    uint256 public reward;
-    bool public closed;
-    address public winner;
-
-    // The asset registry in which assets and their edition chains are registered.
-    IAssetRegistry public assetRegistry;
-
-    // List of permissible transformations.
-    Transformation[] public permissibleTransformations;
+    // ------------------------------------ TYPES ------------------------------------ //
+    enum State {
+        SubmissionsOpen,
+        SubmissionsClosed,
+        WinnerAnnounced
+    }
 
     struct Submission {
         address creator;
         uint256 assetId;
     }
 
+    // ------------------------------------ STORAGE ------------------------------------ //
+
+    address public admin;
+    uint256 public reward;
+    State public state;
+    address public winner;
+    IAssetRegistry public assetRegistry;
+    Transformation[] public permissibleTransformations;
     Submission[] public submissions;
 
+    // ------------------------------------ EVENTS ------------------------------------ //
+
+    event ContestCreated(address admin, uint256 reward, Transformation[] permissibleTransformations);
     event SubmissionReceived(address creator, uint256 assetId, uint256 submissionIndex);
+    event SubmissionWindowClosed();
     event WinnerAnnounced(uint256 submissionIndex, address winner, uint256 reward);
+
+    // ------------------------------------ MODIFIERS ------------------------------------ //
 
     modifier onlyAdmin() {
         require(msg.sender == admin, "Only admin may call this function.");
         _;
     }
 
+    // ------------------------------------ PUBLIC API ------------------------------------ //
+
     /**
      * @notice Constructor sets up the contest.
-     * @param _deadline Unix timestamp after which submissions are no longer accepted.
      * @param _permissibleTransformations An array of permissible transformations.
      * @param _assetRegistry The address of the asset registry contract.
      */
     constructor(
-        uint256 _deadline,
         Transformation[] memory _permissibleTransformations,
         address _assetRegistry
     ) payable {
-        require(block.timestamp <= _deadline, "Deadline must be in the future.");
         admin = msg.sender;
-        deadline = _deadline;
         reward = msg.value;
+        state = State.SubmissionsOpen;
         permissibleTransformations = _permissibleTransformations;
         assetRegistry = IAssetRegistry(_assetRegistry);
-        closed = false;
+        emit ContestCreated(admin, reward, permissibleTransformations);
     }
 
     /**
      * @notice Allows a registered creator to submit an asset.
      * @param assetId The ID of the asset (as registered in the Asset Registry).
      *
-     * The contract delegates the check on the edition chain to the asset registry’s `validateEditChain` function, which
-     * verifies that only permissible transformations are present in the chain from the submitted asset back to its root.
+     * The contract delegates the check that only permissible transformations were used to obtain the submitted asset
+     * to the asset registry’s `validateEditChain` function.
      */
     function submit(uint256 assetId) external {
-        require(block.timestamp < deadline, "Submission window is closed.");
+        require(state == State.SubmissionsOpen, "Submission window is closed.");
 
         bool validChain = assetRegistry.validateEditChain(assetId, permissibleTransformations);
-        require(validChain, "Asset chain contains non-permissible transformations.");
+        require(validChain, "Asset violates contest rules.");
 
         submissions.push(Submission({
             creator: msg.sender,
@@ -83,16 +91,24 @@ contract PhotographyContest {
     }
 
     /**
-     * @notice Admin function for announcing the winner.
+     * @notice Admin-only function to close the submission window.
+     */
+    function closeSubmissions() external onlyAdmin {
+        require(state == State.SubmissionsOpen, "Submission window is not open.");
+        state = State.SubmissionsClosed;
+        emit SubmissionWindowClosed();
+    }
+
+    /**
+     * @notice Admin-only function for announcing the winner.
      * @param submissionIndex The index of the winning submission.
      */
     function announceWinner(uint256 submissionIndex) external onlyAdmin {
-        require(block.timestamp >= deadline, "Submission window is still open.");
-        require(!closed, "Contest already closed.");
+        require(state == State.SubmissionsClosed, "Submission window is not closed.");
         require(submissionIndex < submissions.length, "Invalid submission index.");
 
         winner = submissions[submissionIndex].creator;
-        closed = true;
+        state = State.WinnerAnnounced;
 
         payable(winner).transfer(reward);
 

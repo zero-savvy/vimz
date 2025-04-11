@@ -33,7 +33,7 @@ contract PhotographyContest {
 
     Submission[] public submissions;
 
-    event SubmissionReceived(address creator, uint256 assetId);
+    event SubmissionReceived(address creator, uint256 assetId, uint256 submissionIndex);
     event WinnerAnnounced(uint256 submissionIndex, address winner, uint256 reward);
 
     modifier onlyAdmin() {
@@ -79,7 +79,7 @@ contract PhotographyContest {
             assetId: assetId
         }));
 
-        emit SubmissionReceived(msg.sender, assetId);
+        emit SubmissionReceived(msg.sender, assetId, submissions.length - 1);
     }
 
     /**

@@ -12,7 +12,7 @@ from vimz_marketplace_sdk.types import License, Transformation
 
 
 def main():
-    logger.start_section("Prepare device and creator registries")
+    logger.start_section("Prepare devices and creators")
     device_registry, device = prepare_device_registry()
     creator_registry, creator = prepare_creator_registry()
 

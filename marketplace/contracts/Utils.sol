@@ -5,18 +5,15 @@ import {License} from "./Licensing.sol";
 
 /**
  * @dev A unified asset structure.
- * For an Original asset, captureTime and device are set.
- * For an Edited asset, sourceAssetId (pointer to the source asset) and transformation
- * describe the edit. Proofs are not stored.
  */
 struct Asset {
     address creator;               // Creator's address.
     uint256 imageHash;             // Hash of the asset data.
-    uint256 captureTime;           // Unix timestamp when the image was captured (for originals).
+    uint256 captureTime;           // Unix timestamp when the root image was captured (for originals).
     License license;               // Licensing details.
     uint256 timestamp;             // Registration timestamp.
-    uint256 sourceAssetId;         // For edited assets: pointer to the source asset; 0 if not applicable.
-    Transformation transformation; // For edited assets: description of the applied transformation.
+    uint256 parentAssetId;         // For edited assets: pointer to the parent asset; 0 if not applicable.
+    Transformation transformation; // For edited assets: description of the applied transformation. For originals: NoTransformation.
 }
 
 /**

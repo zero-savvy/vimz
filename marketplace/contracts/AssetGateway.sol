@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-import "./CreatorRegistry.sol";
-import "./DeviceRegistry.sol";
+import {CreatorRegistry} from "./CreatorRegistry.sol";
+import {DeviceRegistry} from "./DeviceRegistry.sol";
 import {License} from "./Licensing.sol";
-import {Asset, Transformation} from "./Utils.sol";
+import {Transformation, Asset} from "./Utils.sol";
 
 /**
  * @dev Interface for the SNARK verifier.
@@ -47,7 +47,7 @@ contract AssetGateway {
         uint256 indexed assetId,
         address indexed creator,
         uint256 imageHash,
-        uint256 sourceAssetId,
+        uint256 parentAssetId,
         Transformation transformation,
         License license,
         uint256 timestamp
@@ -106,7 +106,7 @@ contract AssetGateway {
             captureTime: captureTime,
             license: license,
             timestamp: block.timestamp,
-            sourceAssetId: 0,
+            parentAssetId: 0,
             transformation: Transformation.NoTransformation
         });
 
@@ -122,16 +122,16 @@ contract AssetGateway {
     }
 
     /**
-     * @notice Registers an edited asset based on a source asset.
+     * @notice Registers an edited asset based on a parent asset.
      * @param editedImageHash The uint256 hash of the edited image.
-     * @param sourceAssetId The ID of the original asset being edited.
+     * @param parentAssetId The ID of the original asset being edited.
      * @param transformation The transformation applied to the original asset.
      * @param proof The SNARK proof for the transformation.
      * @param license The licensing details for the edited asset.
      */
     function registerEditedAsset(
         uint256 editedImageHash,
-        uint256 sourceAssetId,
+        uint256 parentAssetId,
         Transformation transformation,
         uint256[25] calldata proof,
         License license
@@ -140,16 +140,16 @@ contract AssetGateway {
         address creator = msg.sender;
         require(creatorRegistry.verifyCreator(creator), "Creator not verified");
 
-        // 2. Ensure the source asset exists.
-        require(sourceAssetId > 0 && sourceAssetId <= assetCount, "Source asset does not exist");
-        Asset storage source = assets[sourceAssetId];
+        // 2. Ensure the parent asset exists.
+        require(parentAssetId > 0 && parentAssetId <= assetCount, "Parent asset does not exist");
+        Asset storage parent = assets[parentAssetId];
 
         // 3. Ensure the transformation is valid.
         require(transformation != Transformation.NoTransformation, "Invalid transformation");
         bool validProof = verifiers[transformation].verifyOpaqueNovaProofWithInputs(
             720, // Number of steps for HD-preserving transformations
             [uint256(0), uint256(0)], // Initial state: empty hashes
-            [source.imageHash, editedImageHash], // Final state: source and edited image hashes
+            [parent.imageHash, editedImageHash], // Final state: parent and edited image hashes
             proof
         );
         require(validProof, "Invalid transformation proof");
@@ -162,10 +162,10 @@ contract AssetGateway {
         assets[assetCount] = Asset({
             creator: creator,
             imageHash: editedImageHash,
-            captureTime: source.captureTime,
+            captureTime: parent.captureTime,
             license: license,
             timestamp: block.timestamp,
-            sourceAssetId: sourceAssetId,
+            parentAssetId: parentAssetId,
             transformation: transformation
         });
 
@@ -173,7 +173,7 @@ contract AssetGateway {
             assetCount,
             creator,
             editedImageHash,
-            sourceAssetId,
+            parentAssetId,
             transformation,
             license,
             block.timestamp
@@ -188,5 +188,33 @@ contract AssetGateway {
     function getAsset(uint256 assetId) external view returns (Asset memory) {
         require(assetId > 0 && assetId <= assetCount, "Asset does not exist");
         return assets[assetId];
+    }
+
+    /**
+     * @notice Checks that the chain of editions for the given asset contains only permissible transformations.
+     * @param assetId The ID of the asset to be checked.
+     * @param permissibleTransformations An array of allowed Transformation enum values.
+     * @return true if the entire chain (from the original asset to the `assetId`) is valid, false otherwise.
+     */
+    function validateEditChain(uint256 assetId, Transformation[] calldata permissibleTransformations)
+        external
+        view
+        returns (bool)
+    {
+        Asset memory a = assets[assetId];
+        while (a.parentAssetId != 0) {
+            bool found = false;
+            for (uint i = 0; i < permissibleTransformations.length; i++) {
+                if (a.transformation == permissibleTransformations[i]) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                return false;
+            }
+            a = assets[a.parentAssetId];
+        }
+        return true;
     }
 }

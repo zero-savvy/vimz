@@ -1,7 +1,7 @@
-from datetime import datetime
 from typing import cast
 
 from eth_typing import ChecksumAddress
+from web3.types import Wei
 
 from vimz_marketplace_sdk.chain import Actor, _eth
 from vimz_marketplace_sdk.contracts.contract import VimzContract
@@ -18,18 +18,16 @@ class PhotographyContest(VimzContract):
     def deploy(
         cls,
         deployer: Actor,
-        submission_deadline: datetime,
-        reward: int,
+        reward: Wei,
         permissible_transformations: list[Transformation],
         asset_gateway_address: ChecksumAddress,
     ) -> "PhotographyContest":
         vimz_contract = super().deploy(
             deployer,
-            int(submission_deadline.timestamp()),
             [t.value for t in permissible_transformations],
             asset_gateway_address,
+            value=reward,
         )
-        # TODO PAY
         return cast(PhotographyContest, vimz_contract)
 
     def submit(self, creator: Actor, asset_id: int):
@@ -39,7 +37,11 @@ class PhotographyContest(VimzContract):
             "SubmissionReceived",
             asset_id,
         )
-        logger.info(f"Submission created: {event['submissionIndex']}")
+        logger.info(f"Submission created with id {event['submissionIndex']}")
+
+    def close_submissions(self, admin: Actor):
+        self.call(admin, "closeSubmissions")
+        logger.info("Submissions closed")
 
     def announce_winner(self, admin: Actor, submission_id: int):
         event = self.call_and_get_event(admin, "announceWinner", "WinnerAnnounced", submission_id)

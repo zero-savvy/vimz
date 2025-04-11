@@ -68,7 +68,10 @@ def get_actor(name: str, endowment: Wei = STANDARD_ENDOWMENT) -> Actor:
 
 
 def deploy_contract(
-    contract: Union[str, typing.Tuple[str, str]], deployer: Actor, *constructor_args
+    contract: Union[str, typing.Tuple[str, str]],
+    deployer: Actor,
+    *constructor_args,
+    **tx_kwargs,
 ) -> Contract:
     if isinstance(contract, tuple):
         assert (
@@ -82,9 +85,9 @@ def deploy_contract(
     artifact = get_contract_artifact(contract_file_name, contract_name)
 
     w3 = get_web3(deployer)
-    ContractCls = w3.eth.contract(abi=artifact["abi"], bytecode=artifact["bytecode"]["object"])
+    contract_cls = w3.eth.contract(abi=artifact["abi"], bytecode=artifact["bytecode"]["object"])
 
-    tx_hash = ContractCls.constructor(*constructor_args).transact()
+    tx_hash = contract_cls.constructor(*constructor_args).transact(tx_kwargs)
     receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 
     logger.info(

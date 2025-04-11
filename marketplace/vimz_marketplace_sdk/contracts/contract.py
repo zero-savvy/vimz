@@ -25,10 +25,9 @@ class VimzContract(ABC):
         return self._contract.address
 
     @classmethod
-    def deploy(cls, deployer: Actor, *args) -> "VimzContract":
-        return cls(
-            deploy_contract((cls.contract_file_name(), cls.contract_name()), deployer, *args)
-        )
+    def deploy(cls, deployer: Actor, *args, **tx_kwargs) -> "VimzContract":
+        contract = (cls.contract_file_name(), cls.contract_name())
+        return cls(deploy_contract(contract, deployer, *args, **tx_kwargs))
 
     def set_caller(self, caller: Actor):
         self._contract.w3.middleware_onion.remove("signer")

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 /**
- * @dev Licensing types for assets.
+ * @dev Licensing types for images.
  */
 enum License {
     Closed,         // Only the original creator holds rights.

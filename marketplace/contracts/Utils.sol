@@ -4,21 +4,20 @@ pragma solidity ^0.8.10;
 import {License} from "./Licensing.sol";
 
 /**
- * @dev A unified asset structure.
+ * @dev A unified Image structure.
  */
-struct Asset {
+struct Image {
     address creator;               // Creator's address.
-    uint256 imageHash;             // Hash of the asset data.
     uint256 captureTime;           // Unix timestamp when the root image was captured (for originals).
     License license;               // Licensing details.
     uint256 timestamp;             // Registration timestamp.
-    uint256 parentAssetId;         // For edited assets: pointer to the parent asset; 0 if not applicable.
-    Transformation transformation; // For edited assets: description of the applied transformation. For originals: NoTransformation.
+    uint256 parentHash;            // For edited images: pointer to the parent image; 0 if not applicable.
+    Transformation transformation; // For edited images: description of the applied transformation. For originals: NoTransformation.
 }
 
 /**
- * @dev Enum for asset transformations.
- * These are the transformations that can be applied to an asset.
+ * @dev Enum for image transformations.
+ * These are the transformations that can be applied to an image.
  */
 enum Transformation {
     Blur,
@@ -29,5 +28,5 @@ enum Transformation {
     Redact,
     Resize,
     Sharpness,
-    NoTransformation // Used for original assets.
+    NoTransformation // Used for original image.
 }

@@ -69,6 +69,8 @@ def participant_1(contest: PhotographyContest, setup: Setup):
     logger.start_section(f"Participant {participant.name()}: submitting images to contest")
     # Unmodified image is allowed
     contest.submit(participant, asset1)
+    # Cannot submit the same image twice
+    repeat_submission(participant, contest, asset1)
     # Sharpness is not allowed
     invalid_submission(participant, contest, asset2)
     # Grayscale is allowed
@@ -93,19 +95,49 @@ def participant_2(contest: PhotographyContest, setup: Setup):
         get_proof("img2-contrast"),
         License.CLOSED,
     )
+    asset3 = setup.gateway.register_edited_asset(
+        participant,
+        get_image_hash("img1-blur"),
+        1,
+        Transformation.BLUR,
+        get_proof("img1-blur"),
+        License.CLOSED,
+    )
 
     logger.start_section(f"Participant {participant.name()}: submitting images to contest")
     # Unmodified image is allowed
     contest.submit(participant, asset1)
     # Contrast is not allowed
     invalid_submission(participant, contest, asset2)
+    # Cannot submit other's work
+    someone_elses_submission(participant, contest, asset3)
+
+
+def repeat_submission(participant: Creator, contest: PhotographyContest, asset_id: int):
+    _fail_submission(participant, contest, asset_id, "Asset already submitted")
 
 
 def invalid_submission(participant: Creator, contest: PhotographyContest, asset_id: int):
+    _fail_submission(participant, contest, asset_id, "Asset violates contest rules")
+
+
+def someone_elses_submission(participant: Creator, contest: PhotographyContest, asset_id: int):
+    _fail_submission(
+        participant, contest, asset_id, "Participant is not the only creator of the asset"
+    )
+
+
+def _fail_submission(
+    participant: Creator,
+    contest: PhotographyContest,
+    asset_id: int,
+    message: str,
+):
     try:
         contest.submit(participant, asset_id)
+        raise Exception("Submission should have failed")
     except ContractLogicError as err:
-        assert "Asset violates contest rules" in err.message
+        assert message in err.message
 
 
 if __name__ == "__main__":

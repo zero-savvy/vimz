@@ -5,6 +5,8 @@ import {Transformation} from "./Utils.sol";
 
 interface IAssetRegistry {
     function validateEditChain(uint256 assetId, Transformation[] calldata permissibleTransformations) external view returns (bool);
+
+    function ensureSoloCreator(uint256 assetId, address creator) external view returns (bool);
 }
 
 /// @title Photography Contest
@@ -21,11 +23,6 @@ contract PhotographyContest {
         WinnerAnnounced
     }
 
-    struct Submission {
-        address creator;
-        uint256 assetId;
-    }
-
     // ------------------------------------ STORAGE ------------------------------------ //
 
     address public admin;
@@ -34,14 +31,14 @@ contract PhotographyContest {
     address public winner;
     IAssetRegistry public assetRegistry;
     Transformation[] public permissibleTransformations;
-    Submission[] public submissions;
+    mapping(uint256 => address) public submissions;
 
     // ------------------------------------ EVENTS ------------------------------------ //
 
     event ContestCreated(address admin, uint256 reward, Transformation[] permissibleTransformations);
-    event SubmissionReceived(address creator, uint256 assetId, uint256 submissionIndex);
+    event SubmissionReceived(address creator, uint256 assetId);
     event SubmissionWindowClosed();
-    event WinnerAnnounced(uint256 submissionIndex, address winner, uint256 reward);
+    event WinnerAnnounced(uint256 assetId, address winner, uint256 reward);
 
     // ------------------------------------ MODIFIERS ------------------------------------ //
 
@@ -75,19 +72,22 @@ contract PhotographyContest {
      *
      * The contract delegates the check that only permissible transformations were used to obtain the submitted asset
      * to the asset registry’s `validateEditChain` function.
+     * The contract also checks that the asset was created only by the participant submitting it. This is done also by
+     * delegating to the asset registry’s `ensureSoloCreator` function.
      */
     function submit(uint256 assetId) external {
         require(state == State.SubmissionsOpen, "Submission window is closed.");
+        require(submissions[assetId] == address(0), "Asset already submitted.");
+
+        bool validCreator = assetRegistry.ensureSoloCreator(assetId, msg.sender);
+        require(validCreator, "Participant is not the only creator of the asset.");
 
         bool validChain = assetRegistry.validateEditChain(assetId, permissibleTransformations);
         require(validChain, "Asset violates contest rules.");
 
-        submissions.push(Submission({
-            creator: msg.sender,
-            assetId: assetId
-        }));
+        submissions[assetId] = msg.sender;
 
-        emit SubmissionReceived(msg.sender, assetId, submissions.length - 1);
+        emit SubmissionReceived(msg.sender, assetId);
     }
 
     /**
@@ -101,17 +101,17 @@ contract PhotographyContest {
 
     /**
      * @notice Admin-only function for announcing the winner.
-     * @param submissionIndex The index of the winning submission.
+     * @param assetId The winning asset id.
      */
-    function announceWinner(uint256 submissionIndex) external onlyAdmin {
+    function announceWinner(uint256 assetId) external onlyAdmin {
         require(state == State.SubmissionsClosed, "Submission window is not closed.");
-        require(submissionIndex < submissions.length, "Invalid submission index.");
 
-        winner = submissions[submissionIndex].creator;
+        winner = submissions[assetId];
+        require(winner != address(0), "Invalid winning submission.");
+
         state = State.WinnerAnnounced;
-
         payable(winner).transfer(reward);
 
-        emit WinnerAnnounced(submissionIndex, winner, reward);
+        emit WinnerAnnounced(assetId, winner, reward);
     }
 }

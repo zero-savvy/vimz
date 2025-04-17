@@ -31,20 +31,15 @@ class PhotographyContest(VimzContract):
         return cast(PhotographyContest, vimz_contract)
 
     def submit(self, creator: Actor, asset_id: int):
-        event = self.call_and_get_event(
-            creator,
-            "submit",
-            "SubmissionReceived",
-            asset_id,
-        )
-        logger.info(f"Submission created with id {event['submissionIndex']}")
+        self.call(creator, "submit", asset_id)
+        logger.info("Submission created")
 
     def close_submissions(self, admin: Actor):
         self.call(admin, "closeSubmissions")
         logger.info("Submissions closed")
 
-    def announce_winner(self, admin: Actor, submission_id: int):
-        event = self.call_and_get_event(admin, "announceWinner", "WinnerAnnounced", submission_id)
+    def announce_winner(self, admin: Actor, asset_id: int):
+        event = self.call_and_get_event(admin, "announceWinner", "WinnerAnnounced", asset_id)
         winner = get_actor_by_address(event["winner"])
         logger.info(
             f"Winner announced: {winner.name()} and paid {_eth(event['reward'])} ETH. Contest completed."

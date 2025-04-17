@@ -149,7 +149,7 @@ contract AssetGateway {
             parent.imageHash,
             editedImageHash,
             transformation,
-        transformationParameters,
+            transformationParameters,
             proof,
             verifiers[transformation]
         );
@@ -216,6 +216,24 @@ contract AssetGateway {
                 return false;
             }
             a = assets[a.parentAssetId];
+        }
+        return true;
+    }
+
+    /**
+     * @notice Checks that the creator is the same for all assets in the chain.
+     * @param assetId The ID of the leaf asset to be checked.
+     * @param creator The address of the creator to be checked against.
+     * @return true if the creator is the same for all assets in the chain, false otherwise.
+     */
+    function ensureSoloCreator(uint256 assetId, address creator) external view returns (bool) {
+        Asset memory a;
+        while (assetId != 0) {
+            a = assets[assetId];
+            if (a.creator != creator) {
+                return false;
+            }
+            assetId = a.parentAssetId;
         }
         return true;
     }

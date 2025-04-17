@@ -1,5 +1,7 @@
 from datetime import UTC, datetime
 
+from web3.exceptions import ContractLogicError
+
 from scenarios import prepare_creator_registry, prepare_device_registry
 from vimz_marketplace_sdk.artifacts import get_image_hash, get_proof
 from vimz_marketplace_sdk.chain import get_actor
@@ -14,6 +16,8 @@ def main():
     (gateway, creator, device) = setup()
     [img1_asset_id, img2_asset_id] = register_originals(gateway, creator, device)
 
+    ################################################################################################
+
     logger.start_section("Register editions of `img1`")
     register_edition(gateway, creator, img1_asset_id, "img1-grayscale", Transformation.GRAYSCALE)
     sharpness_id = register_edition(
@@ -23,6 +27,8 @@ def main():
         gateway, creator, sharpness_id, "img1-sharpness-grayscale", Transformation.GRAYSCALE
     )
 
+    ################################################################################################
+
     logger.start_section("Register editions of `img2`")
     contrast_id = register_edition(
         gateway, creator, img2_asset_id, "img2-contrast", Transformation.CONTRAST
@@ -30,6 +36,29 @@ def main():
     register_edition(
         gateway, creator, contrast_id, "img2-contrast-sharpness", Transformation.SHARPNESS
     )
+
+    ################################################################################################
+
+    logger.start_section("Try to register the same original asset twice")
+    try:
+        gateway.register_new_asset(
+            creator, get_image_hash("img1"), datetime.now(UTC), License.FULLY_FREE, device
+        )
+    except ContractLogicError as err:
+        assert "revert: Image hash already registered" in err.message
+        logger.info("Cannot register the same original asset twice: ✅")
+
+    try:
+        register_edition(
+            gateway,
+            creator,
+            img1_asset_id,
+            "img1-grayscale",
+            Transformation.GRAYSCALE,
+        )
+    except ContractLogicError as err:
+        assert "revert: Image hash already registered" in err.message
+        logger.info("Cannot register the same edited asset twice: ✅")
 
 
 def setup() -> tuple[AssetGateway, Creator, Device]:

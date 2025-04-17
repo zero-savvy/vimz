@@ -20,6 +20,7 @@ contract AssetGateway {
 
     // Mapping from asset ID to Asset details.
     mapping(uint256 => Asset) public assets;
+    mapping(uint256 => uint256) public hashToAssetId;
 
     event NewAssetRegistered(
         uint256 indexed assetId,
@@ -75,18 +76,21 @@ contract AssetGateway {
         address deviceId,
         bytes calldata deviceSignature
     ) external {
-        // 1. Ensure the creator is verified.
+        // 1. Ensure the image hash is unique.
+        require(hashToAssetId[imageHash] == 0, "Image hash already registered");
+
+        // 2. Ensure the creator is verified.
         address creator = msg.sender;
         require(creatorRegistry.verifyCreator(creator), "Creator not verified");
 
-        // 2. Create a message hash for device signature verification and vaildate it.
+        // 3. Create a message hash for device signature verification and vaildate it.
         bytes32 messageHash = keccak256(abi.encodePacked(creator, imageHash, captureTime));
         require(
             deviceRegistry.verifyDeviceSignature(messageHash, deviceSignature, deviceId),
             "Invalid device signature"
         );
 
-        // 3. Increment asset count and store the original asset.
+        // 4. Increment asset count and store the original asset.
         assetCount++;
         assets[assetCount] = Asset({
             creator: creator,
@@ -97,6 +101,7 @@ contract AssetGateway {
             parentAssetId: 0,
             transformation: Transformation.NoTransformation
         });
+        hashToAssetId[imageHash] = assetCount;
 
         emit NewAssetRegistered(
             assetCount,
@@ -127,15 +132,18 @@ contract AssetGateway {
         uint256[25] calldata proof,
         License license
     ) external {
-        // 1. Ensure the creator is verified.
+        // 1. Ensure the image hash is unique.
+        require(hashToAssetId[editedImageHash] == 0, "Image hash already registered");
+
+        // 2. Ensure the creator is verified.
         address creator = msg.sender;
         require(creatorRegistry.verifyCreator(creator), "Creator not verified");
 
-        // 2. Ensure the parent asset exists.
+        // 3. Ensure the parent asset exists.
         require(parentAssetId > 0 && parentAssetId <= assetCount, "Parent asset does not exist");
         Asset storage parent = assets[parentAssetId];
 
-        // 3. Ensure the transformation is valid.
+        // 4. Ensure the transformation is valid.
         require(transformation != Transformation.NoTransformation, "Invalid transformation");
         bool validProof = OnChainVerification.verifyTransformationValidity(
             parent.imageHash,
@@ -147,10 +155,10 @@ contract AssetGateway {
         );
         require(validProof, "Invalid transformation proof");
 
-        // 4. Ensure license is not violated.
+        // 5. Ensure license is not violated.
         // TODO
 
-        // 5. Increment asset count and store the asset.
+        // 6. Increment asset count and store the asset.
         assetCount++;
         assets[assetCount] = Asset({
             creator: creator,
@@ -161,6 +169,7 @@ contract AssetGateway {
             parentAssetId: parentAssetId,
             transformation: transformation
         });
+        hashToAssetId[editedImageHash] = assetCount;
 
         emit EditedAssetRegistered(
             assetCount,

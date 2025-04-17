@@ -20,18 +20,40 @@ def main():
         device_registry.address(),
     )
 
-    logger.start_section("Register assets")
-    original_asset_id = gateway.register_new_asset(
+    logger.start_section("Register original assets")
+    img1_asset_id = gateway.register_new_asset(
         creator, get_image_hash("img1"), datetime.now(UTC), License.FULLY_FREE, device
     )
-    gateway.register_edited_asset(
-        creator,
-        get_image_hash("img1-grayscale"),
-        original_asset_id,
-        Transformation.GRAYSCALE,
-        get_proof("img1-grayscale"),
-        License.FULLY_FREE,
+    img2_asset_id = gateway.register_new_asset(
+        creator, get_image_hash("img2"), datetime.now(UTC), License.FULLY_FREE, device
     )
+
+    logger.start_section("Register editions of `img1`")
+    for asset_name, transformation in [
+        ("img1-grayscale", Transformation.GRAYSCALE),
+        # ("img1-sharpness", Transformation.SHARPNESS),
+    ]:
+        gateway.register_edited_asset(
+            creator,
+            get_image_hash(asset_name),
+            img1_asset_id,
+            transformation,
+            get_proof(asset_name),
+            License.FULLY_FREE,
+        )
+
+    logger.start_section("Register editions of `img2`")
+    for asset_name, transformation in [
+        ("img2-contrast", Transformation.CONTRAST),
+    ]:
+        gateway.register_edited_asset(
+            creator,
+            get_image_hash(asset_name),
+            img2_asset_id,
+            transformation,
+            get_proof(asset_name),
+            License.FULLY_FREE,
+        )
 
 
 if __name__ == "__main__":

@@ -17,3 +17,22 @@ class Transformation(Enum):
     REDACT = 5
     RESIZE = 6
     SHARPNESS = 7
+
+
+def transformation_parameters(t: Transformation) -> int:
+    if t in [
+        Transformation.BLUR,
+        Transformation.GRAYSCALE,
+        Transformation.REDACT,
+        Transformation.RESIZE,
+        Transformation.SHARPNESS,
+    ]:
+        return 0
+    elif t == Transformation.BRIGHTNESS:
+        return 14
+    elif t == Transformation.CONTRAST:
+        return 14
+    elif t == Transformation.CROP:
+        raise ValueError("Crop transformation not supported yet")
+    else:
+        raise ValueError(f"Unknown transformation: {t}")

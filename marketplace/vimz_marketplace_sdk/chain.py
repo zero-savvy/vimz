@@ -84,8 +84,13 @@ def deploy_contract(
     logger.debug(f"⏳ Deploying contract '{contract_file_name}'...")
     artifact = get_contract_artifact(contract_file_name, contract_name)
 
+    bytecode = artifact["bytecode"]["object"]
+    if "__$50ef4545b853d92e1056d517e1233a1758$__" in bytecode:
+        lib_address = deploy_contract("OnChainVerification", deployer).address.removeprefix("0x")
+        bytecode = bytecode.replace("__$50ef4545b853d92e1056d517e1233a1758$__", lib_address)
+
     w3 = get_web3(deployer)
-    contract_cls = w3.eth.contract(abi=artifact["abi"], bytecode=artifact["bytecode"]["object"])
+    contract_cls = w3.eth.contract(abi=artifact["abi"], bytecode=bytecode)
 
     tx_hash = contract_cls.constructor(*constructor_args).transact(tx_kwargs)
     receipt = w3.eth.wait_for_transaction_receipt(tx_hash)

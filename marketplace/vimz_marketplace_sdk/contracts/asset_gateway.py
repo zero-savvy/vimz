@@ -19,7 +19,7 @@ from vimz_marketplace_sdk.contracts.verifiers import (
 from vimz_marketplace_sdk.creator import Creator
 from vimz_marketplace_sdk.device import Device
 from vimz_marketplace_sdk.logging_config import logger
-from vimz_marketplace_sdk.types import License, Transformation
+from vimz_marketplace_sdk.types import License, Transformation, transformation_parameters
 
 
 class AssetGateway(VimzContract):
@@ -93,6 +93,7 @@ class AssetGateway(VimzContract):
             image_hash,
             source_id,
             transformation.value,
+            transformation_parameters(transformation),
             proof.proof,
             license.value,
         )

@@ -123,7 +123,7 @@ contract AssetGateway {
         uint256 editedImageHash,
         uint256 parentAssetId,
         Transformation transformation,
-        uint256 transformationParameters,
+        uint256[] calldata transformationParameters,
         uint256[25] calldata proof,
         License license
     ) external {

@@ -8,7 +8,7 @@ library OnChainVerification {
         uint256 sourceHash,
         uint256 editionHash,
         Transformation transformation,
-        uint256 transformationParameters,
+        uint256[] calldata transformationParameters,
         uint256[25] calldata proof,
         address verifier
     ) public view returns (bool) {
@@ -19,6 +19,7 @@ library OnChainVerification {
             transformation == Transformation.Redact ||
             transformation == Transformation.Resize
         ) {
+            require(transformationParameters.length == 0, "Unexpected transformation parameters.");
             return ISnarkVerifierWithIVCLen2(verifier).verifyOpaqueNovaProofWithInputs(
                 steps,
                 [uint256(0), 0], // Initial state: empty hashes
@@ -28,19 +29,21 @@ library OnChainVerification {
         }
 
         if (transformation == Transformation.Brightness || transformation == Transformation.Contrast) {
+            require(transformationParameters.length == 1, "Invalid transformation parameters - expected transformation factor.");
             return ISnarkVerifierWithIVCLen3(verifier).verifyOpaqueNovaProofWithInputs(
                 steps,
-                [0, 0, transformationParameters], // Initial state: empty hashes + parameters
-                [sourceHash, editionHash, transformationParameters], // Final state: parent and edited image hashes + parameters
+                [0, 0, transformationParameters[0]], // Initial state: empty hashes + parameters
+                [sourceHash, editionHash, transformationParameters[0]], // Final state: parent and edited image hashes + parameters
                 proof
             );
         }
 
         if (transformation == Transformation.Blur || transformation == Transformation.Sharpness) {
+            require(transformationParameters.length == 2, "Invalid transformation parameters - expected final neighbourhood hashes.");
             return ISnarkVerifierWithIVCLen4(verifier).verifyOpaqueNovaProofWithInputs(
                 steps,
                 [uint256(0), 0, 0, 0], // Initial state: empty hashes
-                [sourceHash, editionHash, 0, 0], // Final state: parent and edited image hashes
+                [sourceHash, editionHash, transformationParameters[0], transformationParameters[1]], // Final state: parent and edited image hashes + neighbourhood hashes
                 proof
             );
         }

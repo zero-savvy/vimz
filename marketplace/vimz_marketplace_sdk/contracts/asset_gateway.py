@@ -93,7 +93,7 @@ class AssetGateway(VimzContract):
             image_hash,
             source_id,
             transformation.value,
-            transformation_parameters(transformation),
+            transformation_parameters(transformation, proof),
             proof.proof,
             license.value,
         )

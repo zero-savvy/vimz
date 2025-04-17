@@ -1,5 +1,7 @@
 from enum import Enum
 
+from vimz_marketplace_sdk.artifacts import ProofData
+
 
 class License(Enum):
     CLOSED = 0
@@ -19,19 +21,18 @@ class Transformation(Enum):
     SHARPNESS = 7
 
 
-def transformation_parameters(t: Transformation) -> int:
+def transformation_parameters(t: Transformation, proof: ProofData) -> list[int]:
     if t in [
-        Transformation.BLUR,
         Transformation.GRAYSCALE,
         Transformation.REDACT,
         Transformation.RESIZE,
-        Transformation.SHARPNESS,
     ]:
-        return 0
-    elif t == Transformation.BRIGHTNESS:
-        return 14
-    elif t == Transformation.CONTRAST:
-        return 14
+        return []
+    elif t in [Transformation.BRIGHTNESS, Transformation.CONTRAST]:
+        return [14]
+    elif t in [Transformation.BLUR, Transformation.SHARPNESS]:
+        return [proof.final_state[2], proof.final_state[3]]
+
     elif t == Transformation.CROP:
         raise ValueError("Crop transformation not supported yet")
     else:

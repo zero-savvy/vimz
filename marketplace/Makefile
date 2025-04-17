@@ -11,7 +11,7 @@ help: # Show help for each of the Makefile recipes.
 
 .PHONY: compile-contracts
 compile-contracts: # Compile all contracts using Foundry
-	@forge build
+	@forge build --via-ir
 
 .PHONY: serve-contract-docs
 serve-contract-docs: # Serve documentation locally using MkDocs

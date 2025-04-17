@@ -67,6 +67,13 @@ def get_actor(name: str, endowment: Wei = STANDARD_ENDOWMENT) -> Actor:
     return new_actor
 
 
+def get_actor_by_address(address: ChecksumAddress) -> Actor:
+    for actor in ACTORS.values():
+        if actor.address() == address:
+            return actor
+    raise ValueError(f"Actor with address {address} not found.")
+
+
 def deploy_contract(
     contract: Union[str, typing.Tuple[str, str]],
     deployer: Actor,

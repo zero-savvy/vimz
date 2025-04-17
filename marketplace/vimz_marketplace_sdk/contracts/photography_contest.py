@@ -3,7 +3,7 @@ from typing import cast
 from eth_typing import ChecksumAddress
 from web3.types import Wei
 
-from vimz_marketplace_sdk.chain import Actor, _eth
+from vimz_marketplace_sdk.chain import Actor, _eth, get_actor_by_address
 from vimz_marketplace_sdk.contracts.contract import VimzContract
 from vimz_marketplace_sdk.logging_config import logger
 from vimz_marketplace_sdk.types import Transformation
@@ -45,6 +45,7 @@ class PhotographyContest(VimzContract):
 
     def announce_winner(self, admin: Actor, submission_id: int):
         event = self.call_and_get_event(admin, "announceWinner", "WinnerAnnounced", submission_id)
+        winner = get_actor_by_address(event["winner"])
         logger.info(
-            f"Winner announced: {event['winner']} and paid {_eth(event['reward'])} ETH. Contest completed."
+            f"Winner announced: {winner.name()} and paid {_eth(event['reward'])} ETH. Contest completed."
         )

@@ -20,26 +20,26 @@ class PhotographyContest(VimzContract):
         deployer: Actor,
         reward: Wei,
         permissible_transformations: list[Transformation],
-        asset_gateway_address: ChecksumAddress,
+        image_gateway_address: ChecksumAddress,
     ) -> "PhotographyContest":
         vimz_contract = super().deploy(
             deployer,
             [t.value for t in permissible_transformations],
-            asset_gateway_address,
+            image_gateway_address,
             value=reward,
         )
         return cast(PhotographyContest, vimz_contract)
 
-    def submit(self, creator: Actor, asset_id: int):
-        self.call(creator, "submit", asset_id)
+    def submit(self, creator: Actor, image_hash: int):
+        self.call(creator, "submit", image_hash)
         logger.info("Submission created")
 
     def close_submissions(self, admin: Actor):
         self.call(admin, "closeSubmissions")
         logger.info("Submissions closed")
 
-    def announce_winner(self, admin: Actor, asset_id: int):
-        event = self.call_and_get_event(admin, "announceWinner", "WinnerAnnounced", asset_id)
+    def announce_winner(self, admin: Actor, image_hash: int):
+        event = self.call_and_get_event(admin, "announceWinner", "WinnerAnnounced", image_hash)
         winner = get_actor_by_address(event["winner"])
         logger.info(
             f"Winner announced: {winner.name()} and paid {_eth(event['reward'])} ETH. Contest completed."

@@ -124,7 +124,7 @@ contract ImageGateway {
         License license
     ) external {
         // 1. Ensure the image hash is unique.
-        require(images[editedImageHash].creator == address(0), "Image hash already registered");
+        require(images[editedImageHash].creator == address(0), "Image already registered");
 
         // 2. Ensure the creator is verified.
         address creator = msg.sender;

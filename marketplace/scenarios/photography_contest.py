@@ -30,7 +30,7 @@ def main():
 
     logger.start_section("Announce winner")
     contest.close_submissions(contest_admin)
-    contest.announce_winner(contest_admin, 1)
+    contest.announce_winner(contest_admin, get_image_hash("img1-grayscale"))
 
 
 def participant_1(contest: PhotographyContest, setup: Setup):
@@ -38,29 +38,29 @@ def participant_1(contest: PhotographyContest, setup: Setup):
     device = setup.devices[0]
 
     logger.start_section(f"Participant {participant.name()}: registering images in Gateway")
-    asset1 = setup.gateway.register_new_asset(
+    setup.gateway.register_new_image(
         participant, get_image_hash("img1"), datetime.now(UTC), License.CLOSED, device
     )
-    asset2 = setup.gateway.register_edited_asset(
+    setup.gateway.register_edited_image(
         participant,
         get_image_hash("img1-sharpness"),
-        asset1,
+        get_image_hash("img1"),
         Transformation.SHARPNESS,
         get_proof("img1-sharpness"),
         License.CLOSED,
     )
-    asset3 = setup.gateway.register_edited_asset(
+    setup.gateway.register_edited_image(
         participant,
         get_image_hash("img1-grayscale"),
-        asset1,
+        get_image_hash("img1"),
         Transformation.GRAYSCALE,
         get_proof("img1-grayscale"),
         License.CLOSED,
     )
-    asset4 = setup.gateway.register_edited_asset(
+    setup.gateway.register_edited_image(
         participant,
         get_image_hash("img1-sharpness-grayscale"),
-        asset2,
+        get_image_hash("img1-sharpness"),
         Transformation.GRAYSCALE,
         get_proof("img1-sharpness-grayscale"),
         License.CLOSED,
@@ -68,15 +68,15 @@ def participant_1(contest: PhotographyContest, setup: Setup):
 
     logger.start_section(f"Participant {participant.name()}: submitting images to contest")
     # Unmodified image is allowed
-    contest.submit(participant, asset1)
+    contest.submit(participant, get_image_hash("img1"))
     # Cannot submit the same image twice
-    repeat_submission(participant, contest, asset1)
+    repeat_submission(participant, contest, get_image_hash("img1"))
     # Sharpness is not allowed
-    invalid_submission(participant, contest, asset2)
+    invalid_submission(participant, contest, get_image_hash("img1-sharpness"))
     # Grayscale is allowed
-    contest.submit(participant, asset3)
+    contest.submit(participant, get_image_hash("img1-grayscale"))
     # Sharpness is not allowed, even if grayscale is lay
-    invalid_submission(participant, contest, asset4)
+    invalid_submission(participant, contest, get_image_hash("img1-sharpness-grayscale"))
 
 
 def participant_2(contest: PhotographyContest, setup: Setup):
@@ -84,21 +84,21 @@ def participant_2(contest: PhotographyContest, setup: Setup):
     device = setup.devices[1]
 
     logger.start_section(f"Participant {participant.name()}: registering images in Gateway")
-    asset1 = setup.gateway.register_new_asset(
+    setup.gateway.register_new_image(
         participant, get_image_hash("img2"), datetime.now(UTC), License.CLOSED, device
     )
-    asset2 = setup.gateway.register_edited_asset(
+    setup.gateway.register_edited_image(
         participant,
         get_image_hash("img2-contrast"),
-        asset1,
+        get_image_hash("img2"),
         Transformation.CONTRAST,
         get_proof("img2-contrast"),
         License.CLOSED,
     )
-    asset3 = setup.gateway.register_edited_asset(
+    setup.gateway.register_edited_image(
         participant,
         get_image_hash("img1-blur"),
-        1,
+        get_image_hash("img1"),
         Transformation.BLUR,
         get_proof("img1-blur"),
         License.CLOSED,
@@ -106,35 +106,35 @@ def participant_2(contest: PhotographyContest, setup: Setup):
 
     logger.start_section(f"Participant {participant.name()}: submitting images to contest")
     # Unmodified image is allowed
-    contest.submit(participant, asset1)
+    contest.submit(participant, get_image_hash("img2"))
     # Contrast is not allowed
-    invalid_submission(participant, contest, asset2)
+    invalid_submission(participant, contest, get_image_hash("img2-contrast"))
     # Cannot submit other's work
-    someone_elses_submission(participant, contest, asset3)
+    someone_elses_submission(participant, contest, get_image_hash("img1-blur"))
 
 
-def repeat_submission(participant: Creator, contest: PhotographyContest, asset_id: int):
-    _fail_submission(participant, contest, asset_id, "Asset already submitted")
+def repeat_submission(participant: Creator, contest: PhotographyContest, image_hash: int):
+    _fail_submission(participant, contest, image_hash, "Image already submitted")
 
 
-def invalid_submission(participant: Creator, contest: PhotographyContest, asset_id: int):
-    _fail_submission(participant, contest, asset_id, "Asset violates contest rules")
+def invalid_submission(participant: Creator, contest: PhotographyContest, image_hash: int):
+    _fail_submission(participant, contest, image_hash, "Image violates contest rules")
 
 
-def someone_elses_submission(participant: Creator, contest: PhotographyContest, asset_id: int):
+def someone_elses_submission(participant: Creator, contest: PhotographyContest, image_hash: int):
     _fail_submission(
-        participant, contest, asset_id, "Participant is not the only creator of the asset"
+        participant, contest, image_hash, "Participant is not the only creator of the image"
     )
 
 
 def _fail_submission(
     participant: Creator,
     contest: PhotographyContest,
-    asset_id: int,
+    image_hash: int,
     message: str,
 ):
     try:
-        contest.submit(participant, asset_id)
+        contest.submit(participant, image_hash)
         raise Exception("Submission should have failed")
     except ContractLogicError as err:
         assert message in err.message

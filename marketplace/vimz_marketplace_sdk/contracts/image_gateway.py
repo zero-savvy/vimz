@@ -22,10 +22,10 @@ from vimz_marketplace_sdk.logging_config import logger
 from vimz_marketplace_sdk.types import License, Transformation, transformation_parameters
 
 
-class AssetGateway(VimzContract):
+class ImageGateway(VimzContract):
     @classmethod
     def contract_file_name(cls) -> str:
-        return "AssetGateway"
+        return "ImageGateway"
 
     @classmethod
     def deploy(
@@ -33,12 +33,12 @@ class AssetGateway(VimzContract):
         deployer: Actor,
         creator_registry_address: ChecksumAddress,
         device_registry_address: ChecksumAddress,
-    ) -> "AssetGateway":
+    ) -> "ImageGateway":
         verifiers = cls._deploy_verifiers(deployer)
         vimz_contract = super().deploy(
             deployer, creator_registry_address, device_registry_address, verifiers
         )
-        return cast(AssetGateway, vimz_contract)
+        return cast(ImageGateway, vimz_contract)
 
     @classmethod
     def _deploy_verifiers(cls, deployer: Actor) -> List[ChecksumAddress]:
@@ -57,27 +57,26 @@ class AssetGateway(VimzContract):
             verifiers.append(verifier_contract.address())
         return verifiers
 
-    def register_new_asset(
+    def register_new_image(
         self,
         creator: Creator,
         image_hash: int,
         capture_time: datetime,
         license: License,
         device: Device,
-    ) -> int:
-        event = self.call_and_get_event(
+    ):
+        self.call(
             creator,
-            "registerNewAsset",
-            "NewAssetRegistered",
+            "registerNewImage",
             image_hash,
             int(capture_time.timestamp()),
             license.value,
             device.address(),
             device.sign(creator, image_hash, capture_time),
         )
-        return self._handle_creation_event(image_hash, event)
+        logger.info(f"✅ Image {image_hash} registered successfully.")
 
-    def register_edited_asset(
+    def register_edited_image(
         self,
         creator: Creator,
         image_hash: int,
@@ -86,10 +85,9 @@ class AssetGateway(VimzContract):
         proof: ProofData,
         license: License,
     ):
-        event = self.call_and_get_event(
+        self.call(
             creator,
-            "registerEditedAsset",
-            "EditedAssetRegistered",
+            "registerEditedImage",
             image_hash,
             source_id,
             transformation.value,
@@ -97,10 +95,4 @@ class AssetGateway(VimzContract):
             proof.proof,
             license.value,
         )
-        return self._handle_creation_event(image_hash, event)
-
-    @staticmethod
-    def _handle_creation_event(image_hash: int, event: dict) -> int:
-        asset_id = event["assetId"]
-        logger.info(f"✅ Asset {image_hash} registered with ID {asset_id}")
-        return asset_id
+        logger.info(f"✅ Image {image_hash} registered successfully.")

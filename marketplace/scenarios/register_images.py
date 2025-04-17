@@ -4,7 +4,7 @@ from web3.exceptions import ContractLogicError
 
 from scenarios import full_setup
 from vimz_marketplace_sdk.artifacts import get_image_hash, get_proof
-from vimz_marketplace_sdk.contracts.asset_gateway import AssetGateway
+from vimz_marketplace_sdk.contracts.image_gateway import ImageGateway
 from vimz_marketplace_sdk.creator import Creator
 from vimz_marketplace_sdk.device import Device
 from vimz_marketplace_sdk.logging_config import logger
@@ -18,72 +18,82 @@ def main():
 
     ################################################################################################
 
-    logger.start_section("Register original assets")
-    [img1_asset_id, img2_asset_id] = register_originals(gateway, creator, device)
+    logger.start_section("Register original images")
+    register_originals(gateway, creator, device)
 
     ################################################################################################
 
     logger.start_section("Register editions of `img1`")
-    register_edition(gateway, creator, img1_asset_id, "img1-grayscale", Transformation.GRAYSCALE)
-    sharpness_id = register_edition(
-        gateway, creator, img1_asset_id, "img1-sharpness", Transformation.SHARPNESS
+    register_edition(
+        gateway, creator, get_image_hash("img1"), "img1-grayscale", Transformation.GRAYSCALE
     )
     register_edition(
-        gateway, creator, sharpness_id, "img1-sharpness-grayscale", Transformation.GRAYSCALE
+        gateway, creator, get_image_hash("img1"), "img1-sharpness", Transformation.SHARPNESS
+    )
+    register_edition(
+        gateway,
+        creator,
+        get_image_hash("img1-sharpness"),
+        "img1-sharpness-grayscale",
+        Transformation.GRAYSCALE,
     )
 
     ################################################################################################
 
     logger.start_section("Register editions of `img2`")
-    contrast_id = register_edition(
-        gateway, creator, img2_asset_id, "img2-contrast", Transformation.CONTRAST
+    register_edition(
+        gateway, creator, get_image_hash("img2"), "img2-contrast", Transformation.CONTRAST
     )
     register_edition(
-        gateway, creator, contrast_id, "img2-contrast-sharpness", Transformation.SHARPNESS
+        gateway,
+        creator,
+        get_image_hash("img2-contrast"),
+        "img2-contrast-sharpness",
+        Transformation.SHARPNESS,
     )
 
     ################################################################################################
 
-    logger.start_section("Try to register the same original asset twice")
+    logger.start_section("Try to register the same original image twice")
     try:
-        gateway.register_new_asset(
+        gateway.register_new_image(
             creator, get_image_hash("img1"), datetime.now(UTC), License.FULLY_FREE, device
         )
+        raise Exception("Registration should have failed")
     except ContractLogicError as err:
-        assert "revert: Image hash already registered" in err.message
-        logger.info("Cannot register the same original asset twice: ✅")
+        assert "revert: Image already registered" in err.message
+        logger.info("Cannot register the same original image twice: ✅")
 
     try:
         register_edition(
             gateway,
             creator,
-            img1_asset_id,
+            get_image_hash("img1"),
             "img1-grayscale",
             Transformation.GRAYSCALE,
         )
+        raise Exception("Registration should have failed")
     except ContractLogicError as err:
-        assert "revert: Image hash already registered" in err.message
-        logger.info("Cannot register the same edited asset twice: ✅")
+        assert "revert: Image already registered" in err.message
+        logger.info("Cannot register the same edited image twice: ✅")
 
 
-def register_originals(gateway: AssetGateway, creator: Creator, device: Device) -> list[int]:
-    logger.start_section("Register original assets")
-    return [
-        gateway.register_new_asset(
+def register_originals(gateway: ImageGateway, creator: Creator, device: Device):
+    logger.start_section("Register original images")
+    for title in ["img1", "img2"]:
+        gateway.register_new_image(
             creator, get_image_hash(title), datetime.now(UTC), License.FULLY_FREE, device
         )
-        for title in ["img1", "img2"]
-    ]
 
 
 def register_edition(
-    gateway: AssetGateway,
+    gateway: ImageGateway,
     creator: Creator,
     parent_id: int,
     image_title: str,
     transformation: Transformation,
-) -> int:
-    return gateway.register_edited_asset(
+):
+    gateway.register_edited_image(
         creator,
         get_image_hash(image_title),
         parent_id,

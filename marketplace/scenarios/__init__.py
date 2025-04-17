@@ -1,3 +1,5 @@
+import itertools
+
 from vimz_marketplace_sdk.chain import Actor, get_actor
 from vimz_marketplace_sdk.contracts.asset_gateway import AssetGateway
 from vimz_marketplace_sdk.contracts.creator_registry import CreatorRegistry
@@ -10,16 +12,13 @@ def prepare_device_registry(num_devices: int) -> (DeviceRegistry, list[Brand], l
     device_registry_admin = get_actor("device_registry_admin")
     registry = DeviceRegistry.deploy(device_registry_admin)
 
-    num_brands = min(num_devices, 2)  # we have only 2 default brands
-    brands = []
-    for _ in range(num_brands):
-        brand = next(default_brands())
+    brands = list(itertools.islice(default_brands(), min(2, num_devices)))
+    for brand in brands:
         registry.register_brand(device_registry_admin, brand)
-        brands.append(brand)
 
     devices = []
     for i in range(num_devices):
-        brand = brands[i % num_brands]
+        brand = brands[i % len(brands)]
         device = brand.get_new_device()
         registry.register_device(brand, device)
         devices.append(device)
@@ -31,11 +30,9 @@ def prepare_creator_registry(num_creators) -> (CreatorRegistry, list[Actor]):
     creator_registry_admin = get_actor("creator_registry_admin")
     registry = CreatorRegistry.deploy(creator_registry_admin)
 
-    creators = []
-    for _ in range(num_creators):
-        creator = next(default_creators())
+    creators = list(itertools.islice(default_creators(), num_creators))
+    for creator in creators:
         registry.register_creator(creator_registry_admin, creator)
-        creators.append(creator)
 
     return registry, creators
 

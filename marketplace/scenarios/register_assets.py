@@ -2,9 +2,8 @@ from datetime import UTC, datetime
 
 from web3.exceptions import ContractLogicError
 
-from scenarios import prepare_creator_registry, prepare_device_registry
+from scenarios import full_setup
 from vimz_marketplace_sdk.artifacts import get_image_hash, get_proof
-from vimz_marketplace_sdk.chain import get_actor
 from vimz_marketplace_sdk.contracts.asset_gateway import AssetGateway
 from vimz_marketplace_sdk.creator import Creator
 from vimz_marketplace_sdk.device import Device
@@ -13,7 +12,13 @@ from vimz_marketplace_sdk.types import License, Transformation
 
 
 def main():
-    (gateway, creator, device) = setup()
+    logger.start_section("Prepare environment")
+    setup = full_setup()
+    gateway, creator, device = setup.gateway, setup.creators[0], setup.devices[0]
+
+    ################################################################################################
+
+    logger.start_section("Register original assets")
     [img1_asset_id, img2_asset_id] = register_originals(gateway, creator, device)
 
     ################################################################################################
@@ -59,21 +64,6 @@ def main():
     except ContractLogicError as err:
         assert "revert: Image hash already registered" in err.message
         logger.info("Cannot register the same edited asset twice: ✅")
-
-
-def setup() -> tuple[AssetGateway, Creator, Device]:
-    logger.start_section("Prepare devices and creators")
-    device_registry, device = prepare_device_registry()
-    creator_registry, creator = prepare_creator_registry()
-
-    logger.start_section("Prepare asset gateway")
-    gateway = AssetGateway.deploy(
-        get_actor("gateway_deployer"),
-        creator_registry.address(),
-        device_registry.address(),
-    )
-
-    return (gateway, creator, device)
 
 
 def register_originals(gateway: AssetGateway, creator: Creator, device: Device) -> list[int]:

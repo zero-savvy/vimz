@@ -46,10 +46,17 @@ template GrayscaleChecker(n) {
 
     signal output n_check;
  
+    component nb[n][2];
     component lt[n][2];
 
     for (var i = 0; i < n; i++) {      
         var inter = 299 * orig[i][0] + 587 * orig[i][1] + 114 * orig[i][2];
+
+        nb[i][0] = Num2Bits(18);
+        nb[i][1] = Num2Bits(18);
+
+        nb[i][0].in <== inter - 1000 * gray[i];
+        nb[i][1].in <== 1000 * gray[i] - inter;
 
         lt[i][0] = LessEqThan(18);
         lt[i][1] = LessEqThan(18);

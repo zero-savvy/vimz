@@ -51,6 +51,7 @@ template BrightnessChecker(n) {
 
     signal output n_check;
 
+    component nb[n][3][4];
     component lt[n][3][4];
     component selector[n][3];
     component gt_selector[n][3];
@@ -71,6 +72,11 @@ template BrightnessChecker(n) {
         // log("--------------------------------");
 
         for (var color = 0; color < 3; color++) {
+
+            nb[i][color][0] = Num2Bits(13);
+            nb[i][color][1] = Num2Bits(13);
+            nb[i][color][0].in <== calced[color];
+            nb[i][color][1].in <== 0 - calced[color];
 
             // find sign of r_adjusted
             lt[i][color][0] = LessEqThan(13);
@@ -93,6 +99,13 @@ template BrightnessChecker(n) {
 
             var final_value = selector[i][color].out;
             // log("final_value:" , final_value);
+
+            nb[i][color][2] = Num2Bits(13);
+            nb[i][color][3] = Num2Bits(13);
+
+            nb[i][color][2].in <== final_value - 10 * bright[i][color];
+            nb[i][color][3].in <== 10 * bright[i][color] - final_value;
+            
             lt[i][color][2] = LessEqThan(13);
             lt[i][color][3] = LessEqThan(13);
 

@@ -53,6 +53,7 @@ template ContrastChecker(n) {
 
     signal output n_check;
  
+    component nb[n][3][4];
     component lt[n][3][4];
     component selector[n][3];
     component gt_selector[n][3];
@@ -61,6 +62,11 @@ template ContrastChecker(n) {
         for (var i = 0; i < n; i++) {      
             var adjusted = ((orig[i][color]) - 128) * cf + 1280;
                     
+            nb[i][color][0] = Num2Bits(13);
+            nb[i][color][1] = Num2Bits(13);
+            nb[i][color][0].in <== adjusted;
+            nb[i][color][1].in <== 0 - adjusted;
+
             // find sign of r_adjusted
             lt[i][color][0] = LessEqThan(13);
             lt[i][color][1] = LessEqThan(13);
@@ -82,6 +88,13 @@ template ContrastChecker(n) {
 
             var final_value = selector[i][color].out;
             // log("final_value:" , final_value, contrast[i][color]);
+
+            nb[i][color][2] = Num2Bits(13);
+            nb[i][color][3] = Num2Bits(13);
+
+            nb[i][color][2].in <== final_value - (10 * contrast[i][color]);
+            nb[i][color][3].in <== (10 * contrast[i][color]) - final_value;
+
             lt[i][color][2] = LessEqThan(13);
             lt[i][color][3] = LessEqThan(13);
 

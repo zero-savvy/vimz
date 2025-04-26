@@ -1,18 +1,24 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.10;
 
-import {License} from "./Licensing.sol";
+/**
+ * @dev How editions may be created. Ordered so that larger value means a more permissive policy
+ *      (monotone upgrade rule).
+ */
+enum EditionPolicy {
+    Sealed,      // 0 - no‐one may register editions
+    OnlyOwner,   // 1 - only current root owner may register editions
+    Free         // 2 - anyone may register edition
+}
 
 /**
- * @dev A unified Image structure.
+ * @dev Global license that applies to an entire transformation tree (original image + all derivatives).
  */
-struct Image {
-    address creator;               // Creator's address.
-    uint256 captureTime;           // Unix timestamp when the root image was captured (for originals).
-    License license;               // Licensing details.
-    uint256 timestamp;             // Registration timestamp.
-    uint256 parentHash;            // For edited images: pointer to the parent image; 0 if not applicable.
-    Transformation transformation; // For edited images: description of the applied transformation. For originals: NoTransformation.
+struct LicenseTerms {
+    EditionPolicy editionPolicy; // Policy for creating editions
+    bool commercialUse;          // true  => creator willing to sell commercial rights
+                                 // false => strictly non‑commercial usage
+    string attributionURI;       // optional credit line (full text, URL, ...)
 }
 
 /**
@@ -29,4 +35,16 @@ enum Transformation {
     Resize,
     Sharpness,
     NoTransformation // Used for original image.
+}
+
+/**
+ * @dev A unified Image structure.
+ */
+struct Image {
+    address creator;               // Creator's address.
+    uint256 captureTime;           // Unix timestamp when the root image was captured.
+    uint256 timestamp;             // Registration timestamp.
+    uint256 parentHash;            // Pointer to the parent image; self for originals.
+    uint256 rootHash;              // Pointer to the root image; self for originals.
+    Transformation transformation; // For edited images: description of the applied transformation. For originals: NoTransformation.
 }

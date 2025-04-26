@@ -3,29 +3,37 @@ pragma solidity ^0.8.26;
 
 import {CreatorRegistry} from "./CreatorRegistry.sol";
 import {DeviceRegistry} from "./DeviceRegistry.sol";
-import {License} from "./Licensing.sol";
 import {OnChainVerification} from "./OnChainVerification.sol";
-import {Transformation, Image} from "./Utils.sol";
+import {Transformation, Image, LicenseTerms} from "./Utils.sol";
 
 /**
  * @title ImageGateway
  * @dev Main entry point for registering images in the ecosystem.
  */
 contract ImageGateway {
+    // ------------------------------------ STORAGE ------------------------------------ //
+
     CreatorRegistry public creatorRegistry;
     DeviceRegistry public deviceRegistry;
     mapping(Transformation => address) public verifiers;
 
     // Mapping from image hash to image details.
     mapping(uint256 => Image) public images;
+    // Mapping from root image hash to license terms.
+    mapping(uint256 => LicenseTerms) public licenses;
+    // Mapping from root image hash to owner. address(0) means public good
+    mapping(uint256 => address) public owners;
+
+    // ------------------------------------ EVENTS ------------------------------------ //
 
     event NewImageRegistered(
         uint256 imageHash,
         address creator,
         uint256 captureTime,
         address device,
-        License license,
-        uint256 timestamp
+        LicenseTerms licenseTerms,
+        uint256 timestamp,
+        bool isPublicGood
     );
 
     event EditedImageRegistered(
@@ -33,9 +41,10 @@ contract ImageGateway {
         address creator,
         uint256 parentHash,
         Transformation transformation,
-        License license,
         uint256 timestamp
     );
+
+    // ------------------------------------ PUBLIC API ------------------------------------ //
 
     /**
      * @notice Constructor initializes the contract with the CreatorRegistry and DeviceRegistry.
@@ -60,16 +69,18 @@ contract ImageGateway {
      * @notice Registers a new original image captured by a verified device.
      * @param imageHash The uint256 hash of the original image.
      * @param captureTime Unix timestamp when the image was captured.
-     * @param license The licensing details for the image.
+     * @param licenseTerms The licensing details for the image.
      * @param deviceId The address of the device that captured the image.
      * @param deviceSignature The device’s signature over (creator, imageHash, captureTime).
+     * @param isPublicGood Whether the image is a public good and thus ownership is not transferable.
      */
     function registerNewImage(
         uint256 imageHash,
         uint256 captureTime,
-        License license,
+        LicenseTerms calldata licenseTerms,
         address deviceId,
-        bytes calldata deviceSignature
+        bytes calldata deviceSignature,
+        bool isPublicGood
     ) external {
         // 1. Ensure the image hash is unique.
         require(images[imageHash].creator == address(0), "Image already registered");
@@ -85,23 +96,32 @@ contract ImageGateway {
             "Invalid device signature"
         );
 
-        // 4. Store the image.
+        // 4. Store the image and license terms.
         images[imageHash] = Image({
             creator: creator,
             captureTime: captureTime,
-            license: license,
             timestamp: block.timestamp,
-            parentHash: 0,
+            parentHash: imageHash,
+            rootHash: imageHash,
             transformation: Transformation.NoTransformation
         });
+        licenses[imageHash] = licenseTerms;
+
+        // 5. Ownership assignment.
+        if (!isPublicGood) {
+            owners[imageHash] = creator;
+        } else {
+            owners[imageHash] = address(0);
+        }
 
         emit NewImageRegistered(
             imageHash,
             creator,
             captureTime,
             deviceId,
-            license,
-            block.timestamp
+            licenseTerms,
+            block.timestamp,
+            isPublicGood
         );
     }
 
@@ -113,15 +133,13 @@ contract ImageGateway {
      * @param transformationParameters The parameters for the transformation (like sharpness factor). For some
      *        transformations (like grayscale), this is ignored.
      * @param proof The SNARK proof for the transformation.
-     * @param license The licensing details for the edited image.
      */
     function registerEditedImage(
         uint256 editedImageHash,
         uint256 parentHash,
         Transformation transformation,
         uint256[] calldata transformationParameters,
-        uint256[25] calldata proof,
-        License license
+        uint256[25] calldata proof
     ) external {
         // 1. Ensure the image hash is unique.
         require(images[editedImageHash].creator == address(0), "Image already registered");
@@ -134,7 +152,10 @@ contract ImageGateway {
         Image storage parent = images[parentHash];
         require(parent.creator != address(0), "Parent image does not exist");
 
-        // 4. Ensure the transformation is valid.
+        // 4. Ensure license is not violated.
+        // TODO
+
+        // 5. Ensure the transformation is valid.
         require(transformation != Transformation.NoTransformation, "Invalid transformation");
         bool validProof = OnChainVerification.verifyTransformationValidity(
             parentHash,
@@ -146,16 +167,13 @@ contract ImageGateway {
         );
         require(validProof, "Invalid transformation proof");
 
-        // 5. Ensure license is not violated.
-        // TODO
-
         // 6. Store the image.
         images[editedImageHash] = Image({
             creator: creator,
             captureTime: parent.captureTime,
-            license: license,
             timestamp: block.timestamp,
             parentHash: parentHash,
+            rootHash: parent.rootHash,
             transformation: transformation
         });
 
@@ -164,7 +182,6 @@ contract ImageGateway {
             creator,
             parentHash,
             transformation,
-            license,
             block.timestamp
         );
     }
@@ -177,7 +194,9 @@ contract ImageGateway {
      */
     function validateEditChain(uint256 imageHash, Transformation[] calldata permissibleTransformations) external view returns (bool){
         Image memory image = images[imageHash];
-        while (image.parentHash != 0) {
+        uint256 currentHash = imageHash;
+
+        while (image.parentHash != currentHash) {
             bool found = false;
             for (uint i = 0; i < permissibleTransformations.length; i++) {
                 if (image.transformation == permissibleTransformations[i]) {
@@ -188,7 +207,8 @@ contract ImageGateway {
             if (!found) {
                 return false;
             }
-            image = images[image.parentHash];
+            currentHash = image.parentHash;
+            image = images[currentHash];
         }
         return true;
     }
@@ -200,13 +220,13 @@ contract ImageGateway {
      * @return true if the creator is the same for all images in the chain, false otherwise.
      */
     function ensureSoloCreator(uint256 imageHash, address creator) external view returns (bool) {
-        Image memory image;
-        while (imageHash != 0) {
-            image = images[imageHash];
+        Image memory image = images[imageHash];
+        while (imageHash != image.parentHash) {
             if (image.creator != creator) {
                 return false;
             }
             imageHash = image.parentHash;
+            image = images[imageHash];
         }
         return true;
     }

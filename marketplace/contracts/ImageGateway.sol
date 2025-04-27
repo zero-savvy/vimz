@@ -220,13 +220,18 @@ contract ImageGateway {
      * @return true if the creator is the same for all images in the chain, false otherwise.
      */
     function ensureSoloCreator(uint256 imageHash, address creator) external view returns (bool) {
-        Image memory image = images[imageHash];
-        while (imageHash != image.parentHash) {
+        Image memory image;
+        uint256 currentHash = imageHash;
+
+        while (true) {
+            image = images[currentHash];
             if (image.creator != creator) {
                 return false;
             }
-            imageHash = image.parentHash;
-            image = images[imageHash];
+            if (image.parentHash == currentHash) {
+                break;
+            }
+            currentHash = image.parentHash;
         }
         return true;
     }

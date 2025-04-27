@@ -18,7 +18,7 @@ struct LicenseTerms {
     EditionPolicy editionPolicy; // Policy for creating editions
     bool commercialUse;          // true  => creator willing to sell commercial rights
                                  // false => strictly non‑commercial usage
-    string attributionURI;       // optional credit line (full text, URL, ...)
+    string attribution;       // optional credit line (full text, URL, ...)
 }
 
 /**

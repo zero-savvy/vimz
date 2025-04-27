@@ -3,11 +3,24 @@ from enum import Enum
 from vimz_marketplace_sdk.artifacts import ProofData
 
 
-class License(Enum):
-    CLOSED = 0
-    FREE = 1
-    FULLY_FREE = 2
-    FREE_FOR_EDITIONS = 3
+class EditionPolicy(Enum):
+    SEALED = 0
+    ONLY_OWNER = 1
+    FREE = 2
+
+
+class LicenseTerms:
+    def __init__(self, edition_policy: EditionPolicy, commercial_use: bool, attribution: str = ""):
+        self.edition_policy = edition_policy
+        self.commercial_use = commercial_use
+        self.attribution = attribution
+
+    def encode(self) -> (int, bool, str):
+        return self.edition_policy.value, self.commercial_use, self.attribution
+
+
+def closed_license() -> LicenseTerms:
+    return LicenseTerms(EditionPolicy.SEALED, False)
 
 
 class Transformation(Enum):

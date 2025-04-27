@@ -8,7 +8,7 @@ from vimz_marketplace_sdk.contracts.image_gateway import ImageGateway
 from vimz_marketplace_sdk.creator import Creator
 from vimz_marketplace_sdk.device import Device
 from vimz_marketplace_sdk.logging_config import logger
-from vimz_marketplace_sdk.types import License, Transformation
+from vimz_marketplace_sdk.types import Transformation, closed_license
 
 
 def main():
@@ -57,7 +57,7 @@ def main():
     logger.start_section("Try to register the same original image twice")
     try:
         gateway.register_new_image(
-            creator, get_image_hash("img1"), datetime.now(UTC), License.FULLY_FREE, device
+            creator, get_image_hash("img1"), datetime.now(UTC), closed_license(), device
         )
         raise Exception("Registration should have failed")
     except ContractLogicError as err:
@@ -82,7 +82,7 @@ def register_originals(gateway: ImageGateway, creator: Creator, device: Device):
     logger.start_section("Register original images")
     for title in ["img1", "img2"]:
         gateway.register_new_image(
-            creator, get_image_hash(title), datetime.now(UTC), License.FULLY_FREE, device
+            creator, get_image_hash(title), datetime.now(UTC), closed_license(), device
         )
 
 
@@ -99,7 +99,6 @@ def register_edition(
         parent_id,
         transformation,
         get_proof(image_title),
-        License.FULLY_FREE,
     )
 
 

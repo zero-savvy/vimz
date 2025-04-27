@@ -9,7 +9,7 @@ from vimz_marketplace_sdk.chain import get_actor
 from vimz_marketplace_sdk.contracts.photography_contest import PhotographyContest
 from vimz_marketplace_sdk.creator import Creator
 from vimz_marketplace_sdk.logging_config import logger
-from vimz_marketplace_sdk.types import License, Transformation
+from vimz_marketplace_sdk.types import Transformation, closed_license
 
 
 def main():
@@ -39,7 +39,7 @@ def participant_1(contest: PhotographyContest, setup: Setup):
 
     logger.start_section(f"Participant {participant.name()}: registering images in Gateway")
     setup.gateway.register_new_image(
-        participant, get_image_hash("img1"), datetime.now(UTC), License.CLOSED, device
+        participant, get_image_hash("img1"), datetime.now(UTC), closed_license(), device
     )
     setup.gateway.register_edited_image(
         participant,
@@ -47,7 +47,6 @@ def participant_1(contest: PhotographyContest, setup: Setup):
         get_image_hash("img1"),
         Transformation.SHARPNESS,
         get_proof("img1-sharpness"),
-        License.CLOSED,
     )
     setup.gateway.register_edited_image(
         participant,
@@ -55,7 +54,6 @@ def participant_1(contest: PhotographyContest, setup: Setup):
         get_image_hash("img1"),
         Transformation.GRAYSCALE,
         get_proof("img1-grayscale"),
-        License.CLOSED,
     )
     setup.gateway.register_edited_image(
         participant,
@@ -63,7 +61,6 @@ def participant_1(contest: PhotographyContest, setup: Setup):
         get_image_hash("img1-sharpness"),
         Transformation.GRAYSCALE,
         get_proof("img1-sharpness-grayscale"),
-        License.CLOSED,
     )
 
     logger.start_section(f"Participant {participant.name()}: submitting images to contest")
@@ -85,7 +82,7 @@ def participant_2(contest: PhotographyContest, setup: Setup):
 
     logger.start_section(f"Participant {participant.name()}: registering images in Gateway")
     setup.gateway.register_new_image(
-        participant, get_image_hash("img2"), datetime.now(UTC), License.CLOSED, device
+        participant, get_image_hash("img2"), datetime.now(UTC), closed_license(), device
     )
     setup.gateway.register_edited_image(
         participant,
@@ -93,7 +90,6 @@ def participant_2(contest: PhotographyContest, setup: Setup):
         get_image_hash("img2"),
         Transformation.CONTRAST,
         get_proof("img2-contrast"),
-        License.CLOSED,
     )
     setup.gateway.register_edited_image(
         participant,
@@ -101,7 +97,6 @@ def participant_2(contest: PhotographyContest, setup: Setup):
         get_image_hash("img1"),
         Transformation.BLUR,
         get_proof("img1-blur"),
-        License.CLOSED,
     )
 
     logger.start_section(f"Participant {participant.name()}: submitting images to contest")

@@ -156,7 +156,11 @@ contract ImageGateway {
         require(parent.creator != address(0), "Parent image does not exist");
 
         // 4. Ensure license is not violated.
-        // TODO
+        LicenseTerms storage terms = licenses[parent.rootHash];
+        if (terms.editionPolicy == EditionPolicy.Sealed) revert("Sealed edition policy");
+        if (terms.editionPolicy == EditionPolicy.OnlyOwner) {
+            require(owners[parent.rootHash] == creator, "Only owner can register editions");
+        }
 
         // 5. Ensure the transformation is valid.
         require(transformation != Transformation.NoTransformation, "Invalid transformation");

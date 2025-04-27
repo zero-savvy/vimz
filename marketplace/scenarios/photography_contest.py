@@ -9,7 +9,7 @@ from vimz_marketplace_sdk.chain import get_actor
 from vimz_marketplace_sdk.contracts.photography_contest import PhotographyContest
 from vimz_marketplace_sdk.creator import Creator
 from vimz_marketplace_sdk.logging_config import logger
-from vimz_marketplace_sdk.types import Transformation, closed_license
+from vimz_marketplace_sdk.types import Transformation, open_license
 
 
 def main():
@@ -39,7 +39,7 @@ def participant_1(contest: PhotographyContest, setup: Setup):
 
     logger.start_section(f"Participant {participant.name()}: registering images in Gateway")
     setup.gateway.register_new_image(
-        participant, get_image_hash("img1"), datetime.now(UTC), closed_license(), device
+        participant, get_image_hash("img1"), datetime.now(UTC), open_license(), device
     )
     setup.gateway.register_edited_image(
         participant,
@@ -82,7 +82,7 @@ def participant_2(contest: PhotographyContest, setup: Setup):
 
     logger.start_section(f"Participant {participant.name()}: registering images in Gateway")
     setup.gateway.register_new_image(
-        participant, get_image_hash("img2"), datetime.now(UTC), closed_license(), device
+        participant, get_image_hash("img2"), datetime.now(UTC), open_license(), device
     )
     setup.gateway.register_edited_image(
         participant,

@@ -23,6 +23,10 @@ def closed_license() -> LicenseTerms:
     return LicenseTerms(EditionPolicy.SEALED, False)
 
 
+def open_license() -> LicenseTerms:
+    return LicenseTerms(EditionPolicy.FREE, True)
+
+
 class Transformation(Enum):
     BLUR = 0
     BRIGHTNESS = 1

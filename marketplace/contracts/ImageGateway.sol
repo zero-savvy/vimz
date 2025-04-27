@@ -60,7 +60,7 @@ contract ImageGateway {
      * @param _creatorRegistry Address of the deployed CreatorRegistry contract.
      * @param _deviceRegistry Address of the deployed DeviceRegistry contract.
      */
-    constructor(address _creatorRegistry, address _deviceRegistry, address[8] calldata _verifiers) {
+    constructor(address _creatorRegistry, address _deviceRegistry, address[8] memory _verifiers) {
         creatorRegistry = CreatorRegistry(_creatorRegistry);
         deviceRegistry = DeviceRegistry(_deviceRegistry);
 
@@ -262,6 +262,11 @@ contract ImageGateway {
             currentHash = image.parentHash;
         }
         return true;
+    }
+
+    function isRootImage(uint256 imageHash) external view returns (bool) {
+        Image storage image = images[imageHash];
+        return image.rootHash == imageHash;
     }
 
     // ------------------------------------ OWNERSHIP ------------------------------------ //

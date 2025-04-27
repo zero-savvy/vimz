@@ -4,7 +4,7 @@ pragma solidity ^0.8.26;
 import {CreatorRegistry} from "./CreatorRegistry.sol";
 import {DeviceRegistry} from "./DeviceRegistry.sol";
 import {OnChainVerification} from "./OnChainVerification.sol";
-import {Transformation, Image, LicenseTerms} from "./Utils.sol";
+import {Transformation, Image, LicenseTerms, EditionPolicy} from "./Utils.sol";
 
 /**
  * @title ImageGateway
@@ -45,6 +45,8 @@ contract ImageGateway {
         uint256 timestamp
     );
 
+    event EditionPolicyOpened(uint256 rootHash, EditionPolicy newPolicy);
+
     // ------------------------------------ PUBLIC API ------------------------------------ //
 
     /**
@@ -56,14 +58,14 @@ contract ImageGateway {
         creatorRegistry = CreatorRegistry(_creatorRegistry);
         deviceRegistry = DeviceRegistry(_deviceRegistry);
 
-        verifiers[Transformation.Blur] = _verifiers[0];
+        verifiers[Transformation.Blur]       = _verifiers[0];
         verifiers[Transformation.Brightness] = _verifiers[1];
-        verifiers[Transformation.Contrast] = _verifiers[2];
-        verifiers[Transformation.Crop] = _verifiers[3];
-        verifiers[Transformation.Grayscale] = _verifiers[4];
-        verifiers[Transformation.Redact] = _verifiers[5];
-        verifiers[Transformation.Resize] = _verifiers[6];
-        verifiers[Transformation.Sharpness] = _verifiers[7];
+        verifiers[Transformation.Contrast]   = _verifiers[2];
+        verifiers[Transformation.Crop]       = _verifiers[3];
+        verifiers[Transformation.Grayscale]  = _verifiers[4];
+        verifiers[Transformation.Redact]     = _verifiers[5];
+        verifiers[Transformation.Resize]     = _verifiers[6];
+        verifiers[Transformation.Sharpness]  = _verifiers[7];
     }
 
     /**
@@ -185,6 +187,21 @@ contract ImageGateway {
             transformation,
             block.timestamp
         );
+    }
+
+    /**
+     * @notice Opens the edition policy for a given image tree.
+     * @param rootHash The hash of the root image.
+     * @param newPolicy The new edition policy to be set.
+     */
+    function openEditionPolicy(uint256 rootHash, EditionPolicy newPolicy) external {
+        LicenseTerms storage terms = licenses[rootHash];
+
+        require(uint8(newPolicy) > uint8(terms.editionPolicy), "Invalid edition policy upgrade");
+        require(owners[rootHash] == msg.sender, "Only owner can open edition policy");
+
+        terms.editionPolicy = newPolicy;
+        emit EditionPolicyOpened(rootHash, newPolicy);
     }
 
     /**

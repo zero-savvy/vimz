@@ -2,6 +2,8 @@
 pragma solidity ^0.8.26;
 
 import {IERC4907} from "./IERC4907.sol";
+import {IERC721} from "../contract-deps/forge-std/src/interfaces/IERC721.sol";
+import {LicenseToken} from "./LicenseToken.sol";
 
 interface IImageGateway {
     function isRootImage(uint256 imageHash) external view returns (bool);
@@ -15,14 +17,18 @@ interface IImageGateway {
     function transferOwnership(uint256 rootHash, address newOwner) external;
 }
 
-interface IImageLicenseToken is IERC4907 {
+interface ILicenseToken is IERC4907 {
     function mint(
-        uint256 imageHash,
-        address imageOwner,
+        uint256 itemId,
+        address itemOwner,
         uint256 licenseTokenId,
         address licensedUser,
         uint64 expires
     ) external;
+}
+
+interface IImageCollection is IERC721 {
+    function mint(address owner, uint256[] calldata roots) external returns (uint256);
 }
 
 contract Marketplace {
@@ -34,14 +40,16 @@ contract Marketplace {
     }
 
     struct LicensePricing {
+        address owner;
         uint256 perBlock;
         uint64 minDuration;
     }
 
     // ------------------------------------ STORAGE ------------------------------------ //
 
-    IImageGateway      public immutable gateway;
-    IImageLicenseToken public immutable licence;
+    IImageGateway    public immutable gateway;
+    ILicenseToken    public immutable licence;
+    IImageCollection public immutable collection;
 
     mapping(uint256 => Bid)            public ownershipBids;
     mapping(uint256 => LicensePricing) public licencePrice;
@@ -51,9 +59,10 @@ contract Marketplace {
 
     // ------------------------------------ CONSTRUCTORS ------------------------------------ //
 
-    constructor(address imageGateway, address imageLicenseToken){
+    constructor(address imageGateway, address imageLicenseToken, address imageCollection) {
         gateway = IImageGateway(imageGateway);
-        licence = IImageLicenseToken(imageLicenseToken);
+        licence = ILicenseToken(imageLicenseToken);
+        collection = IImageCollection(imageCollection);
     }
 
     // ------------------------------------ OWNERSHIP TRADING ------------------------------------ //
@@ -90,29 +99,44 @@ contract Marketplace {
     function setLicencePrice(uint256 imageHash, uint256 perBlock, uint64 minDuration) external {
         require(gateway.isRootImage(imageHash), "Not a root image");
         require(gateway.isForCommercialUse(imageHash), "Image is not for commercial use");
-        require(gateway.imageOwner(imageHash) == msg.sender, "Only owner can set license price");
-        licencePrice[imageHash] = LicensePricing(perBlock, minDuration);
-    }
-
-    function buyTimedLicence(uint256 imageHash, uint64 blocksDuration) external payable {
-        require(gateway.isRootImage(imageHash), "Not a root image");
-        require(gateway.isForCommercialUse(imageHash), "Image is not for commercial use");
 
         address owner = gateway.imageOwner(imageHash);
-        require(owner != address(0), "Image is a public good and doesn't require a license");
+        require(owner == msg.sender, "Only owner can set license price");
 
-        LicensePricing memory pricing = licencePrice[imageHash];
+        licencePrice[imageHash] = LicensePricing(owner,perBlock, minDuration);
+    }
+
+    function setCollectionLicensePrice(
+        uint256[] calldata imageHashes,
+        uint256 perBlock,
+        uint64 minDuration
+    ) external {
+        address owner = gateway.imageOwner(imageHashes[0]);
+        require(msg.sender == owner, "Only owner can set license price");
+
+        for (uint i; i < imageHashes.length; ++i) {
+            require(gateway.isRootImage(imageHashes[i]), "Not a root image");
+            require(gateway.isForCommercialUse(imageHashes[i]), "Image is not for commercial use");
+            require(gateway.imageOwner(imageHashes[i]) == owner, "Collection images must have the same owner");
+        }
+
+        uint256 key = uint256(keccak256(abi.encodePacked(imageHashes)));
+        licencePrice[key] = LicensePricing(owner, perBlock, minDuration);
+    }
+
+    function buyTimedLicence(uint256 itemId, uint64 blocksDuration) external payable {
+        LicensePricing memory pricing = licencePrice[itemId];
         require(blocksDuration >= pricing.minDuration, "License duration too short");
 
         uint256 cost = uint256(blocksDuration) * pricing.perBlock;
         require(cost == msg.value, "Incorrect payment amount");
 
-        uint256 tokenId = uint256(keccak256(abi.encodePacked(imageHash, ++licenseNonce)));
-        licenseTokens[tokenId] = imageHash;
+        uint256 tokenId = uint256(keccak256(abi.encodePacked(itemId, ++licenseNonce)));
+        licenseTokens[tokenId] = itemId;
 
-        licence.mint(imageHash, owner, tokenId, msg.sender, uint64(block.number) + blocksDuration);
+        licence.mint(itemId, pricing.owner, tokenId, msg.sender, uint64(block.number) + blocksDuration);
 
-        (bool success,) = owner.call{value: msg.value}("");
+        (bool success,) = pricing.owner.call{value: msg.value}("");
         require(success, "License payment transfer failed");
     }
 
@@ -122,15 +146,15 @@ contract Marketplace {
         uint64 oldExpiration = licence.userExpires(licenseTokenId);
         require(oldExpiration > block.number, "License already expired");
 
-        uint256 rootHash = licenseTokens[licenseTokenId];
-        LicensePricing memory pricing = licencePrice[rootHash];
+        uint256 itemId = licenseTokens[licenseTokenId];
+        LicensePricing memory pricing = licencePrice[itemId];
 
         uint256 cost = uint256(addBlocks) * pricing.perBlock;
         require(msg.value == cost, "Incorrect payment amount");
 
         licence.setUser(licenseTokenId, msg.sender, oldExpiration + addBlocks);
 
-        (bool success,) = gateway.imageOwner(rootHash).call{value: msg.value}("");
+        (bool success,) = pricing.owner.call{value: msg.value}("");
         require(success, "License payment transfer failed");
     }
 }

@@ -12,28 +12,14 @@ contract ImageCollection is ERC721 {
 
     // ------------------------------------ STORAGE ------------------------------------ //
 
-    address public immutable marketplace;
-
     mapping(uint256 => CollectionData) private collections;
     uint256 private counter;
 
-    // ------------------------------------ MODIFIERS ------------------------------------ //
-
-    modifier onlyMarketplace() {
-        require(msg.sender == marketplace, "Only marketplace can call this");
-        _;
-    }
-
     // ------------------------------------ PUBLIC API ------------------------------------ //
 
-    constructor(address _marketplace) ERC721("CollectionPass","CPASS") {
-        marketplace = _marketplace;
-    }
+    constructor() ERC721("CollectionPass","CPASS") {}
 
-    function mint(
-        address owner,
-        uint256[] calldata roots
-    ) external onlyMarketplace returns (uint256 collectionId) {
+    function mint(address owner, uint256[] calldata roots) external returns (uint256 collectionId) {
         collectionId = ++counter;
         _safeMint(owner, collectionId);
         collections[collectionId] = CollectionData(roots);

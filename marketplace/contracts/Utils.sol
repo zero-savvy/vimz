@@ -1,9 +1,8 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.10;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.26;
 
 /**
- * @dev How editions may be created. Ordered so that larger value means a more permissive policy
- *      (monotone upgrade rule).
+ * @dev How editions may be created. Ordered so that larger value means a more permissive policy (monotone upgrade rule).
  */
 enum EditionPolicy {
     Sealed,      // 0 - no‐one may register editions
@@ -12,18 +11,16 @@ enum EditionPolicy {
 }
 
 /**
- * @dev Global license that applies to an entire transformation tree (original image + all derivatives).
+ * @dev Global license that applies to the entire transformation tree (original image + all derivatives).
  */
 struct LicenseTerms {
     EditionPolicy editionPolicy; // Policy for creating editions
-    bool commercialUse;          // true  => creator willing to sell commercial rights
-                                 // false => strictly non‑commercial usage
-    string attribution;       // optional credit line (full text, URL, ...)
+    bool commercialUse;          // true => creator willing to sell commercial rights, false => strictly non‑commercial usage
+    string attribution;          // optional credit line (full text, URL, ...)
 }
 
 /**
- * @dev Enum for image transformations.
- * These are the transformations that can be applied to an image.
+ * @dev The transformations that can be applied to an image.
  */
 enum Transformation {
     Blur,
@@ -38,7 +35,7 @@ enum Transformation {
 }
 
 /**
- * @dev A unified Image structure.
+ * @dev An image metadata.
  */
 struct Image {
     address creator;               // Creator's address.
@@ -46,5 +43,5 @@ struct Image {
     uint256 timestamp;             // Registration timestamp.
     uint256 parentHash;            // Pointer to the parent image; self for originals.
     uint256 rootHash;              // Pointer to the root image; self for originals.
-    Transformation transformation; // For edited images: description of the applied transformation. For originals: NoTransformation.
+    Transformation transformation; // Description of the applied transformation. For originals: NoTransformation.
 }

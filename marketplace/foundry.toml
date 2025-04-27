@@ -1,8 +1,10 @@
 [profile.default]
 src = "contracts"
+libs = ["contract-deps"]
 
 remappings = [
-    "forge-std/=node_modules/forge-std/src",
+    "forge-std/=contract-deps/forge-std/src/",
+    "openzeppelin-contracts/=contract-deps/openzeppelin-contracts/contracts/",
 ]
 
 [rpc_endpoints]

@@ -1,5 +1,6 @@
 cache/
 contract-docs/
+contract-deps/
 out/
 broadcast/
 node_modules/

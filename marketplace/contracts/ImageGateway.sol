@@ -269,10 +269,16 @@ contract ImageGateway {
         return image.rootHash == imageHash;
     }
 
+    function isForCommercialUse(uint256 imageHash) external view returns (bool) {
+        Image storage image = images[imageHash];
+        return licenses[image.rootHash].commercialUse;
+    }
+
     // ------------------------------------ OWNERSHIP ------------------------------------ //
 
-    function imageOwner(uint256 rootHash) external view returns (address) {
-        return owners[rootHash];
+    function imageOwner(uint256 imageHash) external view returns (address) {
+        Image storage image = images[imageHash];
+        return owners[image.rootHash];
     }
 
     function approveOperator(uint256 rootHash, address operator) external {

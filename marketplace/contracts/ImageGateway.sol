@@ -24,6 +24,8 @@ contract ImageGateway {
     mapping(uint256 => LicenseTerms) public licenses;
     // Mapping from root image hash to owner. Absence (address(0)) means public good
     mapping(uint256 => address)      public owners;
+    // Mapping from root image hash to an approved operator who can transfer ownership.
+    mapping(uint256 => address)      public approvedOperators;
 
     // ------------------------------------ EVENTS ------------------------------------ //
 
@@ -47,6 +49,10 @@ contract ImageGateway {
 
     event EditionPolicyOpened(uint256 rootHash, EditionPolicy newPolicy);
 
+    event OwnershipTransferred(uint256 rootHash, address oldOwner, address newOwner);
+
+    event OperatorApproved(uint256 rootHash, address operator);
+
     // ------------------------------------ PUBLIC API ------------------------------------ //
 
     /**
@@ -54,18 +60,18 @@ contract ImageGateway {
      * @param _creatorRegistry Address of the deployed CreatorRegistry contract.
      * @param _deviceRegistry Address of the deployed DeviceRegistry contract.
      */
-    constructor(address _creatorRegistry, address _deviceRegistry, address[8] memory _verifiers) {
+    constructor(address _creatorRegistry, address _deviceRegistry, address[8] calldata _verifiers) {
         creatorRegistry = CreatorRegistry(_creatorRegistry);
         deviceRegistry = DeviceRegistry(_deviceRegistry);
 
-        verifiers[Transformation.Blur]       = _verifiers[0];
+        verifiers[Transformation.Blur] = _verifiers[0];
         verifiers[Transformation.Brightness] = _verifiers[1];
-        verifiers[Transformation.Contrast]   = _verifiers[2];
-        verifiers[Transformation.Crop]       = _verifiers[3];
-        verifiers[Transformation.Grayscale]  = _verifiers[4];
-        verifiers[Transformation.Redact]     = _verifiers[5];
-        verifiers[Transformation.Resize]     = _verifiers[6];
-        verifiers[Transformation.Sharpness]  = _verifiers[7];
+        verifiers[Transformation.Contrast] = _verifiers[2];
+        verifiers[Transformation.Crop] = _verifiers[3];
+        verifiers[Transformation.Grayscale] = _verifiers[4];
+        verifiers[Transformation.Redact] = _verifiers[5];
+        verifiers[Transformation.Resize] = _verifiers[6];
+        verifiers[Transformation.Sharpness] = _verifiers[7];
     }
 
     /**
@@ -215,7 +221,7 @@ contract ImageGateway {
      * @return true if the entire chain (from the original image to the one requested) is valid, false otherwise.
      */
     function validateEditChain(uint256 imageHash, Transformation[] calldata permissibleTransformations) external view returns (bool){
-        Image memory image = images[imageHash];
+        Image storage image = images[imageHash];
         uint256 currentHash = imageHash;
 
         while (image.parentHash != currentHash) {
@@ -242,7 +248,7 @@ contract ImageGateway {
      * @return true if the creator is the same for all images in the chain, false otherwise.
      */
     function ensureSoloCreator(uint256 imageHash, address creator) external view returns (bool) {
-        Image memory image;
+        Image storage image;
         uint256 currentHash = imageHash;
 
         while (true) {
@@ -256,5 +262,34 @@ contract ImageGateway {
             currentHash = image.parentHash;
         }
         return true;
+    }
+
+    // ------------------------------------ OWNERSHIP ------------------------------------ //
+
+    function imageOwner(uint256 rootHash) external view returns (address) {
+        return owners[rootHash];
+    }
+
+    function approveOperator(uint256 rootHash, address operator) external {
+        require(msg.sender == owners[rootHash], "Only image owner may approve operator");
+        require(approvedOperators[rootHash] == address(0), "Some operator already approved");
+
+        approvedOperators[rootHash] = operator;
+        emit OperatorApproved(rootHash, operator);
+    }
+
+    function approvedOperator(uint256 rootHash) external view returns (address) {
+        return approvedOperators[rootHash];
+    }
+
+    function transferOwnership(uint256 rootHash, address newOwner) external {
+        address oldOwner = owners[rootHash];
+        require(
+            msg.sender == oldOwner || msg.sender == approvedOperators[rootHash],
+            "Only image owner or an approved operator can transfer ownership"
+        );
+
+        owners[rootHash] = newOwner;
+        emit OwnershipTransferred(rootHash, oldOwner, newOwner);
     }
 }

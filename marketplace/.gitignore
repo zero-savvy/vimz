@@ -3,6 +3,6 @@ contract-docs/
 out/
 broadcast/
 node_modules/
-marketplace_sdk.egg-info/
+vimz_marketplace_sdk.egg-info/
 build/
 anvil.log

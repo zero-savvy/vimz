@@ -8,11 +8,7 @@ pragma solidity ^0.8.26;
  *      actors are permitted to upload and claim ownership of new images.
  */
 contract CreatorRegistry {
-    /// @notice Address of the contract administrator (the deployer)
-    address public admin;
-
-    /// @notice Set of registered creators identified by their Ethereum addresses.
-    mapping(address => Creator) public creators;
+    // ------------------------------------ TYPES ------------------------------------ //
 
     /// @dev Struct to hold creator details.
     struct Creator {
@@ -24,16 +20,30 @@ contract CreatorRegistry {
         bool exists;
     }
 
+    // ------------------------------------ STORAGE ------------------------------------ //
+
+    /// @notice Address of the contract administrator (the deployer)
+    address public admin;
+
+    /// @notice Set of registered creators identified by their Ethereum addresses.
+    mapping(address => Creator) public creators;
+
+    // ------------------------------------ EVENTS ------------------------------------ //
+
     /// @notice Event emitted when a new creator is registered.
     /// @param creator The Ethereum address of the newly registered creator.
     /// @param kycExpiry The expiration timestamp of the creator's KYC.
     event CreatorRegistered(address indexed creator, uint256 kycExpiry);
+
+    // ------------------------------------ MODIFIERS ------------------------------------ //
 
     /// @notice Modifier to restrict functions to only the contract administrator.
     modifier onlyAdmin() {
         require(msg.sender == admin, "Not admin");
         _;
     }
+
+    // ------------------------------------ PUBLIC API ------------------------------------ //
 
     /**
      * @notice Constructor sets the deployer as the contract administrator.

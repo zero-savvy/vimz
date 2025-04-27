@@ -8,6 +8,18 @@ pragma solidity ^0.8.26;
  *      to verify the authenticity of cryptographic signatures.
  */
 contract DeviceRegistry {
+    // ------------------------------------ TYPES ------------------------------------ //
+
+    /// @dev Struct to hold device details
+    struct Device {
+        /// The brand that registered this device
+        address registrar;
+        /// Ensures device existence in mapping
+        bool exists;
+    }
+
+    // ------------------------------------ STORAGE ------------------------------------ //
+
     /// @notice Address of the contract administrator (the deployer)
     address public admin;
 
@@ -18,13 +30,7 @@ contract DeviceRegistry {
     /// @notice Mapping of registered devices identified by their public keys (represented by Ethereum addresses)
     mapping(address => Device) public devices;
 
-    /// @dev Struct to hold device details
-    struct Device {
-        /// The brand that registered this device
-        address registrar;
-        /// Ensures device existence in mapping
-        bool exists;
-    }
+    // ------------------------------------ EVENTS ------------------------------------ //
 
     /// @notice Event emitted when a new registrar (manufacturer) is added
     /// @param registrar The Ethereum address of the newly added registrar
@@ -34,6 +40,8 @@ contract DeviceRegistry {
     /// @param device The public key (represented by an Ethereum address) of the newly registered device
     /// @param registrar The Ethereum address of the manufacturer who registered the device
     event DeviceRegistered(address device, address indexed registrar);
+
+    // ------------------------------------ MODIFIERS ------------------------------------ //
 
     /// @notice Restricts access to only the contract administrator
     modifier onlyAdmin() {
@@ -46,6 +54,8 @@ contract DeviceRegistry {
         require(registrars[msg.sender], "Not a registrar");
         _;
     }
+
+    // ------------------------------------ PUBLIC API ------------------------------------ //
 
     /**
      * @notice Constructor sets the deployer as the contract administrator
@@ -96,6 +106,8 @@ contract DeviceRegistry {
         // Check if the recovered signer matches the registered device address
         return signer == deviceAddress;
     }
+
+    // ------------------------------------ INTERNALS ------------------------------------ //
 
     /**
      * @notice Recovers the Ethereum address that signed a given message

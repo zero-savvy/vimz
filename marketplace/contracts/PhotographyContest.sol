@@ -17,6 +17,7 @@ interface IImageGateway {
 /// announce a winner, at which point the reward is transferred to the chosen participant.
 contract PhotographyContest {
     // ------------------------------------ TYPES ------------------------------------ //
+
     enum State {
         SubmissionsOpen,
         SubmissionsClosed,

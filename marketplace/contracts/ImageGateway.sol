@@ -13,16 +13,17 @@ import {Transformation, Image, LicenseTerms} from "./Utils.sol";
 contract ImageGateway {
     // ------------------------------------ STORAGE ------------------------------------ //
 
-    CreatorRegistry public creatorRegistry;
-    DeviceRegistry public deviceRegistry;
+    CreatorRegistry public immutable creatorRegistry;
+    DeviceRegistry  public immutable deviceRegistry;
+
     mapping(Transformation => address) public verifiers;
 
     // Mapping from image hash to image details.
-    mapping(uint256 => Image) public images;
+    mapping(uint256 => Image)        public images;
     // Mapping from root image hash to license terms.
     mapping(uint256 => LicenseTerms) public licenses;
-    // Mapping from root image hash to owner. address(0) means public good
-    mapping(uint256 => address) public owners;
+    // Mapping from root image hash to owner. Absence (address(0)) means public good
+    mapping(uint256 => address)      public owners;
 
     // ------------------------------------ EVENTS ------------------------------------ //
 

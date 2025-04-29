@@ -36,7 +36,7 @@ You can browse through contract docs with:
 ```shell
 make serve-contract-docs
 ```
-Then, open `http://localhost:3000` in your browser.
+You will be automatically redirected to `http://localhost:3000` in your browser.
 
 ### Images and hashes
 

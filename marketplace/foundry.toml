@@ -3,12 +3,16 @@ src = "contracts"
 libs = ["contract-deps"]
 
 remappings = [
-    "forge-std/=contract-deps/forge-std/src/",
     "openzeppelin-contracts/=contract-deps/openzeppelin-contracts/contracts/",
 ]
+
+via_ir = true
 
 [rpc_endpoints]
 anvil = "http://localhost:8545"
 
 [doc]
 out = "contract-docs"
+ignore = [
+    "contracts/*Verifier.sol"
+]

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {IERC4907} from "./IERC4907.sol";
-import {IERC721} from "../contract-deps/forge-std/src/interfaces/IERC721.sol";
+import {IERC721} from "openzeppelin-contracts/token/ERC721/IERC721.sol";
 import {LicenseToken} from "./LicenseToken.sol";
 
 interface IImageGateway {

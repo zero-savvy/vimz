@@ -7,3 +7,5 @@ node_modules/
 vimz_marketplace_sdk.egg-info/
 build/
 anvil.log
+
+image-data/*.json

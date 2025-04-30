@@ -1,27 +1,26 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-/**
- * @dev How editions may be created. Ordered so that larger value means a more permissive policy (monotone upgrade rule).
- */
+/// @notice How editions may be created. Ordered so that larger value means a more permissive policy
+/// (monotone upgrade rule).
 enum EditionPolicy {
     Sealed,      // 0 - no‐one may register editions
     OnlyOwner,   // 1 - only current root owner may register editions
     Free         // 2 - anyone may register edition
 }
 
-/**
- * @dev Global license that applies to the entire transformation tree (original image + all derivatives).
- */
+/// @notice Global license terms that applies to the entire transformation tree (original image + all derivatives).
+/// @param editionPolicy Policy for creating editions
+/// @param commercialUse If `true`, then creator willing to sell commercial rights. Otherwise, the image is strictly for
+/// non‑commercial usage
+/// @param attribution Optional credit line (full text, URL, ...)
 struct LicenseTerms {
-    EditionPolicy editionPolicy; // Policy for creating editions
-    bool commercialUse;          // true => creator willing to sell commercial rights, false => strictly non‑commercial usage
-    string attribution;          // optional credit line (full text, URL, ...)
+    EditionPolicy editionPolicy;
+    bool commercialUse;
+    string attribution;
 }
 
-/**
- * @dev The transformations that can be applied to an image.
- */
+/// @notice The transformations that can be applied to an image.
 enum Transformation {
     Blur,
     Brightness,
@@ -34,14 +33,18 @@ enum Transformation {
     NoTransformation // Used for original image.
 }
 
-/**
- * @dev An image metadata.
- */
+/// @notice Image metadata.
+/// @param creator Creator's address.
+/// @param captureTime Unix timestamp when the root image was captured.
+/// @param timestamp Registration timestamp.
+/// @param parentHash Pointer to the parent image; self for originals.
+/// @param rootHash Pointer to the root image; self for originals.
+/// @param transformation Description of the applied transformation. For originals: NoTransformation.
 struct Image {
-    address creator;               // Creator's address.
-    uint256 captureTime;           // Unix timestamp when the root image was captured.
-    uint256 timestamp;             // Registration timestamp.
-    uint256 parentHash;            // Pointer to the parent image; self for originals.
-    uint256 rootHash;              // Pointer to the root image; self for originals.
-    Transformation transformation; // Description of the applied transformation. For originals: NoTransformation.
+    address creator;
+    uint256 captureTime;
+    uint256 timestamp;
+    uint256 parentHash;
+    uint256 rootHash;
+    Transformation transformation;
 }

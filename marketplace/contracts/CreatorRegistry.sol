@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-/// @dev This contract allows the registration of verified content creators.
+/// @notice This contract allows the registration of verified content creators.
 /// Only creators with valid KYC can be registered, ensuring that only trusted
 /// actors are permitted to register new images and their editions.
 contract CreatorRegistry {

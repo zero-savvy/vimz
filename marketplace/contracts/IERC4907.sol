@@ -11,7 +11,7 @@ interface IERC4907 {
     event UpdateUser(
         uint256 indexed tokenId,
         address indexed user,
-        uint64 expires
+        uint256 expires
     );
 
     /// @notice set the user and expires of a NFT
@@ -22,7 +22,7 @@ interface IERC4907 {
     function setUser(
         uint256 tokenId,
         address user,
-        uint64 expires
+        uint256 expires
     ) external;
 
     /// @notice Get the user address of an NFT
@@ -35,5 +35,5 @@ interface IERC4907 {
     /// @dev The zero value indicates that there is no user
     /// @param tokenId The NFT to get the user expires for
     /// @return The user expires for this NFT
-    function userExpires(uint256 tokenId) external view returns (uint64);
+    function userExpires(uint256 tokenId) external view returns (uint256);
 }

@@ -29,7 +29,7 @@ contract AttributionClaim {
         address claimant;
         uint256 rootHash;
         uint256 stake;
-        uint64 deadline;
+        uint256 deadline;
         bytes32 evidenceURI;
         bool resolved;
     }
@@ -148,7 +148,7 @@ contract AttributionClaim {
             claimant: msg.sender,
             rootHash: rootHash,
             stake: msg.value,
-            deadline: uint64(block.timestamp + RESOLUTION_WINDOW),
+            deadline: block.timestamp + RESOLUTION_WINDOW,
             evidenceURI: evidenceURI,
             resolved: false
         });

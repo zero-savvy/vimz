@@ -48,7 +48,7 @@ interface ILicenseToken is IERC4907 {
         address itemOwner,
         uint256 licenseTokenId,
         address licensedUser,
-        uint64 expires
+        uint256 expires
     ) external;
 }
 
@@ -80,7 +80,7 @@ contract Marketplace {
     struct LicensePricing {
         address owner;
         uint256 perBlock;
-        uint64 minDuration;
+        uint256 minDuration;
     }
 
     // ------------------------------------ STORAGE ------------------------------------ //
@@ -168,7 +168,7 @@ contract Marketplace {
     /// @param imageHash The hash of the **root** image.
     /// @param perBlock The price per block for the license.
     /// @param minDuration The minimum duration for the license.
-    function setLicencePrice(uint256 imageHash, uint256 perBlock, uint64 minDuration) external {
+    function setLicencePrice(uint256 imageHash, uint256 perBlock, uint256 minDuration) external {
         require(gateway.isRootImage(imageHash), "Not a root image");
         require(gateway.isForCommercialUse(imageHash), "Image is not for commercial use");
 
@@ -189,7 +189,7 @@ contract Marketplace {
     function setCollectionLicensePrice(
         uint256[] calldata imageHashes,
         uint256 perBlock,
-        uint64 minDuration
+        uint256 minDuration
     ) external {
         address owner = gateway.imageOwner(imageHashes[0]);
         require(msg.sender == owner, "Only owner can set license price");
@@ -211,7 +211,7 @@ contract Marketplace {
     ///  - The payment amount is equal to the cost of the license.
     /// @param itemId The ID of the item (image or collection).
     /// @param blocksDuration The duration of the license in blocks.
-    function buyTimedLicence(uint256 itemId, uint64 blocksDuration) external payable {
+    function buyTimedLicence(uint256 itemId, uint256 blocksDuration) external payable {
         LicensePricing memory pricing = licencePrice[itemId];
         require(blocksDuration >= pricing.minDuration, "License duration too short");
 
@@ -221,7 +221,7 @@ contract Marketplace {
         uint256 tokenId = uint256(keccak256(abi.encodePacked(itemId, ++licenseNonce)));
         licenseTokens[tokenId] = itemId;
 
-        licence.mint(itemId, pricing.owner, tokenId, msg.sender, uint64(block.number) + blocksDuration);
+        licence.mint(itemId, pricing.owner, tokenId, msg.sender, block.number + blocksDuration);
 
         (bool success,) = pricing.owner.call{value: msg.value}("");
         require(success, "License payment transfer failed");
@@ -233,10 +233,10 @@ contract Marketplace {
     ///  - The payment amount is equal to the cost of the extension.
     /// @param licenseTokenId The ID of the license token.
     /// @param addBlocks The number of blocks to extend the license.
-    function extendLicence(uint256 licenseTokenId, uint64 addBlocks) external payable {
+    function extendLicence(uint256 licenseTokenId, uint256 addBlocks) external payable {
         require(licence.userOf(licenseTokenId) == msg.sender, "Caller is not the license user");
 
-        uint64 oldExpiration = licence.userExpires(licenseTokenId);
+        uint256 oldExpiration = licence.userExpires(licenseTokenId);
         require(oldExpiration > block.number, "License already expired");
 
         uint256 itemId = licenseTokens[licenseTokenId];

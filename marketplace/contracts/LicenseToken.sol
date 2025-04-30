@@ -16,7 +16,7 @@ contract LicenseToken is IERC165, ERC721, IERC4907 {
     struct Token {
         uint256 itemId;
         address user;
-        uint64 expires; // TODO
+        uint256 expires;
     }
 
     // ------------------------------------ STORAGE ------------------------------------ //
@@ -53,7 +53,7 @@ contract LicenseToken is IERC165, ERC721, IERC4907 {
         address itemOwner,
         uint256 licenseTokenId,
         address licensedUser,
-        uint64 expires
+        uint256 expires
     ) external onlyMarketplace {
         _safeMint(itemOwner, licenseTokenId);
         tokens[licenseTokenId] = Token(itemId, licensedUser, expires);
@@ -63,7 +63,7 @@ contract LicenseToken is IERC165, ERC721, IERC4907 {
     // ------------------------------------ ERC4907 API ------------------------------------ //
 
     /// @inheritdoc IERC4907
-    function setUser(uint256 licenseTokenId, address licensedUser, uint64 expires) external override onlyMarketplace {
+    function setUser(uint256 licenseTokenId, address licensedUser, uint256 expires) external override onlyMarketplace {
         Token storage token = tokens[licenseTokenId];
         require(token.itemId != 0, "Token does not exist");
 
@@ -80,7 +80,7 @@ contract LicenseToken is IERC165, ERC721, IERC4907 {
     }
 
     /// @inheritdoc IERC4907
-    function userExpires(uint256 licenseTokenId) external view returns (uint64) {
+    function userExpires(uint256 licenseTokenId) external view returns (uint256) {
         return tokens[licenseTokenId].expires;
     }
 

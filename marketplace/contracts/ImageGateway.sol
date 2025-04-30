@@ -6,29 +6,39 @@ import {DeviceRegistry} from "./DeviceRegistry.sol";
 import {OnChainVerification} from "./OnChainVerification.sol";
 import {Transformation, Image, LicenseTerms, EditionPolicy} from "./Utils.sol";
 
-/**
- * @title ImageGateway
- * @dev Main entry point for registering images in the ecosystem.
- */
+/// @notice Main entry point for registering images in the ecosystem.
 contract ImageGateway {
     // ------------------------------------ STORAGE ------------------------------------ //
 
+    /// @notice Address of the creator registry.
+    /// @dev This is an immutable storage entry - settable only during contract initialization.
     CreatorRegistry public immutable creatorRegistry;
+    /// @notice Address of the device registry.
+    /// @dev This is an immutable storage entry - settable only during contract initialization.
     DeviceRegistry  public immutable deviceRegistry;
 
+    /// @notice Mapping between supported image transformations and corresponding verifier contracts.
     mapping(Transformation => address) public verifiers;
 
-    // Mapping from image hash to image details.
+    /// @notice Mapping from image hash to full image metadata.
     mapping(uint256 => Image)        public images;
-    // Mapping from root image hash to license terms.
+    /// @notice Mapping from **root** image hash to license terms.
     mapping(uint256 => LicenseTerms) public licenses;
-    // Mapping from root image hash to owner. Absence (address(0)) means public good
+    /// @notice Mapping from **root** image hash to owner. Absence (`address(0)`) means that the image is public good.
     mapping(uint256 => address)      public owners;
-    // Mapping from root image hash to an approved operator who can transfer ownership.
+    /// @notice Mapping from **root** image hash to an approved operator who can transfer ownership (like a marketplace).
     mapping(uint256 => address)      public approvedOperators;
 
     // ------------------------------------ EVENTS ------------------------------------ //
 
+    /// @notice Emitted when an original image is registered.
+    /// @param imageHash Hash of the registered image
+    /// @param creator Verified creator of the image
+    /// @param captureTime Time of capturing image (signed by the `device`)
+    /// @param device Verified device that captured the image
+    /// @param licenseTerms Image license (for this image and all its future editions)
+    /// @param timestamp Registration block timestamp
+    /// @param isPublicGood Indicates whether the image is a public good (has no legal owner)
     event NewImageRegistered(
         uint256 imageHash,
         address creator,
@@ -39,27 +49,45 @@ contract ImageGateway {
         bool isPublicGood
     );
 
+    /// @notice Emitted when an image edition is registered.
+    /// @param imageHash Hash of the registered image edition
+    /// @param creator Verified creator of the edition
+    /// @param parentHash Hash of the source image (direct ancestor)
+    /// @param rootHash Hash of the original image (global ancestor)
+    /// @param transformation Transformation applied to the parent image (which resulted in this edition)
+    /// @param timestamp Registration block timestamp
     event EditedImageRegistered(
         uint256 imageHash,
         address creator,
         uint256 parentHash,
+        uint256 rootHash,
         Transformation transformation,
         uint256 timestamp
     );
 
+    /// @notice Emitted when the owner loosens edition policy.
+    /// @param rootHash Hash of the original image for which policy has changed
+    /// @param newPolicy New (more open) edition policy
     event EditionPolicyOpened(uint256 rootHash, EditionPolicy newPolicy);
 
+    /// @notice Emitted when an image (with its editions) changes owner
+    /// @param rootHash Hash of the original image
+    /// @param oldOwner Previous owner
+    /// @param newOwner New owner
     event OwnershipTransferred(uint256 rootHash, address oldOwner, address newOwner);
 
+    /// @notice Emitted when an ownership operator is approved for an image
+    /// @param rootHash Hash of the original image
+    /// @param operator Address of the approved operator
     event OperatorApproved(uint256 rootHash, address operator);
 
-    // ------------------------------------ PUBLIC API ------------------------------------ //
+    // ------------------------------------ CONSTRUCTOR ------------------------------------ //
 
-    /**
-     * @notice Constructor initializes the contract with the CreatorRegistry and DeviceRegistry.
-     * @param _creatorRegistry Address of the deployed CreatorRegistry contract.
-     * @param _deviceRegistry Address of the deployed DeviceRegistry contract.
-     */
+    /// @notice Constructor initializes the gateway with registries' and verifiers' addresses.
+    /// @param _creatorRegistry Address of the deployed `CreatorRegistry` contract.
+    /// @param _deviceRegistry Address of the deployed `DeviceRegistry` contract.
+    /// @param _verifiers Addresses of the deployed verifier contracts. Their order should match `Transformation`
+    /// enum variants declaration order.
     constructor(address _creatorRegistry, address _deviceRegistry, address[8] memory _verifiers) {
         creatorRegistry = CreatorRegistry(_creatorRegistry);
         deviceRegistry = DeviceRegistry(_deviceRegistry);
@@ -74,15 +102,20 @@ contract ImageGateway {
         verifiers[Transformation.Sharpness] = _verifiers[7];
     }
 
-    /**
-     * @notice Registers a new original image captured by a verified device.
-     * @param imageHash The uint256 hash of the original image.
-     * @param captureTime Unix timestamp when the image was captured.
-     * @param licenseTerms The licensing details for the image.
-     * @param deviceId The address of the device that captured the image.
-     * @param deviceSignature The device’s signature over (creator, imageHash, captureTime).
-     * @param isPublicGood Whether the image is a public good and thus ownership is not transferable.
-     */
+    // ------------------------------------ IMAGE REGISTRATION ------------------------------------ //
+
+    /// @notice Registers a new original image captured by a verified device.
+    /// Requirements:
+    ///  - The image has not been registered yet (`imageHash` is new to the contract)
+    ///  - Sender must be a verified creator (with valid KYC)
+    ///  - `deviceId` identifies verified and registered device
+    ///  - `deviceSignature` must be a valid signature over a triple: creator ID, `imageHash`, `captureTime`
+    /// @param imageHash The hash of the image.
+    /// @param captureTime Unix timestamp when the image was captured.
+    /// @param licenseTerms The licensing details for the image.
+    /// @param deviceId The address of the verified device that captured the image.
+    /// @param deviceSignature The device’s signature over `(creator, imageHash, captureTime)`.
+    /// @param isPublicGood Whether the image is a public good and thus ownership is not transferable.
     function registerNewImage(
         uint256 imageHash,
         uint256 captureTime,
@@ -117,10 +150,10 @@ contract ImageGateway {
         licenses[imageHash] = licenseTerms;
 
         // 5. Ownership assignment.
-        if (!isPublicGood) {
-            owners[imageHash] = creator;
-        } else {
+        if (isPublicGood) {
             owners[imageHash] = address(0);
+        } else {
+            owners[imageHash] = creator;
         }
 
         emit NewImageRegistered(
@@ -134,15 +167,19 @@ contract ImageGateway {
         );
     }
 
-    /**
-     * @notice Registers an edited image.
-     * @param editedImageHash The uint256 hash of the edited image.
-     * @param parentHash The ID of the original image being edited.
-     * @param transformation The transformation applied to the original image.
-     * @param transformationParameters The parameters for the transformation (like sharpness factor). For some
-     *        transformations (like grayscale), this is ignored.
-     * @param proof The SNARK proof for the transformation.
-     */
+    /// @notice Registers an edited image.
+    /// Requirements:
+    ///  - The image has not been registered yet (`editedImageHash` is new to the contract)
+    ///  - Sender must be a verified creator (with valid KYC)
+    ///  - Parent image (`parentImage`) has been already registered
+    ///  - Image edition policy is not violated
+    ///  - The edition matches claimed transformation
+    /// @param editedImageHash The hash of the edited image.
+    /// @param parentHash The hash of the source image being edited.
+    /// @param transformation The transformation applied to the parent image.
+    /// @param transformationParameters The parameters for the transformation (like sharpness factor). For some
+    /// transformations (like grayscale), this is ignored.
+    /// @param proof The SNARK proof for the transformation.
     function registerEditedImage(
         uint256 editedImageHash,
         uint256 parentHash,
@@ -194,16 +231,17 @@ contract ImageGateway {
             editedImageHash,
             creator,
             parentHash,
+            parent.rootHash,
             transformation,
             block.timestamp
         );
     }
 
-    /**
-     * @notice Opens the edition policy for a given image tree.
-     * @param rootHash The hash of the root image.
-     * @param newPolicy The new edition policy to be set.
-     */
+    // ------------------------------------ EDITION POLICY ------------------------------------ //
+
+    /// @notice Opens the edition policy for a given image tree.
+    /// @param rootHash The hash of the root image.
+    /// @param newPolicy The new edition policy to be set.
     function openEditionPolicy(uint256 rootHash, EditionPolicy newPolicy) external {
         LicenseTerms storage terms = licenses[rootHash];
 
@@ -214,12 +252,12 @@ contract ImageGateway {
         emit EditionPolicyOpened(rootHash, newPolicy);
     }
 
-    /**
-     * @notice Checks that the chain of editions for the given image contains only permissible transformations.
-     * @param imageHash The hash of the image to be checked.
-     * @param permissibleTransformations An array of allowed Transformation enum values.
-     * @return true if the entire chain (from the original image to the one requested) is valid, false otherwise.
-     */
+    // ------------------------------------ EDITION HISTORY VALIDATION ------------------------------------ //
+
+    /// @notice Checks that the chain of editions for the given image contains only permissible transformations
+    /// @param imageHash The hash of the image to be checked
+    /// @param permissibleTransformations An array of allowed Transformation enum values
+    /// @return `true` if the entire chain (from the original image to the one requested) is valid, `false` otherwise
     function validateEditChain(uint256 imageHash, Transformation[] calldata permissibleTransformations) external view returns (bool){
         Image storage image = images[imageHash];
         uint256 currentHash = imageHash;
@@ -241,12 +279,10 @@ contract ImageGateway {
         return true;
     }
 
-    /**
-     * @notice Checks that the creator is the same for all images in the chain.
-     * @param imageHash The ID of the leaf image to be checked.
-     * @param creator The address of the creator to be checked against.
-     * @return true if the creator is the same for all images in the chain, false otherwise.
-     */
+    /// @notice Checks that the creator is the same for all images in the chain
+    /// @param imageHash The ID of the leaf image to be checked
+    /// @param creator The address of the creator to be checked against
+    /// @return `true` if the creator is the same for all images in the chain, `false` otherwise
     function ensureSoloCreator(uint256 imageHash, address creator) external view returns (bool) {
         Image storage image;
         uint256 currentHash = imageHash;
@@ -264,11 +300,19 @@ contract ImageGateway {
         return true;
     }
 
+    // ------------------------------------ IMAGE DETAILS ------------------------------------ //
+
+    /// @notice Checks whether `imageHash` refers to a root image
+    /// @param imageHash Hash of the image to check
+    /// @return `true` if this is a root image, `false` for edition
     function isRootImage(uint256 imageHash) external view returns (bool) {
         Image storage image = images[imageHash];
         return image.rootHash == imageHash;
     }
 
+    /// @notice Checks whether `imageHash` is allowed to be used commercially
+    /// @param imageHash Hash of the image to check
+    /// @return `true` if this image is suitable for commercial use, `false` otherwise
     function isForCommercialUse(uint256 imageHash) external view returns (bool) {
         Image storage image = images[imageHash];
         return licenses[image.rootHash].commercialUse;
@@ -276,11 +320,18 @@ contract ImageGateway {
 
     // ------------------------------------ OWNERSHIP ------------------------------------ //
 
+    /// @notice Returns the address of this image owner
+    /// @param imageHash Hash of the image to check
+    /// @return Address of this image owner (`address(0)` if the image is public good)
     function imageOwner(uint256 imageHash) external view returns (address) {
         Image storage image = images[imageHash];
         return owners[image.rootHash];
     }
 
+    /// @notice Approves an operator for ownership change. Must be called only by the image owner. Image must not have
+    /// any other operator approved already
+    /// @param rootHash Hash of the **root** image for which the operator gains rights
+    /// @param operator Address of the approved operator
     function approveOperator(uint256 rootHash, address operator) external {
         require(msg.sender == owners[rootHash], "Only image owner may approve operator");
         require(approvedOperators[rootHash] == address(0), "Some operator already approved");
@@ -289,10 +340,16 @@ contract ImageGateway {
         emit OperatorApproved(rootHash, operator);
     }
 
+    /// @notice Returns the address of the approved operator for this image (if any)
+    /// @param rootHash Hash of the **root** image to check
+    /// @return Address of this image owner (`address(0)` if the image is public good)
     function approvedOperator(uint256 rootHash) external view returns (address) {
         return approvedOperators[rootHash];
     }
 
+    /// @notice Changes image owner. Can be called only by the current image owner or an approved operator
+    /// @param rootHash Hash of the **root** image for which ownership changes
+    /// @param newOwner New owner of the image
     function transferOwnership(uint256 rootHash, address newOwner) external {
         address oldOwner = owners[rootHash];
         require(

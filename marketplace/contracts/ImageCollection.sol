@@ -17,20 +17,31 @@ contract ImageCollection is ERC721 {
 
     /// @notice All the registered collections
     mapping(uint256 => CollectionData) private collections;
-    /// @notice Collection counter
-    uint256 private counter;
+    /// @notice The only address that can mint new collections
+    address private immutable minter;
+
+    // ------------------------------------ MODIFIERS ------------------------------------ //
+
+    /// @notice Only the minter can call the function
+    modifier onlyMinter() {
+        require(msg.sender == minter, "Not minter");
+        _;
+    }
 
     // ------------------------------------ PUBLIC API ------------------------------------ //
 
     /// @notice Instantiate collection contract
-    constructor() ERC721("CollectionPass","CPASS") {}
+    /// @param _minter Address of the only permitted minter
+    constructor(address _minter) ERC721("CollectionPass","CPASS") {
+        minter = _minter;
+    }
 
     /// @notice Register a new collection
+    /// @param collectionId ID of the new collection
     /// @param owner Collection owner
     /// @param roots Hashes of the **root** images that should be included in the collection
-    /// @return collectionId ID of the new collection
-    function mint(address owner, uint256[] calldata roots) external returns (uint256 collectionId) {
-        collectionId = ++counter;
+    /// @dev Only the minter can call this function
+    function mint(uint256 collectionId, address owner, uint256[] calldata roots) external onlyMinter {
         _safeMint(owner, collectionId);
         collections[collectionId] = CollectionData(roots);
     }

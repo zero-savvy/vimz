@@ -3,7 +3,7 @@ pragma solidity ^0.8.26;
 
 import {Transformation} from "./Utils.sol";
 
-/// @notice A collection of functions for verifying image transformations on-chain with a VIMz+Sonobe generated verifiers.
+/// @notice An interface for verifying image transformations on-chain with a VIMz+Sonobe generated verifiers.
 library OnChainVerification {
     /// @notice Verifies the validity of an image transformation. Currently, supports only HD resolution preserving
     /// transformations.

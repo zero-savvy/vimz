@@ -43,7 +43,7 @@ contract PhotographyContest {
     /// @notice Address of the image gateway contract.
     IImageGateway public immutable imageGateway;
     /// @notice Array of permissible transformations.
-    Transformation[] public immutable permissibleTransformations;
+    Transformation[] public permissibleTransformations;
 
     /// @notice Current state of the contest.
     State public state;

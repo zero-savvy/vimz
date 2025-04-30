@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
+/// @notice Copied from https://thirdweb.com/doubledev.eth/ERC4907.
 interface IERC4907 {
     // Logged when the user of a token assigns a new user or updates expires
     /// @notice Emitted when the `user` of an NFT or the `expires` of the `user` is changed

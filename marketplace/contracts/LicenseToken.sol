@@ -55,8 +55,8 @@ contract LicenseToken is IERC165, ERC721, IERC4907 {
         address licensedUser,
         uint256 expires
     ) external onlyMarketplace {
-        _safeMint(itemOwner, licenseTokenId);
         tokens[licenseTokenId] = Token(itemId, licensedUser, expires);
+        _safeMint(itemOwner, licenseTokenId);
         emit UpdateUser(licenseTokenId, licensedUser, expires);
     }
 

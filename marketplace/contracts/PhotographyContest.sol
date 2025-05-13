@@ -141,7 +141,8 @@ contract PhotographyContest {
         require(winner != address(0), "Invalid winning submission.");
 
         state = State.WinnerAnnounced;
-        payable(winner).transfer(reward);
+        (bool success, ) = winner.call{value: reward}("");
+        require(success, "Transfer failed.");
 
         emit WinnerAnnounced(imageHash, winner, reward);
     }

@@ -27,9 +27,9 @@ serde_json = { version = "1.0.85" }
 tracing = { version = "0.1.26" }
 tracing-subscriber = { version = "0.3.18", features = ["fmt", "json", "env-filter"] }
 
-sonobe = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "8912049", package = "folding-schemes" }
-sonobe-frontends = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "8912049", package = "experimental-frontends" }
-sonobe-solidity = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "8912049", package = "solidity-verifiers" }
+sonobe = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "1fc07ef", package = "folding-schemes" }
+sonobe-frontends = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "1fc07ef", package = "experimental-frontends" }
+sonobe-solidity = { git = "https://github.com/privacy-scaling-explorations/sonobe", rev = "1fc07ef", package = "solidity-verifiers" }
 
 nova-scotia = { version = "0.5.0" }
 nova-snark = { version = "0.23.0" }

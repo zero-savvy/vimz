@@ -68,7 +68,7 @@ contract DeviceRegistry {
     /// @notice Registers a new verified camera device. Only an approved registrar can register a new device.
     /// @param devicePubKey The Ethereum address of the device being registered
     function registerDevice(address devicePubKey) external onlyRegistrar {
-        require(devices[devicePubKey].registrar != address(0), "Device already registered");
+        require(devices[devicePubKey].registrar == address(0), "Device already registered");
         devices[devicePubKey] = Device({registrar: msg.sender});
         emit DeviceRegistered(devicePubKey, msg.sender);
     }

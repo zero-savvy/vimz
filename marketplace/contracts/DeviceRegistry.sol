@@ -108,6 +108,11 @@ contract DeviceRegistry {
             v := byte(0, mload(add(signature, 96)))
         }
 
+        require(v == 27 || v == 28, "Invalid v value");
+        // secp256k1 curve order
+        uint256 SECP256K1_N = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141;
+        require(uint256(s) <= SECP256K1_N / 2, "s-value too high");
+
         return ecrecover(messageHash, v, r, s);
     }
 }

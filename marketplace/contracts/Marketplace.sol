@@ -192,6 +192,7 @@ contract Marketplace is ReentrancyGuard {
         uint256 perBlock,
         uint256 minDuration
     ) external nonReentrant {
+        require(imageHashes.length > 0, "Empty collection");
         address owner = gateway.imageOwner(imageHashes[0]);
         require(msg.sender == owner, "Only owner can set license price");
 

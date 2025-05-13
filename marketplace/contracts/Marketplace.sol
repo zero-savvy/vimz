@@ -4,6 +4,7 @@ pragma solidity ^0.8.26;
 import {IERC4907} from "./IERC4907.sol";
 import {IERC721} from "openzeppelin-contracts/token/ERC721/IERC721.sol";
 import {LicenseToken} from "./LicenseToken.sol";
+import {ReentrancyGuard} from "openzeppelin-contracts/utils/ReentrancyGuard.sol";
 
 /// @notice Subset of Image Gateway functionality.
 interface IImageGateway {
@@ -62,7 +63,7 @@ interface IImageCollection is IERC721 {
 }
 
 /// @notice Marketplace contract for trading images and licenses.
-contract Marketplace {
+contract Marketplace is ReentrancyGuard {
     // ------------------------------------ TYPES ------------------------------------ //
 
     /// @notice Represents a bid for an image ownership.
@@ -144,7 +145,7 @@ contract Marketplace {
     ///  - The price is equal to the sent value.
     ///  - The marketplace is the approved operator for the image.
     /// @param imageHash The hash of the image to be bought.
-    function buyImage(uint256 imageHash) external payable {
+    function buyImage(uint256 imageHash) external payable nonReentrant {
         Bid storage bid = ownershipBids[imageHash];
 
         require(bid.seller != address(0), "Image is not listed for sale");
@@ -190,7 +191,7 @@ contract Marketplace {
         uint256[] calldata imageHashes,
         uint256 perBlock,
         uint256 minDuration
-    ) external {
+    ) external nonReentrant {
         address owner = gateway.imageOwner(imageHashes[0]);
         require(msg.sender == owner, "Only owner can set license price");
 
@@ -211,7 +212,7 @@ contract Marketplace {
     ///  - The payment amount is equal to the cost of the license.
     /// @param itemId The ID of the item (image or collection).
     /// @param blocksDuration The duration of the license in blocks.
-    function buyTimedLicence(uint256 itemId, uint256 blocksDuration) external payable {
+    function buyTimedLicence(uint256 itemId, uint256 blocksDuration) external payable nonReentrant {
         LicensePricing memory pricing = licencePrice[itemId];
         require(blocksDuration >= pricing.minDuration, "License duration too short");
 

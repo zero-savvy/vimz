@@ -4,9 +4,10 @@ pragma solidity ^0.8.26;
 import {ERC721} from "openzeppelin-contracts/token/ERC721/ERC721.sol";
 import {IERC165} from "openzeppelin-contracts/utils/introspection/IERC165.sol";
 import {IERC4907} from "./IERC4907.sol";
+import {ReentrancyGuard} from "openzeppelin-contracts/utils/ReentrancyGuard.sol";
 
 /// @notice Token representing a temporal license for a commercial image usage.
-contract LicenseToken is IERC165, ERC721, IERC4907 {
+contract LicenseToken is IERC165, ERC721, IERC4907, ReentrancyGuard {
     // ------------------------------------ TYPES ------------------------------------ //
 
     /// @notice License token structure.
@@ -54,7 +55,7 @@ contract LicenseToken is IERC165, ERC721, IERC4907 {
         uint256 licenseTokenId,
         address licensedUser,
         uint256 expires
-    ) external onlyMarketplace {
+    ) external onlyMarketplace nonReentrant {
         tokens[licenseTokenId] = Token(itemId, licensedUser, expires);
         _safeMint(itemOwner, licenseTokenId);
         emit UpdateUser(licenseTokenId, licensedUser, expires);

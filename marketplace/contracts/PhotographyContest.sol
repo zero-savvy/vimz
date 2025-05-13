@@ -2,6 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Transformation} from "./Utils.sol";
+import {ReentrancyGuard} from "openzeppelin-contracts/utils/ReentrancyGuard.sol";
 
 /// @notice Set of functions for ensuring image provenance.
 interface IImageGateway {
@@ -24,7 +25,7 @@ interface IImageGateway {
 /// window. For each submission, the image registry is called to check that the chain of editions (from submitted image
 /// to its original source) contains only the allowed transformations. After the contest is closed the admin may
 /// announce a winner, at which point the reward is transferred to the chosen participant.
-contract PhotographyContest {
+contract PhotographyContest is ReentrancyGuard {
     // ------------------------------------ TYPES ------------------------------------ //
 
     /// @notice Current state of the contest.
@@ -134,7 +135,7 @@ contract PhotographyContest {
 
     /// @notice Admin-only function for announcing the winner.
     /// @param imageHash The hash of the winning image.
-    function announceWinner(uint256 imageHash) external onlyAdmin {
+    function announceWinner(uint256 imageHash) external onlyAdmin nonReentrant {
         require(state == State.SubmissionsClosed, "Submission window is not closed.");
 
         winner = submissions[imageHash];

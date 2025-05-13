@@ -3,9 +3,10 @@ pragma solidity ^0.8.26;
 
 import {OnChainVerification} from "./OnChainVerification.sol";
 import {Transformation} from "./Utils.sol";
+import {ReentrancyGuard} from "openzeppelin-contracts/utils/ReentrancyGuard.sol";
 
 /// @notice Bounty program for detecting image infringements.
-contract AttributionClaim {
+contract AttributionClaim is ReentrancyGuard {
     // ------------------------------------ TYPES ------------------------------------ //
 
     /// @notice Bounty set for an image
@@ -158,7 +159,7 @@ contract AttributionClaim {
 
     /// @notice Resolve infringement report successfully. Can be called only by the bounty owner.
     /// @param claimId ID of the claim to be resolved
-    function resolveClaim(uint256 claimId) external {
+    function resolveClaim(uint256 claimId) external nonReentrant {
         Claim storage claim = claims[claimId];
         require(!claim.resolved, "Claim already resolved");
         claim.resolved = true;

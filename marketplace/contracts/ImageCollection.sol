@@ -2,9 +2,10 @@
 pragma solidity ^0.8.26;
 
 import {ERC721} from "openzeppelin-contracts/token/ERC721/ERC721.sol";
+import {ReentrancyGuard} from "openzeppelin-contracts/utils/ReentrancyGuard.sol";
 
 /// @notice This contract allows the minting of NFTs representing collections of images.
-contract ImageCollection is ERC721 {
+contract ImageCollection is ERC721, ReentrancyGuard {
     // ------------------------------------ TYPES ------------------------------------ //
 
     /// @notice Represents a set of images (including their derivatives)
@@ -41,7 +42,7 @@ contract ImageCollection is ERC721 {
     /// @param owner Collection owner
     /// @param roots Hashes of the **root** images that should be included in the collection
     /// @dev Only the minter can call this function
-    function mint(uint256 collectionId, address owner, uint256[] calldata roots) external onlyMinter {
+    function mint(uint256 collectionId, address owner, uint256[] calldata roots) external onlyMinter nonReentrant {
         _safeMint(owner, collectionId);
         collections[collectionId] = CollectionData(roots);
     }

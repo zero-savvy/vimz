@@ -16,7 +16,7 @@ build-pyvimz:
 
 INPUT_SOURCE = --image-path ./source_image/HD.png
 INPUT_TARGET_DIR = ./input_data/
-INPUT_TARGET = --output-dir $(INPUT_TARGET_DIR)
+INPUT_TARGET = --output $(INPUT_TARGET_DIR)
 
 EXTRA_ARGS_brightness = --factor 1.4
 EXTRA_ARGS_contrast = --factor 1.4

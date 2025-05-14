@@ -40,7 +40,7 @@ compute_proof() {
   local circuit_file="../circuits/sonobe/${trans}_step.r1cs"
   local output_file="${SCRIPT_DIR}/${base}-${trans}.proof"
 
-  cargo run --release --features light-test --bin vimz -- \
+  cargo run --release --bin vimz -- \
     -f "$trans" \
     -w "$wasm_file" \
     -i "$input_file" \

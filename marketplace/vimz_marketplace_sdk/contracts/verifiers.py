@@ -1,7 +1,23 @@
+from vimz_marketplace_sdk.artifacts import ProofData
+from vimz_marketplace_sdk.chain import Actor
 from vimz_marketplace_sdk.contracts.contract import VimzContract
+from vimz_marketplace_sdk.logging_config import logger
 
 
-class BlurVerifier(VimzContract):
+class VerifierContract(VimzContract):
+    def verify(self, caller: Actor, proof: ProofData):
+        receipt = self.call(
+            caller,
+            "verifyOpaqueNovaProofWithInputs",
+            proof.steps,
+            proof.initial_state,
+            proof.final_state,
+            proof.proof,
+        )
+        logger.info(f"✅ Proof verified successfully ({receipt['gasUsed']:_} gas)")
+
+
+class BlurVerifier(VerifierContract):
     @classmethod
     def contract_file_name(cls) -> str:
         return "BlurVerifier"
@@ -11,7 +27,7 @@ class BlurVerifier(VimzContract):
         return "NovaDecider"
 
 
-class BrightnessVerifier(VimzContract):
+class BrightnessVerifier(VerifierContract):
     @classmethod
     def contract_file_name(cls) -> str:
         return "BrightnessVerifier"
@@ -21,7 +37,7 @@ class BrightnessVerifier(VimzContract):
         return "NovaDecider"
 
 
-class ContrastVerifier(VimzContract):
+class ContrastVerifier(VerifierContract):
     @classmethod
     def contract_file_name(cls) -> str:
         return "ContrastVerifier"
@@ -31,7 +47,7 @@ class ContrastVerifier(VimzContract):
         return "NovaDecider"
 
 
-class CropVerifier(VimzContract):
+class CropVerifier(VerifierContract):
     @classmethod
     def contract_file_name(cls) -> str:
         return "CropVerifier"
@@ -41,7 +57,7 @@ class CropVerifier(VimzContract):
         return "NovaDecider"
 
 
-class GrayscaleVerifier(VimzContract):
+class GrayscaleVerifier(VerifierContract):
     @classmethod
     def contract_file_name(cls) -> str:
         return "GrayscaleVerifier"
@@ -51,7 +67,7 @@ class GrayscaleVerifier(VimzContract):
         return "NovaDecider"
 
 
-class RedactVerifier(VimzContract):
+class RedactVerifier(VerifierContract):
     @classmethod
     def contract_file_name(cls) -> str:
         return "RedactVerifier"
@@ -61,7 +77,7 @@ class RedactVerifier(VimzContract):
         return "NovaDecider"
 
 
-class ResizeVerifier(VimzContract):
+class ResizeVerifier(VerifierContract):
     @classmethod
     def contract_file_name(cls) -> str:
         return "ResizeVerifier"
@@ -71,7 +87,7 @@ class ResizeVerifier(VimzContract):
         return "NovaDecider"
 
 
-class SharpnessVerifier(VimzContract):
+class SharpnessVerifier(VerifierContract):
     @classmethod
     def contract_file_name(cls) -> str:
         return "SharpnessVerifier"

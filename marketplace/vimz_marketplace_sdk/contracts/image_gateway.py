@@ -19,7 +19,7 @@ from vimz_marketplace_sdk.contracts.verifiers import (
 from vimz_marketplace_sdk.creator import Creator
 from vimz_marketplace_sdk.device import Device
 from vimz_marketplace_sdk.logging_config import logger
-from vimz_marketplace_sdk.types import Transformation, transformation_parameters, LicenseTerms
+from vimz_marketplace_sdk.types import LicenseTerms, Transformation, transformation_parameters
 
 
 class ImageGateway(VimzContract):
@@ -66,7 +66,7 @@ class ImageGateway(VimzContract):
         device: Device,
         public_good: bool = False,
     ):
-        self.call(
+        receipt = self.call(
             creator,
             "registerNewImage",
             image_hash,
@@ -76,7 +76,7 @@ class ImageGateway(VimzContract):
             device.sign(creator, image_hash, capture_time),
             public_good,
         )
-        logger.info(f"✅ Image {image_hash} registered successfully.")
+        logger.info(f"✅ Image {image_hash} registered successfully ({receipt['gasUsed']:_} gas)")
 
     def register_edited_image(
         self,
@@ -86,7 +86,7 @@ class ImageGateway(VimzContract):
         transformation: Transformation,
         proof: ProofData,
     ):
-        self.call(
+        receipt = self.call(
             creator,
             "registerEditedImage",
             image_hash,
@@ -95,4 +95,4 @@ class ImageGateway(VimzContract):
             transformation_parameters(transformation, proof),
             proof.proof,
         )
-        logger.info(f"✅ Image {image_hash} registered successfully.")
+        logger.info(f"✅ Image {image_hash} registered successfully  ({receipt['gasUsed']:_} gas)")

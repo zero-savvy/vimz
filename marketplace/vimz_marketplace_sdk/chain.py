@@ -103,7 +103,7 @@ def deploy_contract(
     receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 
     logger.info(
-        f"✅ Contract '{contract_file_name}' deployed at address: {receipt["contractAddress"]}"
+        f"✅ Contract '{contract_file_name}' deployed at address: {receipt["contractAddress"]} ({receipt['gasUsed']:_} gas)"
     )
 
     return w3.eth.contract(address=receipt["contractAddress"], abi=artifact["abi"])

@@ -135,7 +135,7 @@ def main():
 
     # Save the output to a JSON file
     if os.path.isdir(args.output):
-        output_path = path.join(args.output_dir, f"{operation}.json")
+        output_path = path.join(args.output, f"{operation}.json")
     else:
         output_path = args.output
     with open(output_path, "w") as fp:

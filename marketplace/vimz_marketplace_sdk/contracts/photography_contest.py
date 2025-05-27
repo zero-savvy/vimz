@@ -31,8 +31,8 @@ class PhotographyContest(VimzContract):
         return cast(PhotographyContest, vimz_contract)
 
     def submit(self, creator: Actor, image_hash: int):
-        self.call(creator, "submit", image_hash)
-        logger.info("Submission created")
+        receipt = self.call(creator, "submit", image_hash)
+        logger.info(f"Submission created ({receipt['gasUsed']:_} gas).")
 
     def close_submissions(self, admin: Actor):
         self.call(admin, "closeSubmissions")

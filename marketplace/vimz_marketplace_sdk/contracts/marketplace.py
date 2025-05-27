@@ -18,11 +18,12 @@ class Marketplace(VimzContract):
         cls,
         deployer: Actor,
         image_gateway_address: ChecksumAddress,
+        license_token_address: ChecksumAddress,
     ) -> "Marketplace":
         vimz_contract = super().deploy(
             deployer,
             image_gateway_address,
-            "0x0000000000000000000000000000000000000000",  # license token - TODO
+            license_token_address,
             "0x0000000000000000000000000000000000000000",  # collection - TODO
         )
         return cast(Marketplace, vimz_contract)

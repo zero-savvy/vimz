@@ -22,12 +22,20 @@ contract LicenseToken is IERC165, ERC721, IERC4907, ReentrancyGuard {
 
     // ------------------------------------ STORAGE ------------------------------------ //
 
+    /// @notice Address of the contract administrator (the deployer).
+    address immutable admin;
     /// @notice Sole minter and updater.
-    address public immutable marketplace;
+    address public marketplace;
     /// @notice Mapping from license token id to the token itself.
     mapping(uint256 => Token) private tokens;
 
     // ------------------------------------ MODIFIERS ------------------------------------ //
+
+    /// @notice Restricts access to only the contract administrator.
+    modifier onlyAdmin() {
+        require(msg.sender == admin, "Not admin");
+        _;
+    }
 
     /// @notice Restricts access to only the Marketplace contract.
     modifier onlyMarketplace() {
@@ -38,7 +46,12 @@ contract LicenseToken is IERC165, ERC721, IERC4907, ReentrancyGuard {
     // ------------------------------------ PUBLIC API ------------------------------------ //
 
     /// @notice Constructor for the LicenseToken contract.
-    constructor(address _marketplace) ERC721("ImageLicense", "ILIC"){
+    constructor() ERC721("ImageLicense", "ILIC") {
+        admin = msg.sender;
+    }
+
+    /// @notice Set the marketplace address.
+    function setMarketplace(address _marketplace) external onlyAdmin {
         marketplace = _marketplace;
     }
 
@@ -49,13 +62,11 @@ contract LicenseToken is IERC165, ERC721, IERC4907, ReentrancyGuard {
     /// @param licensedUser The address of the user who obtained the license.
     /// @param expires The block number when the license expires.
     /// @dev Only the marketplace contract can call this function.
-    function mint(
-        uint256 itemId,
-        address itemOwner,
-        uint256 licenseTokenId,
-        address licensedUser,
-        uint256 expires
-    ) external onlyMarketplace nonReentrant {
+    function mint(uint256 itemId, address itemOwner, uint256 licenseTokenId, address licensedUser, uint256 expires)
+        external
+        onlyMarketplace
+        nonReentrant
+    {
         tokens[licenseTokenId] = Token(itemId, licensedUser, expires);
         _safeMint(itemOwner, licenseTokenId);
         emit UpdateUser(licenseTokenId, licensedUser, expires);

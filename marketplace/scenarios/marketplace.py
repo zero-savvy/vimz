@@ -5,6 +5,7 @@ import web3
 from scenarios import full_setup
 from vimz_marketplace_sdk.artifacts import get_image_hash
 from vimz_marketplace_sdk.chain import get_actor
+from vimz_marketplace_sdk.contracts.license_token import LicenseToken
 from vimz_marketplace_sdk.contracts.marketplace import Marketplace
 from vimz_marketplace_sdk.logging_config import logger
 from vimz_marketplace_sdk.types import open_license
@@ -28,10 +29,11 @@ def main():
     logger.start_section("Setup marketplace")
 
     marketplace_admin = get_actor("marketplace_admin")
+    license_token = LicenseToken.deploy(marketplace_admin)
     marketplace = Marketplace.deploy(
-        marketplace_admin,
-        setup.gateway.address(),
+        marketplace_admin, setup.gateway.address(), license_token.address()
     )
+    license_token.set_marketplace(marketplace_admin, marketplace.address())
 
     logger.start_section("Setting and buying license")
 

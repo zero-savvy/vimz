@@ -36,13 +36,13 @@ class VimzContract(ABC):
         )
         self._contract.w3.eth.default_account = caller.address()
 
-    def call(self, caller: Actor, function: str, *args) -> TxReceipt:
+    def call(self, caller: Actor, function: str, *args, **tx_kwargs) -> TxReceipt:
         self.set_caller(caller)
 
         function = getattr(self._contract.functions, function)
         calldata = function(*args)
 
-        tx_hash = calldata.transact()
+        tx_hash = calldata.transact(tx_kwargs)
         return self._contract.w3.eth.wait_for_transaction_receipt(tx_hash)
 
     def call_and_get_event(self, caller: Actor, function: str, event: str, *args) -> dict:

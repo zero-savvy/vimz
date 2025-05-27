@@ -4,9 +4,10 @@ pragma solidity ^0.8.26;
 /// @notice How editions may be created. Ordered so that larger value means a more permissive policy
 /// (monotone upgrade rule).
 enum EditionPolicy {
-    Sealed,      // 0 - no‐one may register editions
-    OnlyOwner,   // 1 - only current root owner may register editions
-    Free         // 2 - anyone may register edition
+    Sealed, // 0 - no‐one may register editions
+    OnlyOwner, // 1 - only current root owner may register editions
+    Free // 2 - anyone may register edition
+
 }
 
 /// @notice Global license terms that applies to the entire transformation tree (original image + all derivatives).
@@ -31,6 +32,7 @@ enum Transformation {
     Resize,
     Sharpness,
     NoTransformation // Used for original image.
+
 }
 
 /// @notice Image metadata.

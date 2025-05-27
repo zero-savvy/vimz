@@ -33,7 +33,7 @@ contract ImageCollection is ERC721, ReentrancyGuard {
 
     /// @notice Instantiate collection contract
     /// @param _minter Address of the only permitted minter
-    constructor(address _minter) ERC721("CollectionPass","CPASS") {
+    constructor(address _minter) ERC721("CollectionPass", "CPASS") {
         minter = _minter;
     }
 

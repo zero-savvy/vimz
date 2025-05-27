@@ -26,9 +26,8 @@ library OnChainVerification {
         uint256 steps = 720; // For HD resolution preserving transformations.
 
         if (
-            transformation == Transformation.Grayscale ||
-            transformation == Transformation.Redact ||
-            transformation == Transformation.Resize
+            transformation == Transformation.Grayscale || transformation == Transformation.Redact
+                || transformation == Transformation.Resize
         ) {
             require(transformationParameters.length == 0, "Unexpected transformation parameters.");
             return ISnarkVerifierWithIVCLen2(verifier).verifyOpaqueNovaProofWithInputs(
@@ -40,7 +39,10 @@ library OnChainVerification {
         }
 
         if (transformation == Transformation.Brightness || transformation == Transformation.Contrast) {
-            require(transformationParameters.length == 1, "Invalid transformation parameters - expected transformation factor.");
+            require(
+                transformationParameters.length == 1,
+                "Invalid transformation parameters - expected transformation factor."
+            );
             return ISnarkVerifierWithIVCLen3(verifier).verifyOpaqueNovaProofWithInputs(
                 steps,
                 [0, 0, transformationParameters[0]], // Initial state: empty hashes + parameters
@@ -50,7 +52,10 @@ library OnChainVerification {
         }
 
         if (transformation == Transformation.Blur || transformation == Transformation.Sharpness) {
-            require(transformationParameters.length == 2, "Invalid transformation parameters - expected final neighbourhood hashes.");
+            require(
+                transformationParameters.length == 2,
+                "Invalid transformation parameters - expected final neighbourhood hashes."
+            );
             return ISnarkVerifierWithIVCLen4(verifier).verifyOpaqueNovaProofWithInputs(
                 steps,
                 [uint256(0), 0, 0, 0], // Initial state: empty hashes
@@ -59,7 +64,7 @@ library OnChainVerification {
             );
         }
 
-        revert ("Unsupported transformation");
+        revert("Unsupported transformation");
     }
 }
 

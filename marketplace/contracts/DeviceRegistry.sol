@@ -79,7 +79,10 @@ contract DeviceRegistry {
     /// @param signature The cryptographic signature produced by the device
     /// @param deviceAddress The Ethereum address of the device that supposedly signed the message
     /// @return `true` if the signature is valid, `false` otherwise
-    function verifyDeviceSignature(bytes32 messageHash, bytes memory signature, address deviceAddress) external view returns (bool)
+    function verifyDeviceSignature(bytes32 messageHash, bytes memory signature, address deviceAddress)
+        external
+        view
+        returns (bool)
     {
         require(devices[deviceAddress].registrar != address(0), "Device not found");
         // Recover the signer address from the signature

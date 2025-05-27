@@ -10,7 +10,10 @@ interface IImageGateway {
     /// @param imageHash The hash of the image.
     /// @param permissibleTransformations An array of permissible transformations.
     /// @return `true` if the image was created using only the permissible transformations, `false` otherwise.
-    function validateEditChain(uint256 imageHash, Transformation[] calldata permissibleTransformations) external view returns (bool);
+    function validateEditChain(uint256 imageHash, Transformation[] calldata permissibleTransformations)
+        external
+        view
+        returns (bool);
 
     /// @notice Checks that the image was created by a single creator.
     /// @param imageHash The hash of the image.
@@ -89,10 +92,7 @@ contract PhotographyContest is ReentrancyGuard {
     /// @notice Constructor sets up the contest.
     /// @param _permissibleTransformations An array of permissible transformations.
     /// @param _imageGateway The address of the image gateway contract.
-    constructor(
-        Transformation[] memory _permissibleTransformations,
-        address _imageGateway
-    ) payable {
+    constructor(Transformation[] memory _permissibleTransformations, address _imageGateway) payable {
         admin = msg.sender;
         reward = msg.value;
         state = State.SubmissionsOpen;
@@ -142,7 +142,7 @@ contract PhotographyContest is ReentrancyGuard {
         require(winner != address(0), "Invalid winning submission.");
 
         state = State.WinnerAnnounced;
-        (bool success, ) = winner.call{value: reward}("");
+        (bool success,) = winner.call{value: reward}("");
         require(success, "Transfer failed.");
 
         emit WinnerAnnounced(imageHash, winner, reward);

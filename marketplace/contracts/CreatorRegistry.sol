@@ -51,19 +51,11 @@ contract CreatorRegistry {
     /// @param creatorAddr The Ethereum address of the creator being registered.
     /// @param kycExpiry The timestamp indicating when the creator's KYC expires.
     /// @param contactInfo The contact information for the creator.
-    function registerCreator(
-        address creatorAddr,
-        uint256 kycExpiry,
-        string calldata contactInfo
-    ) external onlyAdmin {
+    function registerCreator(address creatorAddr, uint256 kycExpiry, string calldata contactInfo) external onlyAdmin {
         require(!creators[creatorAddr].exists, "Creator already registered");
         require(kycExpiry > block.timestamp, "KYC expiry must be in the future");
 
-        creators[creatorAddr] = Creator({
-            kycExpiry: kycExpiry,
-            contactInfo: contactInfo,
-            exists: true
-        });
+        creators[creatorAddr] = Creator({kycExpiry: kycExpiry, contactInfo: contactInfo, exists: true});
 
         emit CreatorRegistered(creatorAddr, kycExpiry);
     }

@@ -134,12 +134,7 @@ contract AttributionClaim is ReentrancyGuard {
 
         if (transformation != Transformation.NoTransformation) {
             bool validProof = OnChainVerification.verifyTransformationValidity(
-                rootHash,
-                infringementHash,
-                transformation,
-                transformationParameters,
-                proof,
-                verifiers[transformation]
+                rootHash, infringementHash, transformation, transformationParameters, proof, verifiers[transformation]
             );
             require(validProof, "Invalid transformation proof");
         }

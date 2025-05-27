@@ -15,19 +15,19 @@ contract ImageGateway {
     CreatorRegistry public immutable creatorRegistry;
     /// @notice Address of the device registry.
     /// @dev This is an immutable storage entry - settable only during contract initialization.
-    DeviceRegistry  public immutable deviceRegistry;
+    DeviceRegistry public immutable deviceRegistry;
 
     /// @notice Mapping between supported image transformations and corresponding verifier contracts.
     mapping(Transformation => address) public verifiers;
 
     /// @notice Mapping from image hash to full image metadata.
-    mapping(uint256 => Image)        public images;
+    mapping(uint256 => Image) public images;
     /// @notice Mapping from **root** image hash to license terms.
     mapping(uint256 => LicenseTerms) public licenses;
     /// @notice Mapping from **root** image hash to owner. Absence (`address(0)`) means that the image is public good.
-    mapping(uint256 => address)      public owners;
+    mapping(uint256 => address) public owners;
     /// @notice Mapping from **root** image hash to an approved operator who can transfer ownership (like a marketplace).
-    mapping(uint256 => address)      public approvedOperators;
+    mapping(uint256 => address) public approvedOperators;
 
     // ------------------------------------ EVENTS ------------------------------------ //
 
@@ -134,8 +134,7 @@ contract ImageGateway {
         // 3. Create a message hash for device signature verification and validate it.
         bytes32 messageHash = keccak256(abi.encodePacked(creator, imageHash, captureTime));
         require(
-            deviceRegistry.verifyDeviceSignature(messageHash, deviceSignature, deviceId),
-            "Invalid device signature"
+            deviceRegistry.verifyDeviceSignature(messageHash, deviceSignature, deviceId), "Invalid device signature"
         );
 
         // 4. Store the image and license terms.
@@ -156,15 +155,7 @@ contract ImageGateway {
             owners[imageHash] = creator;
         }
 
-        emit NewImageRegistered(
-            imageHash,
-            creator,
-            captureTime,
-            deviceId,
-            licenseTerms,
-            block.timestamp,
-            isPublicGood
-        );
+        emit NewImageRegistered(imageHash, creator, captureTime, deviceId, licenseTerms, block.timestamp, isPublicGood);
     }
 
     /// @notice Registers an edited image.
@@ -208,12 +199,7 @@ contract ImageGateway {
         // 5. Ensure the transformation is valid.
         require(transformation != Transformation.NoTransformation, "Invalid transformation");
         bool validProof = OnChainVerification.verifyTransformationValidity(
-            parentHash,
-            editedImageHash,
-            transformation,
-            transformationParameters,
-            proof,
-            verifiers[transformation]
+            parentHash, editedImageHash, transformation, transformationParameters, proof, verifiers[transformation]
         );
         require(validProof, "Invalid transformation proof");
 
@@ -228,12 +214,7 @@ contract ImageGateway {
         });
 
         emit EditedImageRegistered(
-            editedImageHash,
-            creator,
-            parentHash,
-            parent.rootHash,
-            transformation,
-            block.timestamp
+            editedImageHash, creator, parentHash, parent.rootHash, transformation, block.timestamp
         );
     }
 
@@ -258,13 +239,17 @@ contract ImageGateway {
     /// @param imageHash The hash of the image to be checked
     /// @param permissibleTransformations An array of allowed Transformation enum values
     /// @return `true` if the entire chain (from the original image to the one requested) is valid, `false` otherwise
-    function validateEditChain(uint256 imageHash, Transformation[] calldata permissibleTransformations) external view returns (bool){
+    function validateEditChain(uint256 imageHash, Transformation[] calldata permissibleTransformations)
+        external
+        view
+        returns (bool)
+    {
         Image storage image = images[imageHash];
         uint256 currentHash = imageHash;
 
         while (image.parentHash != currentHash) {
             bool found = false;
-            for (uint i = 0; i < permissibleTransformations.length; i++) {
+            for (uint256 i = 0; i < permissibleTransformations.length; i++) {
                 if (image.transformation == permissibleTransformations[i]) {
                     found = true;
                     break;

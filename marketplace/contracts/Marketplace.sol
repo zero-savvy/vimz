@@ -44,13 +44,8 @@ interface ILicenseToken is IERC4907 {
     /// @param licenseTokenId The ID of the license token.
     /// @param licensedUser The address of the licensed user.
     /// @param expires The expiration block number of the license.
-    function mint(
-        uint256 itemId,
-        address itemOwner,
-        uint256 licenseTokenId,
-        address licensedUser,
-        uint256 expires
-    ) external;
+    function mint(uint256 itemId, address itemOwner, uint256 licenseTokenId, address licensedUser, uint256 expires)
+        external;
 }
 
 /// @notice Interface for the image collection contract.
@@ -87,18 +82,18 @@ contract Marketplace is ReentrancyGuard {
     // ------------------------------------ STORAGE ------------------------------------ //
 
     /// @notice The address of the image gateway contract.
-    IImageGateway    public immutable gateway;
+    IImageGateway public immutable gateway;
     /// @notice The address of the license token contract.
-    ILicenseToken    public immutable licence;
+    ILicenseToken public immutable licence;
     /// @notice The address of the image collection contract.
     IImageCollection public immutable collection;
 
     /// @notice Maps image hashes to ownership bids.
-    mapping(uint256 => Bid)            public ownershipBids;
+    mapping(uint256 => Bid) public ownershipBids;
     /// @notice Maps image hashes to license pricing.
     mapping(uint256 => LicensePricing) public licencePrice;
     /// @notice Maps license token IDs to licensed item IDs.
-    mapping(uint256 => uint256)        public licenseTokens;
+    mapping(uint256 => uint256) public licenseTokens;
 
     /// @notice The nonce for generating unique license token IDs.
     uint256 private licenseNonce;
@@ -176,7 +171,7 @@ contract Marketplace is ReentrancyGuard {
         address owner = gateway.imageOwner(imageHash);
         require(owner == msg.sender, "Only owner can set license price");
 
-        licencePrice[imageHash] = LicensePricing(owner,perBlock, minDuration);
+        licencePrice[imageHash] = LicensePricing(owner, perBlock, minDuration);
     }
 
     /// @notice Sets the license price for a collection of images. Requirements:
@@ -187,16 +182,15 @@ contract Marketplace is ReentrancyGuard {
     /// @param imageHashes The hashes of the **root** images.
     /// @param perBlock The price per block for the license.
     /// @param minDuration The minimum duration for the license.
-    function setCollectionLicensePrice(
-        uint256[] calldata imageHashes,
-        uint256 perBlock,
-        uint256 minDuration
-    ) external nonReentrant {
+    function setCollectionLicensePrice(uint256[] calldata imageHashes, uint256 perBlock, uint256 minDuration)
+        external
+        nonReentrant
+    {
         require(imageHashes.length > 0, "Empty collection");
         address owner = gateway.imageOwner(imageHashes[0]);
         require(msg.sender == owner, "Only owner can set license price");
 
-        for (uint i; i < imageHashes.length; ++i) {
+        for (uint256 i; i < imageHashes.length; ++i) {
             require(gateway.isRootImage(imageHashes[i]), "Not a root image");
             require(gateway.isForCommercialUse(imageHashes[i]), "Image is not for commercial use");
             require(gateway.imageOwner(imageHashes[i]) == owner, "Collection images must have the same owner");

@@ -1,7 +1,10 @@
 [package]
 name = "vimz"
 version = "2.0.0"
-edition = "2021"
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
 
 [[bin]]
 name = "vimz"
@@ -12,30 +15,27 @@ name = "generate-verifier-contract"
 path = "src/bin/generate_verifier_contract.rs"
 
 [dependencies]
-ark-bn254 = { version = "^0.5.0", features = ["r1cs"] }
-ark-grumpkin = { version = "^0.5.0", features = ["r1cs"] }
-ark-groth16 = { version = "^0.5.0", features = ["parallel"] }
-ark-r1cs-std = { version = "^0.5.0", features = ["parallel"] }
-ark-relations = { version = "^0.5.0" }
-clap = { version = "4.5.16", features = ["derive"] }
-num-bigint = { version = "0.4.3" }
-num-traits = { version = "0.2.15" }
-paste = { version = "1.0.15" }
-rand = { version = "0.8.5" }
-serde = { version = "1.0" }
-serde_json = { version = "1.0.85" }
-tracing = { version = "0.1.26" }
-tracing-subscriber = { version = "0.3.18", features = ["fmt", "json", "env-filter"] }
+ark-bn254 = { workspace = true, features = ["r1cs"] }
+ark-grumpkin = { workspace = true, features = ["r1cs"] }
+ark-groth16 = { workspace = true, features = ["parallel"] }
+ark-r1cs-std = { workspace = true, features = ["parallel"] }
+ark-relations = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
+num-bigint = { workspace = true }
+num-traits = { workspace = true }
+paste = { workspace = true }
+rand = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter"] }
 
-sonobe = { git = "https://github.com/pmikolajczyk41/sonobe", rev = "d312916", package = "folding-schemes" }
-sonobe-frontends = { git = "https://github.com/pmikolajczyk41/sonobe", rev = "d312916", package = "experimental-frontends" }
-sonobe-solidity = { git = "https://github.com/pmikolajczyk41/sonobe", rev = "d312916", package = "solidity-verifiers" }
+sonobe = { workspace = true }
+sonobe-frontends = { workspace = true }
+sonobe-solidity = { workspace = true }
 
-nova-scotia = { version = "0.5.0" }
-nova-snark = { version = "0.23.0" }
-
-[patch.crates-io]
-ark-r1cs-std = { git = "https://github.com/yelhousni/r1cs-std", rev = "440ca3" } # "perf/sw" branch
+nova-scotia = { workspace = true }
+nova-snark = { workspace = true }
 
 [features]
 light-test = [

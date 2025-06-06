@@ -10,3 +10,4 @@ circuits/**/*.r1cs
 circuits/**/*.sym
 
 calldata/
+target/

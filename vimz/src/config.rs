@@ -11,6 +11,14 @@ pub enum Backend {
     NovaSnark,
 }
 
+/// Supported circuits frontend for the Sonobe backend.
+#[derive(Copy, Clone, Default, PartialEq, Eq, Debug, ValueEnum)]
+pub enum Frontend {
+    #[default]
+    Circom,
+    Arkworks,
+}
+
 #[derive(Parser)]
 #[command(
     version,
@@ -54,6 +62,10 @@ pub struct Config {
     /// The backend proof system.
     #[clap(short, long, value_enum)]
     pub backend: Backend,
+    
+    /// The circuit frontend (applicable only to the Sonobe backend).
+    #[clap(long, value_enum, default_value_t = Frontend::default())]
+    pub frontend: Frontend,
 
     /// Run the procedure only on a small part of the image.
     #[clap(short, long)]
@@ -90,9 +102,12 @@ impl Config {
         println!(" ██     ██  ██  ████  ████      ███    Manipulation from");
         println!("  ██   ██   ██  ██ ████ ██     ██      Folded   zkSNARKs");
         println!("   ██ ██    ██  ██  ██  ██   ███                         ");
-        println!("    ███     ██  ██      ██  ████████████ v1.4.0 ████████");
+        println!("    ███     ██  ██      ██  ████████████ v2.0.0 ████████");
         println!(" ________________________________________________________");
         println!("| Selected Backend: {:?}", self.backend);
+        if self.backend == Backend::Sonobe {
+            println!("| Circuit Frontend: {:?}", self.frontend);
+        }
         println!("| Input file: {:?}", self.input);
         println!("| Output file: {:?}", self.output);
         println!("| Selected function: {:?}", self.function);

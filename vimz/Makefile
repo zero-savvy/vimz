@@ -13,8 +13,11 @@ endif
 ifeq ($(DEMO),yes)
 	DEMO_FLAG := --demo
 else
-	DEMO_FLAG := ""
+	DEMO_FLAG :=
 endif
+
+FRONTEND ?=
+FRONTEND_ARG := $(if $(FRONTEND),--frontend $(FRONTEND),)
 
 .PHONY: help
 help: # Show help for each of the Makefile recipes.
@@ -32,7 +35,7 @@ run-transformation:
  		-f $(TRANSFORMATION) -w ../circuits/$(SUBDIR)/$(TRANSFORMATION)_step_js/$(TRANSFORMATION)_step.wasm \
 		-i ../input_data/$(TRANSFORMATION).json \
 		-c ../circuits/$(SUBDIR)/$(TRANSFORMATION)_step.r1cs -r HD \
-		-b $(BACKEND) $(DEMO_FLAG) -o ../calldata/$(TRANSFORMATION).bytes
+		-b $(BACKEND) $(FRONTEND_ARG) $(DEMO_FLAG) -o ../calldata/$(TRANSFORMATION).bytes
 
 .PHONY: blur
 blur: # Run the blur transformation.

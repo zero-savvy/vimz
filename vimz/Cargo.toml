@@ -37,6 +37,8 @@ sonobe-solidity = { workspace = true }
 nova-scotia = { workspace = true }
 nova-snark = { workspace = true }
 
+ark-circuits = { workspace = true }
+
 [features]
 light-test = [
     "sonobe/light-test",

@@ -5393,6 +5393,7 @@ name = "vimz"
 version = "2.0.0"
 dependencies = [
  "ark-bn254 0.5.0",
+ "ark-circuits",
  "ark-groth16",
  "ark-grumpkin",
  "ark-r1cs-std",

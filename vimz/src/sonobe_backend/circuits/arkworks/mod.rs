@@ -1,4 +1,5 @@
 mod brightness;
+mod compression;
 mod hash;
 
 pub use brightness::BrightnessArkworksCircuit;

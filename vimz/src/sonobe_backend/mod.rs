@@ -40,6 +40,9 @@ pub fn run(config: &Config) {
             Transformation::Hash => {
                 _run::<HashArkworksCircuit<Fr, { Transformation::Hash.step_input_width() }>>(config)
             }
+            Transformation::Brightness => _run::<
+                BrightnessArkworksCircuit<Fr, { Transformation::Brightness.step_input_width() }>,
+            >(config),
             _ => unimplemented!("Not supported for Arkworks frontend yet"),
         },
     }

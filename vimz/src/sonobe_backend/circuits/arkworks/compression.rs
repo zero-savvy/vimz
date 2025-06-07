@@ -40,14 +40,13 @@ pub fn decompress_pixels<F: PrimeField>(
 
     // Reconstruct the compressed value from the decomposed pixels, to ensure that prover's advices
     // are correct.
-    let actual_compression = compress_pixels(cs, &pixels)?;
+    let actual_compression = compress_pixels(&pixels)?;
     actual_compression.enforce_equal(compressed)?;
 
     Ok(pixels.try_into().unwrap())
 }
 
 fn compress_pixels<F: PrimeField>(
-    cs: ConstraintSystemRef<F>,
     pixels: &[Pixel<F>],
 ) -> Result<CompressedPixels<F>, SynthesisError> {
     let mut compressed = FpVar::zero();

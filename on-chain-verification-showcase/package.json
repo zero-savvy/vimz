@@ -1,8 +1,0 @@
-{
-  "name": "vimz-on-chain-verification-showcase",
-  "version": "1.0.0",
-  "author": "Piotr Mikołajczyk",
-  "dependencies": {
-    "forge-std": "github:foundry-rs/forge-std#v1.8.1"
-  }
-}

@@ -21,7 +21,7 @@ pub fn prepare_contract_calldata<Circuit: FCircuit<Fr>>(
         nova.z_i.clone(),
         &nova.U_i,
         &nova.u_i,
-        &proof,
+        proof,
     )
     .expect("Failed to prepare calldata")
 }

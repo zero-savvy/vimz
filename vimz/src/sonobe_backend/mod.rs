@@ -1,11 +1,13 @@
 use std::fs;
 
+use ark_bn254::Fr;
+use ark_circuits::hash_step::HashStep;
 use rand::{prelude::StdRng, SeedableRng};
 use sonobe::Decider as _;
 use tracing::info_span;
 
 use crate::{
-    config::Config,
+    config::{Config, Frontend},
     sonobe_backend::{
         circuit::*,
         decider::{verify_final_proof, Decider},
@@ -23,16 +25,24 @@ pub mod input;
 pub mod solidity;
 
 pub fn run(config: &Config) {
-    match config.function {
-        Transformation::Blur => _run::<BlurCircuit>(config),
-        Transformation::Brightness => _run::<BrightnessCircuit>(config),
-        Transformation::Contrast => _run::<ContrastCircuit>(config),
-        Transformation::Crop => _run::<CropCircuit>(config),
-        Transformation::Grayscale => _run::<GrayscaleCircuit>(config),
-        Transformation::Hash => _run::<HashCircuit>(config),
-        Transformation::Redact => _run::<RedactCircuit>(config),
-        Transformation::Resize => _run::<ResizeCircuit>(config),
-        Transformation::Sharpness => _run::<SharpnessCircuit>(config),
+    match config.frontend {
+        Frontend::Circom => match config.function {
+            Transformation::Blur => _run::<BlurCircuit>(config),
+            Transformation::Brightness => _run::<BrightnessCircuit>(config),
+            Transformation::Contrast => _run::<ContrastCircuit>(config),
+            Transformation::Crop => _run::<CropCircuit>(config),
+            Transformation::Grayscale => _run::<GrayscaleCircuit>(config),
+            Transformation::Hash => _run::<HashCircuit>(config),
+            Transformation::Redact => _run::<RedactCircuit>(config),
+            Transformation::Resize => _run::<ResizeCircuit>(config),
+            Transformation::Sharpness => _run::<SharpnessCircuit>(config),
+        },
+        Frontend::Arkworks => match config.function {
+            Transformation::Hash => {
+                _run::<HashStep<Fr, { Transformation::Hash.step_input_width() }>>(config)
+            }
+            _ => unimplemented!("Not supported for Arkworks frontend yet"),
+        },
     }
 }
 

@@ -62,7 +62,7 @@ pub struct Config {
     /// The backend proof system.
     #[clap(short, long, value_enum)]
     pub backend: Backend,
-    
+
     /// The circuit frontend (applicable only to the Sonobe backend).
     #[clap(long, value_enum, default_value_t = Frontend::default())]
     pub frontend: Frontend,

@@ -19,6 +19,7 @@ pub struct HashStep<F: PrimeField, const WIDTH: usize> {
     poseidon_config: PoseidonConfig<F>,
     _f: PhantomData<F>,
 }
+
 impl<F: PrimeField + Absorb, const WIDTH: usize> FCircuit<F> for HashStep<F, WIDTH> {
     type Params = PoseidonConfig<F>;
     type ExternalInputs = VecF<F, WIDTH>;

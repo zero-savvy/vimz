@@ -12,7 +12,7 @@ use tracing::info_span;
 
 use crate::{
     config::Config,
-    sonobe_backend::circuit::{FromVec, SonobeCircuit},
+    sonobe_backend::circuits::{SonobeCircuit, VecFT},
 };
 
 /// The folding scheme used.

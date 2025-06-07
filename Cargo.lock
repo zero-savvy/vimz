@@ -340,20 +340,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ark-circuits"
-version = "0.1.0"
-dependencies = [
- "ark-bn254 0.5.0",
- "ark-crypto-primitives",
- "ark-ff 0.5.0",
- "ark-r1cs-std",
- "ark-relations 0.5.1",
- "folding-schemes",
- "num-bigint 0.4.6",
- "num-traits",
-]
-
-[[package]]
 name = "ark-crypto-primitives"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5393,7 +5379,8 @@ name = "vimz"
 version = "2.0.0"
 dependencies = [
  "ark-bn254 0.5.0",
- "ark-circuits",
+ "ark-crypto-primitives",
+ "ark-ff 0.5.0",
  "ark-groth16",
  "ark-grumpkin",
  "ark-r1cs-std",

@@ -8,7 +8,7 @@ use vimz::{
     config::{Backend, Config},
     logging::init_logging,
     sonobe_backend::{
-        circuit::*,
+        circuits::{circom::*, SonobeCircuit},
         decider::{Decider, DeciderVerifierParam},
         folding::prepare_folding,
         input::prepare_input,
@@ -25,15 +25,15 @@ fn main() {
     }
 
     match config.function {
-        Transformation::Blur => run::<BlurCircuit>(&config),
-        Transformation::Brightness => run::<BrightnessCircuit>(&config),
-        Transformation::Contrast => run::<ContrastCircuit>(&config),
-        Transformation::Crop => run::<CropCircuit>(&config),
-        Transformation::Grayscale => run::<GrayscaleCircuit>(&config),
-        Transformation::Hash => run::<HashCircuit>(&config),
-        Transformation::Redact => run::<RedactCircuit>(&config),
-        Transformation::Resize => run::<ResizeCircuit>(&config),
-        Transformation::Sharpness => run::<SharpnessCircuit>(&config),
+        Transformation::Blur => run::<BlurCircomCircuit>(&config),
+        Transformation::Brightness => run::<BrightnessCircomCircuit>(&config),
+        Transformation::Contrast => run::<ContrastCircomCircuit>(&config),
+        Transformation::Crop => run::<CropCircomCircuit>(&config),
+        Transformation::Grayscale => run::<GrayscaleCircomCircuit>(&config),
+        Transformation::Hash => run::<HashCircomCircuit>(&config),
+        Transformation::Redact => run::<RedactCircomCircuit>(&config),
+        Transformation::Resize => run::<ResizeCircomCircuit>(&config),
+        Transformation::Sharpness => run::<SharpnessCircomCircuit>(&config),
     }
 }
 

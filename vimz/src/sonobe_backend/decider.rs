@@ -7,7 +7,7 @@ use sonobe::{
     Decider as DeciderTrait,
 };
 
-use crate::sonobe_backend::{circuit::SonobeCircuit, folding::Folding};
+use crate::sonobe_backend::{circuits::SonobeCircuit, folding::Folding};
 
 /// Compressed proof producer.
 pub type Decider<Circuit> = DeciderEth<

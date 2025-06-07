@@ -1,7 +1,6 @@
 use std::fs;
 
 use ark_bn254::Fr;
-use ark_circuits::hash_step::HashStep;
 use rand::{prelude::StdRng, SeedableRng};
 use sonobe::Decider as _;
 use tracing::info_span;
@@ -9,7 +8,7 @@ use tracing::info_span;
 use crate::{
     config::{Config, Frontend},
     sonobe_backend::{
-        circuit::*,
+        circuits::{arkworks::*, circom::*, SonobeCircuit},
         decider::{verify_final_proof, Decider},
         folding::{fold_input, prepare_folding, verify_folding},
         input::prepare_input,
@@ -18,7 +17,7 @@ use crate::{
     transformation::Transformation,
 };
 
-pub mod circuit;
+pub mod circuits;
 pub mod decider;
 pub mod folding;
 pub mod input;
@@ -27,15 +26,15 @@ pub mod solidity;
 pub fn run(config: &Config) {
     match config.frontend {
         Frontend::Circom => match config.function {
-            Transformation::Blur => _run::<BlurCircuit>(config),
-            Transformation::Brightness => _run::<BrightnessCircuit>(config),
-            Transformation::Contrast => _run::<ContrastCircuit>(config),
-            Transformation::Crop => _run::<CropCircuit>(config),
-            Transformation::Grayscale => _run::<GrayscaleCircuit>(config),
-            Transformation::Hash => _run::<HashCircuit>(config),
-            Transformation::Redact => _run::<RedactCircuit>(config),
-            Transformation::Resize => _run::<ResizeCircuit>(config),
-            Transformation::Sharpness => _run::<SharpnessCircuit>(config),
+            Transformation::Blur => _run::<BlurCircomCircuit>(config),
+            Transformation::Brightness => _run::<BrightnessCircomCircuit>(config),
+            Transformation::Contrast => _run::<ContrastCircomCircuit>(config),
+            Transformation::Crop => _run::<CropCircomCircuit>(config),
+            Transformation::Grayscale => _run::<GrayscaleCircomCircuit>(config),
+            Transformation::Hash => _run::<HashCircomCircuit>(config),
+            Transformation::Redact => _run::<RedactCircomCircuit>(config),
+            Transformation::Resize => _run::<ResizeCircomCircuit>(config),
+            Transformation::Sharpness => _run::<SharpnessCircomCircuit>(config),
         },
         Frontend::Arkworks => match config.function {
             Transformation::Hash => {

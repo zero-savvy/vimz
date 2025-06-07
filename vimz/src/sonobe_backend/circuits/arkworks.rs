@@ -1,5 +1,6 @@
 use std::marker::PhantomData;
 
+use ark_bn254::Fr;
 use ark_crypto_primitives::{
     crh::{
         poseidon::constraints::{CRHGadget, CRHParametersVar},
@@ -10,9 +11,10 @@ use ark_crypto_primitives::{
 use ark_ff::PrimeField;
 use ark_r1cs_std::{alloc::AllocVar, fields::fp::FpVar};
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
-use sonobe::{frontend::FCircuit, Error};
+use sonobe::{frontend::FCircuit, transcript::poseidon::poseidon_canonical_config, Error};
+use sonobe_frontends::utils::{VecF, VecFpVar};
 
-use crate::{VecF, VecFpVar};
+use crate::{config::Config, sonobe_backend::circuits::SonobeCircuit};
 
 #[derive(Clone, Debug)]
 pub struct HashStep<F: PrimeField, const WIDTH: usize> {
@@ -53,5 +55,12 @@ impl<F: PrimeField + Absorb, const WIDTH: usize> FCircuit<F> for HashStep<F, WID
         let h = CRHGadget::<F>::evaluate(&crh_params, &hash_input)?;
 
         Ok(vec![h])
+    }
+}
+
+impl<const WIDTH: usize> SonobeCircuit for HashStep<Fr, WIDTH> {
+    fn from_config(_config: &Config) -> Self {
+        Self::new(poseidon_canonical_config::<Fr>())
+            .expect("Failed to construct HashStep from config")
     }
 }

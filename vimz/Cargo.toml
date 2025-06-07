@@ -16,6 +16,8 @@ path = "src/bin/generate_verifier_contract.rs"
 
 [dependencies]
 ark-bn254 = { workspace = true, features = ["r1cs"] }
+ark-crypto-primitives = { workspace = true }
+ark-ff = { workspace = true }
 ark-grumpkin = { workspace = true, features = ["r1cs"] }
 ark-groth16 = { workspace = true, features = ["parallel"] }
 ark-r1cs-std = { workspace = true, features = ["parallel"] }
@@ -36,8 +38,6 @@ sonobe-solidity = { workspace = true }
 
 nova-scotia = { workspace = true }
 nova-snark = { workspace = true }
-
-ark-circuits = { workspace = true }
 
 [features]
 light-test = [

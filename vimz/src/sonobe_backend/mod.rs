@@ -38,7 +38,7 @@ pub fn run(config: &Config) {
         },
         Frontend::Arkworks => match config.function {
             Transformation::Hash => {
-                _run::<HashStep<Fr, { Transformation::Hash.step_input_width() }>>(config)
+                _run::<HashArkworksCircuit<Fr, { Transformation::Hash.step_input_width() }>>(config)
             }
             _ => unimplemented!("Not supported for Arkworks frontend yet"),
         },

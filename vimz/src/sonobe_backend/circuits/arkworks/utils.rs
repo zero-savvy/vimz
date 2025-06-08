@@ -1,5 +1,3 @@
-use std::cmp::Ordering;
-
 use ark_ff::PrimeField;
 use ark_r1cs_std::{cmp::CmpGadget, fields::fp::FpVar, uint16::UInt16};
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
@@ -18,10 +16,5 @@ pub fn decompress_row<F: PrimeField>(
 }
 
 pub fn cap<F: PrimeField>(value: &UInt16<F>, max: &UInt16<F>) -> Result<UInt16<F>, SynthesisError> {
-    value.is_lt(max)?.select(&value, &max)
-}
-
-pub fn abs_diff<F: PrimeField>(a: &FpVar<F>, b: &FpVar<F>) -> Result<FpVar<F>, SynthesisError> {
-    a.is_cmp(b, Ordering::Less, false)?
-        .select(&(b - a), &(a - b))
+    value.is_lt(max)?.select(value, max)
 }

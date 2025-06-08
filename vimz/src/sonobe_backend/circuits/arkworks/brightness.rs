@@ -9,10 +9,10 @@ use ark_crypto_primitives::{
     sponge::poseidon::PoseidonConfig,
 };
 use ark_ff::PrimeField;
-use ark_r1cs_std::{alloc::AllocVar, fields::fp::FpVar, uint16::UInt16};
-use ark_r1cs_std::boolean::Boolean;
-use ark_r1cs_std::cmp::CmpGadget;
-use ark_r1cs_std::eq::EqGadget;
+use ark_r1cs_std::{
+    alloc::AllocVar, boolean::Boolean, cmp::CmpGadget, eq::EqGadget, fields::fp::FpVar,
+    uint16::UInt16,
+};
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
 use sonobe::{frontend::FCircuit, transcript::poseidon::poseidon_canonical_config, Error};
 use sonobe_frontends::utils::{VecF, VecFpVar};
@@ -20,12 +20,14 @@ use sonobe_frontends::utils::{VecF, VecFpVar};
 use crate::{
     config::Config,
     sonobe_backend::circuits::{
-        arkworks::{compression::Pixel, utils::decompress_row},
+        arkworks::{
+            compression::Pixel,
+            utils::{cap, decompress_row},
+        },
         SonobeCircuit,
     },
     transformation::Transformation,
 };
-use crate::sonobe_backend::circuits::arkworks::utils::cap;
 
 #[derive(Clone, Debug)]
 pub struct BrightnessArkworksCircuit<F: PrimeField, const WIDTH: usize> {
@@ -102,18 +104,20 @@ impl<const WIDTH: usize> FCircuit<Fr> for BrightnessArkworksCircuit<Fr, WIDTH> {
             .flat_map(Pixel::flatten)
             .map(|p| p.mul(&precision))
             .map(|p| UInt16::from_fp(&p));
-        
-        for (source, target) in source_scaled
-            .zip(target_with_precision)
-        {
+
+        for (source, target) in source_scaled.zip(target_with_precision) {
             let source = cap(&source?.0, &max)?;
             let target = target?.0;
-            
+
             let source_with_margin = source.saturating_add(&diff_cap);
             let target_with_margin = target.saturating_add(&diff_cap);
-            
-            source.is_le(&target_with_margin)?.enforce_equal(&Boolean::TRUE)?;
-            target.is_le(&source_with_margin)?.enforce_equal(&Boolean::TRUE)?;
+
+            source
+                .is_le(&target_with_margin)?
+                .enforce_equal(&Boolean::TRUE)?;
+            target
+                .is_le(&source_with_margin)?
+                .enforce_equal(&Boolean::TRUE)?;
         }
 
         Ok(vec![new_source_hash, new_target_hash, factor])

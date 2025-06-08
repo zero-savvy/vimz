@@ -1,5 +1,8 @@
-use std::{cmp::Ordering, marker::PhantomData, ops::Mul};
-use std::ops::MulAssign;
+use std::{
+    marker::PhantomData,
+    ops::{Mul, MulAssign},
+};
+
 use ark_bn254::Fr;
 use ark_crypto_primitives::{
     crh::{
@@ -10,11 +13,14 @@ use ark_crypto_primitives::{
 };
 use ark_ff::PrimeField;
 use ark_r1cs_std::{
-    alloc::AllocVar, boolean::Boolean, cmp::CmpGadget, eq::EqGadget, fields::fp::FpVar,
-    uint16::UInt16,
+    alloc::AllocVar,
+    boolean::Boolean,
+    eq::EqGadget,
+    fields::{fp::FpVar, FieldVar},
+    R1CSVar,
 };
-use ark_r1cs_std::fields::FieldVar;
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
+use num_traits::{One, Zero};
 use sonobe::{frontend::FCircuit, transcript::poseidon::poseidon_canonical_config, Error};
 use sonobe_frontends::utils::{VecF, VecFpVar};
 
@@ -90,35 +96,56 @@ impl<const WIDTH: usize> FCircuit<Fr> for BrightnessArkworksCircuit<Fr, WIDTH> {
         let source_pixels = decompress_row(cs.clone(), &source_row)?;
         let target_pixels = decompress_row(cs.clone(), &target_row)?;
 
-        let max = UInt16::new_constant(cs.clone(), 2550)?;
-        let diff_cap = UInt16::new_constant(cs.clone(), 10)?;
+        let max = FpVar::new_constant(cs.clone(), Fr::from(2550))?;
         let precision = FpVar::new_constant(cs.clone(), Fr::from(10))?;
 
         let source_scaled = source_pixels
             .iter()
             .flat_map(Pixel::flatten)
-            .map(|p| p.mul(&factor))
-            .map(|scaled| UInt16::from_fp(&scaled));
+            .map(|p| p.mul(&factor));
 
         let target_with_precision = target_pixels
             .iter()
             .flat_map(Pixel::flatten)
-            .map(|p| p.mul(&precision))
-            .map(|p| UInt16::from_fp(&p));
+            .map(|p| p.mul(&precision));
 
         for (source, target) in source_scaled.zip(target_with_precision) {
-            let source = cap(&source?.0, &max)?;
-            let target = target?.0;
+            let source = cap(cs.clone(), &source, &max)?;
 
-            let source_with_margin = source.saturating_add(&diff_cap);
-            let target_with_margin = target.saturating_add(&diff_cap);
+            let u = FpVar::new_witness(cs.clone(), || {
+                let sv = source.value()?;
+                let tv = target.value()?;
+                if sv < tv {
+                    Ok(tv - sv)
+                } else {
+                    Ok(Fr::zero())
+                }
+            })?;
 
-            source
-                .is_le(&target_with_margin)?
+            let v = FpVar::new_witness(cs.clone(), || {
+                let sv = source.value()?;
+                let tv = target.value()?;
+                if sv > tv {
+                    Ok(sv - tv)
+                } else {
+                    Ok(Fr::zero())
+                }
+            })?;
+
+            u.clone().mul(&v).is_zero()?.enforce_equal(&Boolean::TRUE)?;
+            (source.clone() + u.clone() - v.clone() - target.clone())
+                .is_zero()?
                 .enforce_equal(&Boolean::TRUE)?;
-            target
-                .is_le(&source_with_margin)?
-                .enforce_equal(&Boolean::TRUE)?;
+
+            let mut u_range = FpVar::Constant(Fr::one());
+            let mut v_range = FpVar::Constant(Fr::one());
+            
+            for i in 0..=10 {
+                u_range *= u.clone() - Fr::from(i as u64);
+                v_range *= v.clone() - Fr::from(i as u64);
+            }
+            u_range.is_zero()?.enforce_equal(&Boolean::TRUE)?;
+            v_range.is_zero()?.enforce_equal(&Boolean::TRUE)?;
         }
 
         Ok(vec![new_source_hash, new_target_hash, factor])

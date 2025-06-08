@@ -1,4 +1,4 @@
-use std::marker::PhantomData;
+use std::{cmp::Ordering, marker::PhantomData, ops::Mul};
 
 use ark_bn254::Fr;
 use ark_crypto_primitives::{
@@ -9,16 +9,23 @@ use ark_crypto_primitives::{
     sponge::poseidon::PoseidonConfig,
 };
 use ark_ff::PrimeField;
-use ark_r1cs_std::{alloc::AllocVar, fields::fp::FpVar};
+use ark_r1cs_std::{alloc::AllocVar, fields::fp::FpVar, uint16::UInt16};
+use ark_r1cs_std::boolean::Boolean;
+use ark_r1cs_std::cmp::CmpGadget;
+use ark_r1cs_std::eq::EqGadget;
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
 use sonobe::{frontend::FCircuit, transcript::poseidon::poseidon_canonical_config, Error};
 use sonobe_frontends::utils::{VecF, VecFpVar};
 
 use crate::{
     config::Config,
-    sonobe_backend::circuits::{arkworks::compression::decompress_pixels, SonobeCircuit},
+    sonobe_backend::circuits::{
+        arkworks::{compression::Pixel, utils::decompress_row},
+        SonobeCircuit,
+    },
     transformation::Transformation,
 };
+use crate::sonobe_backend::circuits::arkworks::utils::cap;
 
 #[derive(Clone, Debug)]
 pub struct BrightnessArkworksCircuit<F: PrimeField, const WIDTH: usize> {
@@ -54,6 +61,12 @@ impl<const WIDTH: usize> FCircuit<Fr> for BrightnessArkworksCircuit<Fr, WIDTH> {
         let old_target_hash = z_i[1].clone();
         let factor = z_i[2].clone();
 
+        factor.enforce_cmp(
+            &FpVar::new_constant(cs.clone(), Fr::from(32))?,
+            Ordering::Less,
+            false,
+        )?;
+
         let crh_params =
             CRHParametersVar::<Fr>::new_constant(cs.clone(), self.poseidon_config.clone())?;
 
@@ -71,16 +84,37 @@ impl<const WIDTH: usize> FCircuit<Fr> for BrightnessArkworksCircuit<Fr, WIDTH> {
         let new_target_hash_input = [&[old_target_hash], target_row.as_slice()].concat();
         let new_target_hash = CRHGadget::<Fr>::evaluate(&crh_params, &new_target_hash_input)?;
 
-        let _source_pixels = source_row
+        let source_pixels = decompress_row(cs.clone(), &source_row)?;
+        let target_pixels = decompress_row(cs.clone(), &target_row)?;
+
+        let max = UInt16::new_constant(cs.clone(), 2550)?;
+        let diff_cap = UInt16::new_constant(cs.clone(), 10)?;
+        let precision = FpVar::new_constant(cs.clone(), Fr::from(10))?;
+
+        let source_scaled = source_pixels
             .iter()
-            .map(|batch| decompress_pixels(cs.clone(), batch))
-            .collect::<Result<Vec<_>, _>>()?
-            .concat();
-        let _target_pixels = target_row
+            .flat_map(Pixel::flatten)
+            .map(|p| p.mul(&factor))
+            .map(|scaled| UInt16::from_fp(&scaled));
+
+        let target_with_precision = target_pixels
             .iter()
-            .map(|batch| decompress_pixels(cs.clone(), batch))
-            .collect::<Result<Vec<_>, _>>()?
-            .concat();
+            .flat_map(Pixel::flatten)
+            .map(|p| p.mul(&precision))
+            .map(|p| UInt16::from_fp(&p));
+        
+        for (source, target) in source_scaled
+            .zip(target_with_precision)
+        {
+            let source = cap(&source?.0, &max)?;
+            let target = target?.0;
+            
+            let source_with_margin = source.saturating_add(&diff_cap);
+            let target_with_margin = target.saturating_add(&diff_cap);
+            
+            source.is_le(&target_with_margin)?.enforce_equal(&Boolean::TRUE)?;
+            target.is_le(&source_with_margin)?.enforce_equal(&Boolean::TRUE)?;
+        }
 
         Ok(vec![new_source_hash, new_target_hash, factor])
     }

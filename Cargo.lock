@@ -627,7 +627,7 @@ dependencies = [
 [[package]]
 name = "ark-r1cs-std"
 version = "0.5.0"
-source = "git+https://github.com/yelhousni/r1cs-std?rev=440ca3#440ca331af2c5a43b137ea44a7f21f171e4bd6ea"
+source = "git+https://github.com/pmikolajczyk41/r1cs-std?rev=d8e18fa#d8e18fab7e052cf83ec8225a7092948b5b2a3f19"
 dependencies = [
  "ark-ec 0.5.0",
  "ark-ff 0.5.0",

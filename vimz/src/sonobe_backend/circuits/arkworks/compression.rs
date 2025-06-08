@@ -2,8 +2,7 @@ use ark_ff::{BigInteger, PrimeField};
 use ark_r1cs_std::{
     alloc::AllocVar,
     eq::EqGadget,
-    fields::{fp::FpVar, FieldVar}
-    ,
+    fields::{fp::FpVar, FieldVar},
     R1CSVar,
 };
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
@@ -15,6 +14,12 @@ pub struct Pixel<F: PrimeField> {
     pub r: FpVar<F>,
     pub g: FpVar<F>,
     pub b: FpVar<F>,
+}
+
+impl<F: PrimeField> Pixel<F> {
+    pub fn flatten(&self) -> [FpVar<F>; 3] {
+        [self.r.clone(), self.g.clone(), self.b.clone()]
+    }
 }
 
 pub type CompressedPixels<F> = FpVar<F>;

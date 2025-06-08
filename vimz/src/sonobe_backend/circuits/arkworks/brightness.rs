@@ -1,5 +1,5 @@
 use std::{cmp::Ordering, marker::PhantomData, ops::Mul};
-
+use std::ops::MulAssign;
 use ark_bn254::Fr;
 use ark_crypto_primitives::{
     crh::{
@@ -13,6 +13,7 @@ use ark_r1cs_std::{
     alloc::AllocVar, boolean::Boolean, cmp::CmpGadget, eq::EqGadget, fields::fp::FpVar,
     uint16::UInt16,
 };
+use ark_r1cs_std::fields::FieldVar;
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
 use sonobe::{frontend::FCircuit, transcript::poseidon::poseidon_canonical_config, Error};
 use sonobe_frontends::utils::{VecF, VecFpVar};
@@ -63,11 +64,11 @@ impl<const WIDTH: usize> FCircuit<Fr> for BrightnessArkworksCircuit<Fr, WIDTH> {
         let old_target_hash = z_i[1].clone();
         let factor = z_i[2].clone();
 
-        factor.enforce_cmp(
-            &FpVar::new_constant(cs.clone(), Fr::from(32))?,
-            Ordering::Less,
-            false,
-        )?;
+        let mut x = FpVar::Constant(1.into());
+        for i in 0..32 {
+            x.mul_assign(factor.clone() - FpVar::Constant(Fr::from(i as u64)));
+        }
+        x.is_zero()?.enforce_equal(&Boolean::TRUE)?;
 
         let crh_params =
             CRHParametersVar::<Fr>::new_constant(cs.clone(), self.poseidon_config.clone())?;

@@ -1,15 +1,15 @@
 use std::collections::HashMap;
 
-use nova_scotia::F;
-use serde_json::{json, Value};
 use Transformation::*;
+use nova_scotia::F;
+use serde_json::{Value, json};
 
 use crate::{
+    DEMO_STEPS,
     config::Config,
     input::VIMzInput,
     nova_snark_backend::{G1, G2},
     transformation::{Resolution, Transformation},
-    DEMO_STEPS,
 };
 
 pub struct PreparedInputs {

@@ -6,8 +6,8 @@ use std::{
 use ark_bn254::Fr;
 use ark_crypto_primitives::{
     crh::{
-        poseidon::constraints::{CRHGadget, CRHParametersVar},
         CRHSchemeGadget,
+        poseidon::constraints::{CRHGadget, CRHParametersVar},
     },
     sponge::poseidon::PoseidonConfig,
 };
@@ -16,22 +16,18 @@ use ark_r1cs_std::{
     alloc::AllocVar,
     boolean::Boolean,
     eq::EqGadget,
-    fields::{fp::FpVar, FieldVar},
-    R1CSVar,
+    fields::{FieldVar, fp::FpVar},
 };
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
-use num_traits::{One, Zero};
-use sonobe::{frontend::FCircuit, transcript::poseidon::poseidon_canonical_config, Error};
+use arkworks_small_values_ops::{abs_diff, enforce_in_bound, min};
+use sonobe::{Error, frontend::FCircuit, transcript::poseidon::poseidon_canonical_config};
 use sonobe_frontends::utils::{VecF, VecFpVar};
 
 use crate::{
     config::Config,
     sonobe_backend::circuits::{
-        arkworks::{
-            compression::Pixel,
-            utils::{cap, decompress_row},
-        },
         SonobeCircuit,
+        arkworks::{compression::Pixel, utils::decompress_row},
     },
     transformation::Transformation,
 };
@@ -96,56 +92,23 @@ impl<const WIDTH: usize> FCircuit<Fr> for BrightnessArkworksCircuit<Fr, WIDTH> {
         let source_pixels = decompress_row(cs.clone(), &source_row)?;
         let target_pixels = decompress_row(cs.clone(), &target_row)?;
 
-        let max = FpVar::new_constant(cs.clone(), Fr::from(2550))?;
-        let precision = FpVar::new_constant(cs.clone(), Fr::from(10))?;
+        let max = FpVar::Constant(Fr::from(2550));
+        let precision = FpVar::Constant(Fr::from(10));
 
-        let source_scaled = source_pixels
+        let source = source_pixels
             .iter()
             .flat_map(Pixel::flatten)
-            .map(|p| p.mul(&factor));
+            .map(|p| p.mul(&factor))
+            .map(|scaled| min::<_, 13>(cs.clone(), &scaled, &max));
 
-        let target_with_precision = target_pixels
+        let target = target_pixels
             .iter()
             .flat_map(Pixel::flatten)
             .map(|p| p.mul(&precision));
 
-        for (source, target) in source_scaled.zip(target_with_precision) {
-            let source = cap(cs.clone(), &source, &max)?;
-
-            let u = FpVar::new_witness(cs.clone(), || {
-                let sv = source.value()?;
-                let tv = target.value()?;
-                if sv < tv {
-                    Ok(tv - sv)
-                } else {
-                    Ok(Fr::zero())
-                }
-            })?;
-
-            let v = FpVar::new_witness(cs.clone(), || {
-                let sv = source.value()?;
-                let tv = target.value()?;
-                if sv > tv {
-                    Ok(sv - tv)
-                } else {
-                    Ok(Fr::zero())
-                }
-            })?;
-
-            u.clone().mul(&v).is_zero()?.enforce_equal(&Boolean::TRUE)?;
-            (source.clone() + u.clone() - v.clone() - target.clone())
-                .is_zero()?
-                .enforce_equal(&Boolean::TRUE)?;
-
-            let mut u_range = FpVar::Constant(Fr::one());
-            let mut v_range = FpVar::Constant(Fr::one());
-
-            for i in 0..=10 {
-                u_range *= u.clone() - Fr::from(i as u64);
-                v_range *= v.clone() - Fr::from(i as u64);
-            }
-            u_range.is_zero()?.enforce_equal(&Boolean::TRUE)?;
-            v_range.is_zero()?.enforce_equal(&Boolean::TRUE)?;
+        for (source, target) in source.zip(target) {
+            let diff = abs_diff::<_, 13>(cs.clone(), &source?, &target)?;
+            enforce_in_bound(&diff, 10)?;
         }
 
         Ok(vec![new_source_hash, new_target_hash, factor])

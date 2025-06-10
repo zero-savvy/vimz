@@ -5,15 +5,15 @@ use tracing::{
     level_filters::LevelFilter,
 };
 use tracing_subscriber::{
+    EnvFilter,
     field::RecordFields,
     fmt,
     fmt::{
-        format::{DefaultFields, FmtSpan, Format, Writer},
         FormatFields,
+        format::{DefaultFields, FmtSpan, Format, Writer},
     },
     layer::SubscriberExt,
     util::SubscriberInitExt,
-    EnvFilter,
 };
 
 /// Set up and initialize logging for the application.

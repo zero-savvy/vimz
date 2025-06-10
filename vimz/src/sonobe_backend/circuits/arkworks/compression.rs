@@ -1,9 +1,9 @@
 use ark_ff::{BigInteger, PrimeField};
 use ark_r1cs_std::{
+    R1CSVar,
     alloc::AllocVar,
     eq::EqGadget,
-    fields::{fp::FpVar, FieldVar},
-    R1CSVar,
+    fields::{FieldVar, fp::FpVar},
 };
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
 

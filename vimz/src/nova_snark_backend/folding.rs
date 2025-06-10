@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 
 use nova_scotia::{
+    C1, C2, F, FileLocation,
     circom::{circuit::R1CS, reader::load_r1cs},
-    create_public_params, create_recursive_circuit, FileLocation, C1, C2, F,
+    create_public_params, create_recursive_circuit,
 };
 use nova_snark::{PublicParams, RecursiveSNARK};
 use serde_json::Value;

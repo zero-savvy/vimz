@@ -2,9 +2,9 @@ use ark_bn254::{Bn254, G1Projective as G1};
 use ark_groth16::Groth16;
 use ark_grumpkin::Projective as G2;
 use sonobe::{
+    Decider as DeciderTrait,
     commitment::{kzg::KZG, pedersen::Pedersen},
     folding::{nova::decider_eth::Decider as DeciderEth, traits::CommittedInstanceOps},
-    Decider as DeciderTrait,
 };
 
 use crate::sonobe_backend::{circuits::SonobeCircuit, folding::Folding};
@@ -31,14 +31,16 @@ pub fn verify_final_proof<Circuit: SonobeCircuit>(
     folding: &Folding<Circuit>,
     decider_vp: DeciderVerifierParam<Circuit>,
 ) {
-    assert!(Decider::<Circuit>::verify(
-        decider_vp,
-        folding.i,
-        folding.z_0.clone(),
-        folding.z_i.clone(),
-        &folding.U_i.get_commitments(),
-        &folding.u_i.get_commitments(),
-        proof,
+    assert!(
+        Decider::<Circuit>::verify(
+            decider_vp,
+            folding.i,
+            folding.z_0.clone(),
+            folding.z_i.clone(),
+            &folding.U_i.get_commitments(),
+            &folding.u_i.get_commitments(),
+            proof,
+        )
+        .expect("Failed to verify proof")
     )
-    .expect("Failed to verify proof"))
 }

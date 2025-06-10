@@ -1,11 +1,11 @@
-use ark_bn254::Fr;
 use Transformation::*;
+use ark_bn254::Fr;
 
 use crate::{
+    DEMO_STEPS,
     config::Config,
     input::VIMzInput,
     transformation::{Resolution, Transformation},
-    DEMO_STEPS,
 };
 
 /// Read the input data specified in the configuration and prepare it for the folding scheme.

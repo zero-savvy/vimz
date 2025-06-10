@@ -2,7 +2,7 @@ use ark_bn254::Fr;
 use ark_r1cs_std::fields::fp::FpVar;
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
 use paste::paste;
-use sonobe::{frontend::FCircuit, Error};
+use sonobe::{Error, frontend::FCircuit};
 use sonobe_frontends::circom::CircomFCircuit;
 
 use super::SonobeCircuit;

@@ -1,7 +1,7 @@
 use ark_bn254::Fr;
 use sonobe::frontend::FCircuit;
 use sonobe_solidity::calldata::{
-    prepare_calldata_for_nova_cyclefold_verifier, NovaVerificationMode,
+    NovaVerificationMode, prepare_calldata_for_nova_cyclefold_verifier,
 };
 
 use crate::sonobe_backend::{decider::DeciderProof, folding::Folding};

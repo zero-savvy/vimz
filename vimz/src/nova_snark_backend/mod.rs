@@ -9,7 +9,7 @@ use crate::{
     config::Config,
     nova_snark_backend::{
         folding::{fold_input, prepare_folding, verify_folded_proof},
-        input::{prepare_input, PreparedInputs},
+        input::{PreparedInputs, prepare_input},
     },
 };
 

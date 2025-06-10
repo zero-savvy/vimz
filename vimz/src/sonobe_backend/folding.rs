@@ -2,11 +2,11 @@ use ark_bn254::{Bn254, Fr, G1Projective as G1};
 use ark_grumpkin::Projective as G2;
 use rand::{CryptoRng, RngCore};
 use sonobe::{
+    FoldingScheme,
     commitment::{kzg::KZG, pedersen::Pedersen},
     folding::nova::{Nova, PreprocessorParam},
     frontend::FCircuit,
     transcript::poseidon::poseidon_canonical_config,
-    FoldingScheme,
 };
 use tracing::info_span;
 

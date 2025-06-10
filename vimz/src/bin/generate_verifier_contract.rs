@@ -1,14 +1,14 @@
 use std::fs;
 
 use clap::Parser;
-use rand::{prelude::StdRng, SeedableRng};
+use rand::{SeedableRng, prelude::StdRng};
 use sonobe::Decider as _;
-use sonobe_solidity::{get_decider_template_for_cyclefold_decider, NovaCycleFoldVerifierKey};
+use sonobe_solidity::{NovaCycleFoldVerifierKey, get_decider_template_for_cyclefold_decider};
 use vimz::{
     config::{Backend, Config},
     logging::init_logging,
     sonobe_backend::{
-        circuits::{circom::*, SonobeCircuit},
+        circuits::{SonobeCircuit, circom::*},
         decider::{Decider, DeciderVerifierParam},
         folding::prepare_folding,
         input::prepare_input,

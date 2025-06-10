@@ -3,15 +3,15 @@ use std::marker::PhantomData;
 use ark_bn254::Fr;
 use ark_crypto_primitives::{
     crh::{
-        poseidon::constraints::{CRHGadget, CRHParametersVar},
         CRHSchemeGadget,
+        poseidon::constraints::{CRHGadget, CRHParametersVar},
     },
-    sponge::{poseidon::PoseidonConfig, Absorb},
+    sponge::{Absorb, poseidon::PoseidonConfig},
 };
 use ark_ff::PrimeField;
 use ark_r1cs_std::{alloc::AllocVar, fields::fp::FpVar};
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
-use sonobe::{frontend::FCircuit, transcript::poseidon::poseidon_canonical_config, Error};
+use sonobe::{Error, frontend::FCircuit, transcript::poseidon::poseidon_canonical_config};
 use sonobe_frontends::utils::{VecF, VecFpVar};
 
 use crate::{

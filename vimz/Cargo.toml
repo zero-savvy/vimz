@@ -2,7 +2,7 @@
 name = "vimz"
 version = "2.0.0"
 authors = ["Zero Savvy"]
-edition = "2021"
+edition = "2024"
 license = "MIT"
 repository = "https://github.com/zero-savvy/vimz"
 
@@ -22,6 +22,7 @@ ark-grumpkin = { version = "^0.5.0", features = ["r1cs"] }
 ark-groth16 = { version = "^0.5.0", features = ["parallel"] }
 ark-r1cs-std = { version = "^0.5.0", features = ["parallel"] }
 ark-relations = { version = "^0.5.0" }
+arkworks-small-values-ops = { version = "0.0.1" }
 clap = { version = "4.5.16", features = ["derive"] }
 num-bigint = { version = "0.4.3" }
 num-traits = { version = "0.2.15" }

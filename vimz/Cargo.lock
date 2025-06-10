@@ -766,6 +766,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "arkworks-small-values-ops"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9498250b4ac87e1525b7cfcca5d544f5e20791a81fce781b018986a3966421ab"
+dependencies = [
+ "ark-bn254 0.5.0",
+ "ark-ff 0.5.0",
+ "ark-r1cs-std",
+ "ark-relations 0.5.1",
+]
+
+[[package]]
 name = "arrayref"
 version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5385,6 +5397,7 @@ dependencies = [
  "ark-grumpkin",
  "ark-r1cs-std",
  "ark-relations 0.5.1",
+ "arkworks-small-values-ops",
  "clap 4.5.23",
  "experimental-frontends",
  "folding-schemes",

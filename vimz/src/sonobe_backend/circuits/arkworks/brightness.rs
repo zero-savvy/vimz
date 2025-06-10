@@ -139,7 +139,7 @@ impl<const WIDTH: usize> FCircuit<Fr> for BrightnessArkworksCircuit<Fr, WIDTH> {
 
             let mut u_range = FpVar::Constant(Fr::one());
             let mut v_range = FpVar::Constant(Fr::one());
-            
+
             for i in 0..=10 {
                 u_range *= u.clone() - Fr::from(i as u64);
                 v_range *= v.clone() - Fr::from(i as u64);

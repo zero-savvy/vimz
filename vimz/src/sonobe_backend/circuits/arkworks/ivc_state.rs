@@ -21,8 +21,8 @@ pub trait IVCStateT<F: PrimeField + Absorb> {
 
 #[derive(Clone, Debug)]
 pub struct IVCState<F: PrimeField> {
-    source_hash: FpVar<F>,
-    target_hash: FpVar<F>,
+    pub source_hash: FpVar<F>,
+    pub target_hash: FpVar<F>,
 }
 
 impl<F: PrimeField + Absorb> IVCStateT<F> for IVCState<F> {

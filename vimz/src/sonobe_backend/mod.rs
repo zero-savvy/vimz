@@ -41,6 +41,7 @@ pub fn run(config: &Config) {
             Transformation::Brightness => _run::<BrightnessArkworksCircuit<Fr>>(config),
             Transformation::Contrast => _run::<ContrastArkworksCircuit<Fr>>(config),
             Transformation::Grayscale => _run::<GrayscaleArkworksCircuit<Fr>>(config),
+            Transformation::Redact => _run::<RedactArkworksCircuit<Fr>>(config),
             _ => unimplemented!("Not supported for Arkworks frontend yet"),
         },
     }

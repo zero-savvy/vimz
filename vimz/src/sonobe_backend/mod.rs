@@ -46,9 +46,7 @@ pub fn run(config: &Config) {
             Transformation::Contrast => _run::<
                 ContrastArkworksCircuit<Fr, { Transformation::Contrast.step_input_width() }>,
             >(config),
-            Transformation::Grayscale => _run::<
-                GrayscaleArkworksCircuit<Fr, { Transformation::Grayscale.step_input_width() }>,
-            >(config),
+            Transformation::Grayscale => _run::<GrayscaleArkworksCircuit<Fr>>(config),
             _ => unimplemented!("Not supported for Arkworks frontend yet"),
         },
     }

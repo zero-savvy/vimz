@@ -4,6 +4,7 @@ mod contrast;
 mod grayscale;
 mod hash;
 mod ivc_state;
+mod macros;
 
 pub use brightness::BrightnessArkworksCircuit;
 pub use contrast::ContrastArkworksCircuit;

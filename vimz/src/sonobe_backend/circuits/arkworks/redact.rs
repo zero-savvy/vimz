@@ -38,6 +38,7 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
     let source_hash =
         CRHGadget::<F>::evaluate(&crh_params, &[state.source_hash, block_hash.clone()])?;
 
+    // TODO: add constant for hash of the empty block (to be consistent with off-circuit image hash)
     let redacted_hash = CRHGadget::<F>::evaluate(&crh_params, &[state.target_hash.clone()])?;
     let nonredacted_hash = CRHGadget::<F>::evaluate(&crh_params, &[state.target_hash, block_hash])?;
     let target_hash = redaction_indicator.select(&redacted_hash, &nonredacted_hash)?;

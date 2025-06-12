@@ -44,7 +44,7 @@ macro_rules! circuit_from_step_function {
                     Transformation::$transformation.step_input_width(),
                     external_inputs.0.len()
                 );
-                
+
                 use ark_r1cs_std::alloc::AllocVar;
                 let crh_params =
                     CRHParametersVar::<F>::new_constant(cs.clone(), self.poseidon_config.clone())?;

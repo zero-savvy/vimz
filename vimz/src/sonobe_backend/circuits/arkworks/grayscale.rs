@@ -1,9 +1,9 @@
+use Transformation::Grayscale;
 use ark_crypto_primitives::{crh::poseidon::constraints::CRHParametersVar, sponge::Absorb};
 use ark_ff::PrimeField;
 use ark_r1cs_std::{eq::EqGadget, fields::fp::FpVar};
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
 use arkworks_small_values_ops::{abs_diff, min};
-use Transformation::Grayscale;
 
 use crate::{
     circuit_from_step_function,
@@ -24,8 +24,8 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
 ) -> Result<Vec<FpVar<F>>, SynthesisError> {
     let state = IVCState::new(z_i);
 
-    let source_row = external_inputs[0..ROW_WIDTH / 2].to_vec();
-    let target_row = external_inputs[ROW_WIDTH / 2..ROW_WIDTH].to_vec();
+    let source_row = external_inputs[..ROW_WIDTH / 2].to_vec();
+    let target_row = external_inputs[ROW_WIDTH / 2..].to_vec();
 
     let source_pixels = decompress_row(cs.clone(), &source_row)?;
     let target_pixels = decompress_gray_row(cs.clone(), &target_row)?;

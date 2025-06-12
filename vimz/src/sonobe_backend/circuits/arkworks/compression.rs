@@ -1,9 +1,9 @@
 use ark_ff::{BigInteger, PrimeField};
 use ark_r1cs_std::{
-    R1CSVar,
     alloc::AllocVar,
     eq::EqGadget,
-    fields::{FieldVar, fp::FpVar},
+    fields::{fp::FpVar, FieldVar},
+    R1CSVar,
 };
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
 
@@ -24,6 +24,31 @@ impl<F: PrimeField> Pixel<F> {
 
 pub type CompressedPixels<F> = FpVar<F>;
 pub type DecomposedPixels<F> = [Pixel<F>; PACKING_FACTOR];
+
+pub fn decompress_row<F: PrimeField>(
+    cs: ConstraintSystemRef<F>,
+    row: &[FpVar<F>],
+) -> Result<Vec<Pixel<F>>, SynthesisError> {
+    Ok(map_row(cs, row, decompress_pixels)?.concat())
+}
+
+pub fn decompress_gray_row<F: PrimeField>(
+    cs: ConstraintSystemRef<F>,
+    row: &[FpVar<F>],
+) -> Result<Vec<FpVar<F>>, SynthesisError> {
+    Ok(map_row(cs, row, decompress_grayscale)?.concat())
+}
+
+fn map_row<F: PrimeField, T>(
+    cs: ConstraintSystemRef<F>,
+    row: &[FpVar<F>],
+    action: impl Fn(ConstraintSystemRef<F>, &FpVar<F>) -> Result<T, SynthesisError>,
+) -> Result<Vec<T>, SynthesisError> {
+    Ok(row
+        .iter()
+        .map(|f| action(cs.clone(), f))
+        .collect::<Result<Vec<_>, _>>()?)
+}
 
 pub fn decompress_pixels<F: PrimeField>(
     cs: ConstraintSystemRef<F>,
@@ -59,6 +84,38 @@ fn compress_pixels<F: PrimeField>(pixels: &[Pixel<F>]) -> CompressedPixels<F> {
         compressed += &pixel.r * FpVar::constant(F::from(2).pow([8 * offset as u64]));
         compressed += &pixel.g * FpVar::constant(F::from(2).pow([8 * (offset + 1) as u64]));
         compressed += &pixel.b * FpVar::constant(F::from(2).pow([8 * (offset + 2) as u64]));
+    }
+
+    compressed
+}
+
+pub fn decompress_grayscale<F: PrimeField>(
+    cs: ConstraintSystemRef<F>,
+    compressed: &CompressedPixels<F>,
+) -> Result<Vec<FpVar<F>>, SynthesisError> {
+    let mut pixels = vec![];
+
+    let bytes = compressed
+        .value()
+        .map(|raw_value| raw_value.into_bigint().to_bytes_le());
+
+    for i in 0..PACKING_FACTOR {
+        pixels.push(FpVar::new_witness(cs.clone(), || {
+            Ok(F::from(bytes.clone()?[3 * i]))
+        })?);
+    }
+
+    let actual_compression = compress_grayscale_pixels(&pixels);
+    actual_compression.enforce_equal(compressed)?;
+
+    Ok(pixels.try_into().unwrap())
+}
+
+fn compress_grayscale_pixels<F: PrimeField>(pixels: &[FpVar<F>]) -> CompressedPixels<F> {
+    let mut compressed = FpVar::zero();
+
+    for (i, pixel) in pixels.iter().enumerate() {
+        compressed += pixel * FpVar::constant(F::from(2).pow([3 * 8 * i as u64]));
     }
 
     compressed

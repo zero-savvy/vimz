@@ -21,11 +21,11 @@ use crate::{
         arkworks::{
             compression::Pixel,
             ivc_state::{IVCStateT, IVCStateWithInfo},
-            utils::decompress_row,
         },
     },
     transformation::Transformation,
 };
+use crate::sonobe_backend::circuits::arkworks::compression::decompress_row;
 
 #[derive(Clone, Debug)]
 pub struct ContrastArkworksCircuit<F: PrimeField, const WIDTH: usize> {

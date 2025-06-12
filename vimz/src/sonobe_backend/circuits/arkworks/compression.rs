@@ -1,9 +1,9 @@
 use ark_ff::{BigInteger, PrimeField};
 use ark_r1cs_std::{
-    R1CSVar,
     alloc::AllocVar,
     eq::EqGadget,
-    fields::{FieldVar, fp::FpVar},
+    fields::{fp::FpVar, FieldVar},
+    R1CSVar,
 };
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
 
@@ -44,10 +44,9 @@ fn map_row<F: PrimeField, T>(
     row: &[FpVar<F>],
     action: impl Fn(ConstraintSystemRef<F>, &FpVar<F>) -> Result<T, SynthesisError>,
 ) -> Result<Vec<T>, SynthesisError> {
-    Ok(row
-        .iter()
+    row.iter()
         .map(|f| action(cs.clone(), f))
-        .collect::<Result<Vec<_>, _>>()?)
+        .collect::<Result<Vec<_>, _>>()
 }
 
 pub fn decompress_pixels<F: PrimeField>(
@@ -108,7 +107,7 @@ pub fn decompress_grayscale<F: PrimeField>(
     let actual_compression = compress_grayscale_pixels(&pixels);
     actual_compression.enforce_equal(compressed)?;
 
-    Ok(pixels.try_into().unwrap())
+    Ok(pixels)
 }
 
 fn compress_grayscale_pixels<F: PrimeField>(pixels: &[FpVar<F>]) -> CompressedPixels<F> {

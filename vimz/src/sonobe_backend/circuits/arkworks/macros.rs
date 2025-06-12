@@ -53,8 +53,8 @@ macro_rules! circuit_from_step_function {
             }
         }
 
-        impl crate::sonobe_backend::SonobeCircuit for [<$transformation Arkworks Circuit>] <ark_bn254::Fr> {
-            fn from_config(_config: &crate::config::Config) -> Self {
+        impl $crate::sonobe_backend::SonobeCircuit for [<$transformation Arkworks Circuit>] <ark_bn254::Fr> {
+            fn from_config(_config: &$crate::config::Config) -> Self {
                 <Self as sonobe::frontend::FCircuit<ark_bn254::Fr>>::new(
                     sonobe::transcript::poseidon::poseidon_canonical_config::<ark_bn254::Fr>()
                 ).expect("Failed to construct HashStep from config")

@@ -45,10 +45,14 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
             }
 
             let adjusted = convolution + FpVar::Constant(F::from(4 * 255));
-            let clamped = min::<_, 12>(cs.clone(), &adjusted, &FpVar::Constant(F::from(5 * 255)))?;
-            let clamped = max::<_, 12>(cs.clone(), &clamped, &FpVar::Constant(F::from(4 * 255)))?;
+            // BIT BOUND: Max value of `adjusted` is 255 · 9 < 2^(8 + 4) => 12 bits
+            // BIT BOUND: 5 · 255 < 2^11 => 11 bits
+            let trimmed = min::<_, 12>(cs.clone(), &adjusted, &FpVar::Constant(F::from(5 * 255)))?;
+            // BIT BOUND: Max value of `trimmed` is 255 · 5 < 2^(8 + 3) => 11 bits
+            // BIT BOUND: 4 · 255 < 2^10 => 10 bits
+            let trimmed = max::<_, 11>(cs.clone(), &trimmed, &FpVar::Constant(F::from(4 * 255)))?;
 
-            clamped.enforce_equal(&(&target_pixel[color] + FpVar::Constant(F::from(4 * 255))))?
+            trimmed.enforce_equal(&(&target_pixel[color] + FpVar::Constant(F::from(4 * 255))))?
         }
     }
 

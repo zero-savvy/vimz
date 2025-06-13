@@ -41,6 +41,8 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
             }
 
             let scaled_target = (&target_pixel[color]).mul(&kernel_weight);
+            // BIT BOUND: Max value of `convolution` is 255 * 9 < 2^(8 + 4) => 12 bits
+            // BIT BOUND: Max value of `scaled_target` is 255 * 9 < 2^(8 + 4) => 12 bits
             let diff = abs_diff::<_, 12>(cs.clone(), &convolution, &scaled_target)?;
             enforce_in_bound(&diff, KERNEL_WEIGHT as u8)?;
         }

@@ -767,9 +767,9 @@ dependencies = [
 
 [[package]]
 name = "arkworks-small-values-ops"
-version = "0.0.1"
+version = "0.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9498250b4ac87e1525b7cfcca5d544f5e20791a81fce781b018986a3966421ab"
+checksum = "de964bc1927a7341c4f5b70447ba4692bc47c7a35f8a170389def4b89057fd79"
 dependencies = [
  "ark-bn254 0.5.0",
  "ark-ff 0.5.0",

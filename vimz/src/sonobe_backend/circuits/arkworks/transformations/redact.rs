@@ -1,16 +1,14 @@
 use ark_crypto_primitives::{
     crh::{
-        CRHSchemeGadget,
         poseidon::constraints::{CRHGadget, CRHParametersVar},
+        CRHSchemeGadget,
     },
     sponge::Absorb,
 };
 use ark_ff::PrimeField;
-use ark_r1cs_std::{
-    R1CSVar, alloc::AllocVar, boolean::Boolean, convert::ToConstraintFieldGadget, eq::EqGadget,
-    fields::fp::FpVar,
-};
+use ark_r1cs_std::{alloc::AllocVar, fields::fp::FpVar};
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
+use arkworks_small_values_ops::cast_to_boolean;
 
 use crate::{
     circuit_from_step_function,
@@ -26,12 +24,7 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
 ) -> Result<Vec<FpVar<F>>, SynthesisError> {
     let state = IVCState::new(z_i);
 
-    // hack to safely cast FpVar<F> to Boolean<F>
-    let redaction_indicator_fp = external_inputs.pop().unwrap();
-    let redaction_indicator = Boolean::new_witness(cs.clone(), || {
-        Ok(redaction_indicator_fp.value()? == F::one())
-    })?;
-    redaction_indicator_fp.enforce_equal(&redaction_indicator.to_constraint_field()?[0])?;
+    let redaction_indicator = cast_to_boolean(cs.clone(), &external_inputs.pop().unwrap())?;
 
     let block_hash = CRHGadget::<F>::evaluate(&crh_params, &external_inputs)?;
 

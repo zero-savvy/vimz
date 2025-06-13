@@ -1,14 +1,14 @@
 use ark_crypto_primitives::{
     crh::{
-        poseidon::constraints::{CRHGadget, CRHParametersVar},
         CRHSchemeGadget,
+        poseidon::constraints::{CRHGadget, CRHParametersVar},
     },
     sponge::Absorb,
 };
 use ark_ff::PrimeField;
 use ark_r1cs_std::{
-    alloc::AllocVar, boolean::Boolean, convert::ToConstraintFieldGadget, eq::EqGadget, fields::fp::FpVar,
-    R1CSVar,
+    R1CSVar, alloc::AllocVar, boolean::Boolean, convert::ToConstraintFieldGadget, eq::EqGadget,
+    fields::fp::FpVar,
 };
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
 

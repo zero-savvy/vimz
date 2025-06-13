@@ -1,12 +1,12 @@
 use ark_crypto_primitives::{
     crh::{
-        poseidon::constraints::{CRHGadget, CRHParametersVar},
         CRHSchemeGadget,
+        poseidon::constraints::{CRHGadget, CRHParametersVar},
     },
     sponge::Absorb,
 };
 use ark_ff::PrimeField;
-use ark_r1cs_std::{alloc::AllocVar, fields::fp::FpVar};
+use ark_r1cs_std::fields::fp::FpVar;
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
 use arkworks_small_values_ops::cast_to_boolean;
 

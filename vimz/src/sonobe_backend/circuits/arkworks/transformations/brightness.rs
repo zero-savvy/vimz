@@ -24,6 +24,7 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
 ) -> Result<Vec<FpVar<F>>, SynthesisError> {
     let state = IVCStateWithInfo::new(z_i);
 
+    // 1) Ensure the factor is in the range [0, 31]
     let factor = state.info();
     enforce_in_binary_bound::<_, 5>(factor)?;
 
@@ -32,19 +33,26 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
     let max = FpVar::Constant(F::from(2550));
     let precision = FpVar::Constant(F::from(10));
 
-    let source = source_pixels
+    // 2) Scale the source pixels by the factor and trim them to 2550
+    let actual = source_pixels
         .iter()
         .flat_map(Pixel::flatten)
         .map(|p| p.mul(factor))
+        // BIT BOUND: Max value of `scaled` is 31 · 255 < 2^(5+8) => 13 bits
+        // BIT BOUND: Max value of `max` is 2550 < 2^12 => 12 bits
         .map(|scaled| min::<_, 13>(cs.clone(), &scaled, &max));
 
-    let target = target_pixels
+    // 3) Scale the target pixels by the precision
+    let target_scaled = target_pixels
         .iter()
         .flat_map(Pixel::flatten)
         .map(|p| p.mul(&precision));
 
-    for (source, target) in source.zip(target) {
-        let diff = abs_diff::<_, 13>(cs.clone(), &source?, &target)?;
+    // 4) Ensure the absolute difference between the scaled source and target pixels is within the precision
+    for (actual, claimed) in actual.zip(target_scaled) {
+        // BIT BOUND: Max value of `actual` is 2550 < 2^12 => 12 bits
+        // BIT BOUND: Max value of `claimed` is 2550 < 2^12 => 12 bits
+        let diff = abs_diff::<_, 12>(cs.clone(), &actual?, &claimed)?;
         enforce_in_bound(&diff, 10)?;
     }
 

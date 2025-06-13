@@ -37,10 +37,11 @@ pub fn run(config: &Config) {
             Transformation::Sharpness => _run::<SharpnessCircomCircuit>(config),
         },
         Frontend::Arkworks => match config.function {
-            Transformation::Hash => _run::<HashArkworksCircuit<Fr>>(config),
+            Transformation::Blur => _run::<BlurArkworksCircuit<Fr>>(config),
             Transformation::Brightness => _run::<BrightnessArkworksCircuit<Fr>>(config),
             Transformation::Contrast => _run::<ContrastArkworksCircuit<Fr>>(config),
             Transformation::Grayscale => _run::<GrayscaleArkworksCircuit<Fr>>(config),
+            Transformation::Hash => _run::<HashArkworksCircuit<Fr>>(config),
             Transformation::Redact => _run::<RedactArkworksCircuit<Fr>>(config),
             _ => unimplemented!("Not supported for Arkworks frontend yet"),
         },

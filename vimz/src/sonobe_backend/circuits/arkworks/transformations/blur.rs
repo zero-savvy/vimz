@@ -9,14 +9,13 @@ use arkworks_small_values_ops::{abs_diff, enforce_in_bound};
 use crate::{
     circuit_from_step_function,
     sonobe_backend::circuits::arkworks::{
-        compression::{decompress_convolution_rows, decompress_row},
+        input::StepInput,
         ivc_state::{IVCStateConvolution, IVCStateT},
     },
-    transformation::{Transformation, Transformation::Blur},
+    transformation::Transformation,
 };
 
 const KERNEL_SIZE: usize = 3; // Assuming a 3x3 kernel for the blur operation
-const ROW_WIDTH: usize = Blur.step_input_width() / (KERNEL_SIZE + 1);
 const KERNEL_WEIGHT: usize = KERNEL_SIZE * KERNEL_SIZE;
 
 fn generate_step_constraints<F: PrimeField + Absorb>(
@@ -27,14 +26,8 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
 ) -> Result<Vec<FpVar<F>>, SynthesisError> {
     let state = IVCStateConvolution::<_, KERNEL_SIZE>::new(z_i);
 
-    let mut source_rows = vec![];
-    for i in 0..KERNEL_SIZE {
-        source_rows.push(external_inputs[i * ROW_WIDTH..(i + 1) * ROW_WIDTH].to_vec());
-    }
-    let target_row = external_inputs[KERNEL_SIZE * ROW_WIDTH..].to_vec();
-
-    let source_pixels = decompress_convolution_rows::<_, KERNEL_SIZE>(cs.clone(), &source_rows)?;
-    let target_pixels = decompress_row(cs.clone(), &target_row)?;
+    let (source_pixels, target_pixels) =
+        external_inputs.convolution_pixels::<KERNEL_SIZE>(cs.clone())?;
 
     let kernel_weight = FpVar::Constant(F::from((KERNEL_SIZE * KERNEL_SIZE) as u64));
     for (i, target_pixel) in target_pixels.iter().enumerate() {
@@ -53,7 +46,7 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
         }
     }
 
-    state.update(&crh_params, &source_rows.try_into().unwrap(), &target_row)
+    state.update(&crh_params, &external_inputs)
 }
 
 circuit_from_step_function!(Blur, generate_step_constraints);

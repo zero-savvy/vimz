@@ -14,16 +14,14 @@ use ark_r1cs_std::{
 };
 use ark_relations::r1cs::SynthesisError;
 
-pub trait IVCStateT<F: PrimeField + Absorb> {
-    type SourceData<'a>;
-    type TargetData<'a>;
+use crate::sonobe_backend::circuits::arkworks::input::StepInput;
 
+pub trait IVCStateT<F: PrimeField + Absorb> {
     fn new(values: Vec<FpVar<F>>) -> Self;
-    fn update<'data>(
+    fn update(
         self,
         crh_params: &CRHParametersVar<F>,
-        source_data: Self::SourceData<'data>,
-        target_data: Self::TargetData<'data>,
+        step_input: &impl StepInput<F>,
     ) -> Result<Vec<FpVar<F>>, SynthesisError>;
 }
 
@@ -34,9 +32,6 @@ pub struct IVCState<F: PrimeField> {
 }
 
 impl<F: PrimeField + Absorb> IVCStateT<F> for IVCState<F> {
-    type SourceData<'data> = &'data [FpVar<F>];
-    type TargetData<'data> = &'data [FpVar<F>];
-
     fn new(values: Vec<FpVar<F>>) -> Self {
         assert_eq!(values.len(), 2, "IVCState requires exactly 2 values");
         Self {
@@ -48,12 +43,13 @@ impl<F: PrimeField + Absorb> IVCStateT<F> for IVCState<F> {
     fn update(
         self,
         crh_params: &CRHParametersVar<F>,
-        source_data: &[FpVar<F>],
-        target_data: &[FpVar<F>],
+        step_input: &impl StepInput<F>,
     ) -> Result<Vec<FpVar<F>>, SynthesisError> {
-        let new_source_hash_input = [&[self.source_hash], source_data].concat();
+        let (source_row, target_row) = step_input.two_rows_compressed();
+
+        let new_source_hash_input = [&[self.source_hash], source_row].concat();
         let new_source_hash = CRHGadget::<F>::evaluate(crh_params, &new_source_hash_input)?;
-        let new_target_hash_input = [&[self.target_hash], target_data].concat();
+        let new_target_hash_input = [&[self.target_hash], target_row].concat();
         let new_target_hash = CRHGadget::<F>::evaluate(crh_params, &new_target_hash_input)?;
 
         Ok(vec![new_source_hash, new_target_hash])
@@ -73,9 +69,6 @@ impl<F: PrimeField> IVCStateWithInfo<F> {
 }
 
 impl<F: PrimeField + Absorb> IVCStateT<F> for IVCStateWithInfo<F> {
-    type SourceData<'data> = &'data [FpVar<F>];
-    type TargetData<'data> = &'data [FpVar<F>];
-
     fn new(values: Vec<FpVar<F>>) -> Self {
         assert_eq!(values.len(), 3, "IVCState requires exactly 3 values");
         Self {
@@ -87,10 +80,9 @@ impl<F: PrimeField + Absorb> IVCStateT<F> for IVCStateWithInfo<F> {
     fn update(
         self,
         crh_params: &CRHParametersVar<F>,
-        source_data: &[FpVar<F>],
-        target_data: &[FpVar<F>],
+        step_input: &impl StepInput<F>,
     ) -> Result<Vec<FpVar<F>>, SynthesisError> {
-        let base_updates = self.base.update(crh_params, source_data, target_data)?;
+        let base_updates = self.base.update(crh_params, step_input)?;
         Ok([base_updates, vec![self.info]].concat())
     }
 }
@@ -104,9 +96,6 @@ pub struct IVCStateConvolution<F: PrimeField, const K: usize> {
 }
 
 impl<F: PrimeField + Absorb, const K: usize> IVCStateT<F> for IVCStateConvolution<F, K> {
-    type SourceData<'data> = &'data [Vec<FpVar<F>>; K];
-    type TargetData<'data> = &'data [FpVar<F>];
-
     fn new(values: Vec<FpVar<F>>) -> Self {
         assert_eq!(K % 2, 1, "K must be an odd number");
         assert_eq!(
@@ -125,13 +114,13 @@ impl<F: PrimeField + Absorb, const K: usize> IVCStateT<F> for IVCStateConvolutio
     fn update(
         self,
         crh_params: &CRHParametersVar<F>,
-        new_source_rows: &[Vec<FpVar<F>>; K],
-        target_row: &[FpVar<F>],
+        step_input: &impl StepInput<F>,
     ) -> Result<Vec<FpVar<F>>, SynthesisError> {
+        let (new_source_rows, target_row) = step_input.row_batch_and_row_compressed::<K>();
+
         // Compute source and target image hashes as usual. The actual source row is the middle one.
-        let base_updates = self
-            .base
-            .update(crh_params, &new_source_rows[K / 2], target_row)?;
+        let reduced_step_input = [new_source_rows[K / 2], target_row].concat();
+        let base_updates = self.base.update(crh_params, &reduced_step_input)?;
 
         // Compute hashes of the new source rows.
         let mut new_source_row_hashes = vec![];

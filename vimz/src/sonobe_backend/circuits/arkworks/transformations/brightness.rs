@@ -9,13 +9,12 @@ use arkworks_small_values_ops::{abs_diff, enforce_in_binary_bound, enforce_in_bo
 use crate::{
     circuit_from_step_function,
     sonobe_backend::circuits::arkworks::{
-        compression::{Pixel, decompress_row},
+        compression::Pixel,
+        input::StepInput,
         ivc_state::{IVCStateT, IVCStateWithInfo},
     },
-    transformation::{Transformation, Transformation::Brightness},
+    transformation::Transformation,
 };
-
-const ROW_WIDTH: usize = Brightness.step_input_width();
 
 fn generate_step_constraints<F: PrimeField + Absorb>(
     cs: ConstraintSystemRef<F>,
@@ -28,11 +27,7 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
     let factor = state.info();
     enforce_in_binary_bound::<_, 5>(factor)?;
 
-    let source_row = external_inputs[..ROW_WIDTH / 2].to_vec();
-    let target_row = external_inputs[ROW_WIDTH / 2..].to_vec();
-
-    let source_pixels = decompress_row(cs.clone(), &source_row)?;
-    let target_pixels = decompress_row(cs.clone(), &target_row)?;
+    let (source_pixels, target_pixels) = external_inputs.two_rows_pixels(cs.clone())?;
 
     let max = FpVar::Constant(F::from(2550));
     let precision = FpVar::Constant(F::from(10));
@@ -53,7 +48,7 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
         enforce_in_bound(&diff, 10)?;
     }
 
-    state.update(&crh_params, &source_row, &target_row)
+    state.update(&crh_params, &external_inputs)
 }
 
 circuit_from_step_function!(Brightness, generate_step_constraints);

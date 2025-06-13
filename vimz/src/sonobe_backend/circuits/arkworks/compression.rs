@@ -57,7 +57,7 @@ pub fn decompress_row<F: PrimeField>(
 
 pub fn decompress_convolution_rows<F: PrimeField, const KERNEL_SIZE: usize>(
     cs: ConstraintSystemRef<F>,
-    rows: &Vec<Vec<FpVar<F>>>,
+    rows: &Vec<&[FpVar<F>]>,
 ) -> Result<Vec<Vec<Pixel<F>>>, SynthesisError> {
     assert_eq!(rows.len(), KERNEL_SIZE);
 

@@ -1,4 +1,3 @@
-use Transformation::Grayscale;
 use ark_crypto_primitives::{crh::poseidon::constraints::CRHParametersVar, sponge::Absorb};
 use ark_ff::PrimeField;
 use ark_r1cs_std::{eq::EqGadget, fields::fp::FpVar};
@@ -8,13 +7,11 @@ use arkworks_small_values_ops::{abs_diff, min};
 use crate::{
     circuit_from_step_function,
     sonobe_backend::circuits::arkworks::{
-        compression::{decompress_gray_row, decompress_row},
+        input::StepInput,
         ivc_state::{IVCState, IVCStateT},
     },
     transformation::Transformation,
 };
-
-const ROW_WIDTH: usize = Grayscale.step_input_width();
 
 fn generate_step_constraints<F: PrimeField + Absorb>(
     cs: ConstraintSystemRef<F>,
@@ -24,11 +21,7 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
 ) -> Result<Vec<FpVar<F>>, SynthesisError> {
     let state = IVCState::new(z_i);
 
-    let source_row = external_inputs[..ROW_WIDTH / 2].to_vec();
-    let target_row = external_inputs[ROW_WIDTH / 2..].to_vec();
-
-    let source_pixels = decompress_row(cs.clone(), &source_row)?;
-    let target_pixels = decompress_gray_row(cs.clone(), &target_row)?;
+    let (source_pixels, target_pixels) = external_inputs.pixel_row_grayscale_row(cs.clone())?;
 
     let r_scale = FpVar::Constant(F::from(299));
     let g_scale = FpVar::Constant(F::from(587));
@@ -44,7 +37,7 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
         min_with_scale.enforce_equal(&diff)?
     }
 
-    state.update(&crh_params, &source_row, &target_row)
+    state.update(&crh_params, &external_inputs)
 }
 
 circuit_from_step_function!(Grayscale, generate_step_constraints);

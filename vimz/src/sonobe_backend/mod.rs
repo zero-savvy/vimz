@@ -43,6 +43,7 @@ pub fn run(config: &Config) {
             Transformation::Grayscale => _run::<GrayscaleArkworksCircuit<Fr>>(config),
             Transformation::Hash => _run::<HashArkworksCircuit<Fr>>(config),
             Transformation::Redact => _run::<RedactArkworksCircuit<Fr>>(config),
+            Transformation::Sharpness => _run::<SharpnessArkworksCircuit<Fr>>(config),
             _ => unimplemented!("Not supported for Arkworks frontend yet"),
         },
     }

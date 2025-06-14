@@ -7,8 +7,8 @@ use arkworks_small_values_ops::{abs_diff, enforce_le};
 use crate::{
     circuit_from_step_function,
     sonobe_backend::circuits::arkworks::{
-        input::StepInput,
         ivc_state::{IVCState, IVCStateT},
+        step_input::StepInput,
     },
     transformation::Transformation,
 };
@@ -21,7 +21,7 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
 ) -> Result<Vec<FpVar<F>>, SynthesisError> {
     let state = IVCState::new(z_i);
 
-    let (source_pixels, target_pixels) = external_inputs.pixel_row_grayscale_row(cs.clone())?;
+    let (source_pixels, target_pixels) = external_inputs.as_pixel_row_grayscale_row(cs.clone())?;
 
     let r_scale = FpVar::Constant(F::from(299));
     let g_scale = FpVar::Constant(F::from(587));

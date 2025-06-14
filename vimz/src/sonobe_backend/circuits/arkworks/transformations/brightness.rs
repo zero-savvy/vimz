@@ -10,7 +10,7 @@ use crate::{
     circuit_from_step_function,
     sonobe_backend::circuits::arkworks::{
         compression::Pixel,
-        input::StepInput,
+        step_input::StepInput,
         ivc_state::{IVCStateT, IVCStateWithInfo},
     },
     transformation::Transformation,
@@ -28,7 +28,7 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
     let factor = state.info();
     enforce_in_binary_bound::<_, 5>(factor)?;
 
-    let (source_pixels, target_pixels) = external_inputs.two_rows_pixels(cs.clone())?;
+    let (source_pixels, target_pixels) = external_inputs.as_two_rows_pixels(cs.clone())?;
 
     let max = FpVar::Constant(F::from(2550));
     let precision = FpVar::Constant(F::from(10));

@@ -1,5 +1,5 @@
 mod compression;
-mod input;
+mod step_input;
 mod ivc_state;
 mod kernel;
 mod macros;

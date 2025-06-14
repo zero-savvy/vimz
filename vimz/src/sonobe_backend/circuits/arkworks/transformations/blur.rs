@@ -9,7 +9,7 @@ use arkworks_small_values_ops::{abs_diff, enforce_in_bound};
 use crate::{
     circuit_from_step_function,
     sonobe_backend::circuits::arkworks::{
-        input::StepInput,
+        step_input::StepInput,
         ivc_state::{IVCStateConvolution, IVCStateT},
     },
     transformation::Transformation,
@@ -27,7 +27,7 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
     let state = IVCStateConvolution::<_, KERNEL_SIZE>::new(z_i);
 
     let (source_pixels, target_pixels) =
-        external_inputs.convolution_pixels::<KERNEL_SIZE>(cs.clone())?;
+        external_inputs.as_convolution_pixels::<KERNEL_SIZE>(cs.clone())?;
 
     let kernel_weight = FpVar::Constant(F::from((KERNEL_SIZE * KERNEL_SIZE) as u64));
     for (i, target_pixel) in target_pixels.iter().enumerate() {

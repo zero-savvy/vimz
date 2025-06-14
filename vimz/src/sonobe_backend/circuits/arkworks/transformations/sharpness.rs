@@ -9,7 +9,7 @@ use arkworks_small_values_ops::{max, min};
 use crate::{
     circuit_from_step_function,
     sonobe_backend::circuits::arkworks::{
-        input::StepInput,
+        step_input::StepInput,
         ivc_state::{IVCStateConvolution, IVCStateT},
         kernel::{Kernel, KernelEntry},
     },
@@ -27,7 +27,7 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
     let state = IVCStateConvolution::<_, KERNEL_SIZE>::new(z_i);
 
     let (source_pixels, target_pixels) =
-        external_inputs.convolution_pixels::<KERNEL_SIZE>(cs.clone())?;
+        external_inputs.as_convolution_pixels::<KERNEL_SIZE>(cs.clone())?;
 
     // Instantiate the sharpness kernel.
     let kernel = sharpness_kernel::<F>();

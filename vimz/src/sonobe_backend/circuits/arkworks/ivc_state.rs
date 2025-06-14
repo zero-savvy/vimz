@@ -14,7 +14,7 @@ use ark_r1cs_std::{
 };
 use ark_relations::r1cs::SynthesisError;
 
-use crate::sonobe_backend::circuits::arkworks::input::StepInput;
+use crate::sonobe_backend::circuits::arkworks::step_input::StepInput;
 
 pub trait IVCStateT<F: PrimeField + Absorb> {
     fn new(values: Vec<FpVar<F>>) -> Self;
@@ -45,7 +45,7 @@ impl<F: PrimeField + Absorb> IVCStateT<F> for IVCState<F> {
         crh_params: &CRHParametersVar<F>,
         step_input: &impl StepInput<F>,
     ) -> Result<Vec<FpVar<F>>, SynthesisError> {
-        let (source_row, target_row) = step_input.two_rows_compressed();
+        let (source_row, target_row) = step_input.as_two_rows_compressed();
 
         let new_source_hash_input = [&[self.source_hash], source_row].concat();
         let new_source_hash = CRHGadget::<F>::evaluate(crh_params, &new_source_hash_input)?;
@@ -116,7 +116,7 @@ impl<F: PrimeField + Absorb, const K: usize> IVCStateT<F> for IVCStateConvolutio
         crh_params: &CRHParametersVar<F>,
         step_input: &impl StepInput<F>,
     ) -> Result<Vec<FpVar<F>>, SynthesisError> {
-        let (new_source_rows, target_row) = step_input.row_batch_and_row_compressed::<K>();
+        let (new_source_rows, target_row) = step_input.as_row_batch_and_row_compressed::<K>();
 
         // Compute source and target image hashes as usual. The actual source row is the middle one.
         let reduced_step_input = [new_source_rows[K / 2], target_row].concat();

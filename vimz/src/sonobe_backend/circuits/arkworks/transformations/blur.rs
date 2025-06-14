@@ -1,22 +1,23 @@
-use std::ops::Mul;
+use std::{array, ops::Mul};
 
 use ark_crypto_primitives::{crh::poseidon::constraints::CRHParametersVar, sponge::Absorb};
 use ark_ff::PrimeField;
-use ark_r1cs_std::fields::{FieldVar, fp::FpVar};
+use ark_r1cs_std::fields::fp::FpVar;
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
 use arkworks_small_values_ops::{abs_diff, enforce_in_bound};
+use array::from_fn;
 
 use crate::{
     circuit_from_step_function,
     sonobe_backend::circuits::arkworks::{
         ivc_state::{IVCStateConvolution, IVCStateT},
+        kernel::Kernel,
         step_input::StepInput,
     },
     transformation::Transformation,
 };
 
 const KERNEL_SIZE: usize = 3; // Assuming a 3x3 kernel for the blur operation
-const KERNEL_WEIGHT: usize = KERNEL_SIZE * KERNEL_SIZE;
 
 fn generate_step_constraints<F: PrimeField + Absorb>(
     cs: ConstraintSystemRef<F>,
@@ -29,22 +30,19 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
     let (source_pixels, target_pixels) =
         external_inputs.as_convolution_pixels::<KERNEL_SIZE>(cs.clone())?;
 
-    let kernel_weight = FpVar::Constant(F::from((KERNEL_SIZE * KERNEL_SIZE) as u64));
+    let kernel = blur_kernel();
+    let kernel_scale = kernel.scale().expect("Blur kernel should be non-negative");
+
     for (i, target_pixel) in target_pixels.iter().enumerate() {
         for color in 0..3 {
-            let mut convolution = FpVar::zero();
+            let conv_input = from_fn(|row| from_fn(|col| &source_pixels[row][col + i][color]));
+            let convolution = kernel.convolve(&conv_input);
 
-            for source_row in &source_pixels {
-                for j in 0..KERNEL_SIZE {
-                    convolution += &source_row[i + j][color];
-                }
-            }
-
-            let scaled_target = (&target_pixel[color]).mul(&kernel_weight);
-            // BIT BOUND: Max value of `convolution` is 255 * 9 < 2^(8 + 4) => 12 bits
-            // BIT BOUND: Max value of `scaled_target` is 255 * 9 < 2^(8 + 4) => 12 bits
+            let scaled_target = (&target_pixel[color]).mul(FpVar::Constant(F::from(kernel_scale)));
+            // BIT BOUND: Max value of `convolution` is 255 · 9 < 2^(8 + 4) => 12 bits
+            // BIT BOUND: `scaled_target` has exactly the same bound
             let diff = abs_diff::<_, 12>(cs.clone(), &convolution, &scaled_target)?;
-            enforce_in_bound(&diff, KERNEL_WEIGHT as u8)?;
+            enforce_in_bound(&diff, kernel_scale)?;
         }
     }
 
@@ -52,3 +50,15 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
 }
 
 circuit_from_step_function!(Blur, generate_step_constraints);
+
+/// [ 1, 1, 1 ]
+/// [ 1, 1, 1 ]
+/// [ 1, 1, 1 ]
+fn blur_kernel() -> Kernel<KERNEL_SIZE> {
+    use crate::sonobe_backend::circuits::arkworks::kernel::KernelEntry::Positive;
+    Kernel::new([
+        [Positive(1), Positive(1), Positive(1)],
+        [Positive(1), Positive(1), Positive(1)],
+        [Positive(1), Positive(1), Positive(1)],
+    ])
+}

@@ -30,7 +30,7 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
         external_inputs.as_convolution_pixels::<KERNEL_SIZE>(cs.clone())?;
 
     // Instantiate the sharpness kernel.
-    let kernel = sharpness_kernel::<F>();
+    let kernel = sharpness_kernel();
     // This is the max value of a pixel in the input image.
     let pixel_max_value = FpVar::Constant(F::from(255));
     // This is the offset we need to add to the convolution result to ensure it is non-negative.
@@ -63,22 +63,11 @@ circuit_from_step_function!(Sharpness, generate_step_constraints);
 /// [  0, -1,  0 ]
 /// [ -1,  5, -1 ]
 /// [  0, -1,  0 ]
-fn sharpness_kernel<F: PrimeField>() -> Kernel<F, KERNEL_SIZE> {
+fn sharpness_kernel() -> Kernel<KERNEL_SIZE> {
+    use KernelEntry::*;
     Kernel::new([
-        [
-            KernelEntry::Zero,
-            KernelEntry::negative(F::one()),
-            KernelEntry::Zero,
-        ],
-        [
-            KernelEntry::negative(F::one()),
-            KernelEntry::positive(F::from(5)),
-            KernelEntry::negative(F::one()),
-        ],
-        [
-            KernelEntry::Zero,
-            KernelEntry::negative(F::one()),
-            KernelEntry::Zero,
-        ],
+        [Zero, Negative(1), Zero],
+        [Negative(1), Positive(5), Negative(1)],
+        [Zero, Negative(1), Zero],
     ])
 }

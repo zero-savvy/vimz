@@ -11,8 +11,8 @@ use arkworks_small_values_ops::{
 use crate::{
     circuit_from_step_function,
     sonobe_backend::circuits::arkworks::{
-        compression::Pixel,
         ivc_state::{IVCStateT, IVCStateWithInfo},
+        pixel::Pixel,
         step_input::StepInput,
     },
     transformation::Transformation,

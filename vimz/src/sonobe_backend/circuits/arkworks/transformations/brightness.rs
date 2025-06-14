@@ -9,8 +9,8 @@ use arkworks_small_values_ops::{abs_diff, enforce_in_binary_bound, enforce_in_bo
 use crate::{
     circuit_from_step_function,
     sonobe_backend::circuits::arkworks::{
-        compression::Pixel,
         ivc_state::{IVCStateT, IVCStateWithInfo},
+        pixel::Pixel,
         step_input::StepInput,
     },
     transformation::Transformation,

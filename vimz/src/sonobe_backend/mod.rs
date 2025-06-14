@@ -1,15 +1,15 @@
 use std::fs;
 
 use ark_bn254::Fr;
-use rand::{prelude::StdRng, SeedableRng};
+use rand::{SeedableRng, prelude::StdRng};
 use sonobe::Decider as _;
 use tracing::info_span;
 
 use crate::{
     config::{Config, Frontend},
     sonobe_backend::{
-        circuits::{arkworks::*, circom::*, SonobeCircuit},
-        decider::{verify_final_proof, Decider},
+        circuits::{SonobeCircuit, arkworks::*, circom::*},
+        decider::{Decider, verify_final_proof},
         folding::{fold_input, prepare_folding, verify_folding},
         input::prepare_input,
         solidity::prepare_contract_calldata,

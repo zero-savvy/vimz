@@ -9,9 +9,9 @@ use arkworks_small_values_ops::{max, min};
 use crate::{
     circuit_from_step_function,
     sonobe_backend::circuits::arkworks::{
-        step_input::StepInput,
         ivc_state::{IVCStateConvolution, IVCStateT},
         kernel::{Kernel, KernelEntry},
+        step_input::StepInput,
     },
     transformation::Transformation,
 };
@@ -38,9 +38,8 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
 
     for (i, target_pixel) in target_pixels.iter().enumerate() {
         for color in 0..3 {
-            let input = array::from_fn(|row| {
-                array::from_fn(|col| source_pixels[row][col + i][color].clone())
-            });
+            let input =
+                array::from_fn(|row| array::from_fn(|col| &source_pixels[row][col + i][color]));
             let convolution = kernel.convolve(&input);
             let adjusted = convolution + shift.clone();
 

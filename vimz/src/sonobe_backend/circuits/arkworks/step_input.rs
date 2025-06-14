@@ -5,7 +5,7 @@ use ark_r1cs_std::fields::fp::FpVar;
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
 
 use crate::sonobe_backend::circuits::arkworks::compression::{
-    decompress_convolution_rows, decompress_gray_row, decompress_row, Pixel,
+    Pixel, decompress_convolution_rows, decompress_gray_row, decompress_row,
 };
 
 pub trait StepInput<F: PrimeField> {

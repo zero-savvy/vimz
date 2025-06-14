@@ -10,8 +10,8 @@ use crate::{
     circuit_from_step_function,
     sonobe_backend::circuits::arkworks::{
         compression::Pixel,
-        step_input::StepInput,
         ivc_state::{IVCStateT, IVCStateWithInfo},
+        step_input::StepInput,
     },
     transformation::Transformation,
 };

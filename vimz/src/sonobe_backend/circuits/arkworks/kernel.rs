@@ -10,16 +10,16 @@ impl<F: PrimeField, const KERNEL_SIZE: usize> Kernel<F, KERNEL_SIZE> {
         Self { kernel }
     }
 
-    pub fn convolve(&self, input: &[[FpVar<F>; KERNEL_SIZE]; KERNEL_SIZE]) -> FpVar<F> {
+    pub fn convolve(&self, input: &[[&FpVar<F>; KERNEL_SIZE]; KERNEL_SIZE]) -> FpVar<F> {
         let mut result = FpVar::Constant(F::zero());
         for (i, input_row) in input.iter().enumerate() {
             for (j, input_value) in input_row.iter().enumerate() {
                 match &self.kernel[i][j] {
                     KernelEntry::Positive(k) => {
-                        result += k * input_value;
+                        result += k * *input_value;
                     }
                     KernelEntry::Negative(k) => {
-                        result -= k * input_value;
+                        result -= k * *input_value;
                     }
                     KernelEntry::Zero => {}
                 }
@@ -28,16 +28,28 @@ impl<F: PrimeField, const KERNEL_SIZE: usize> Kernel<F, KERNEL_SIZE> {
         result
     }
 
+    pub fn max_convolution_value(&self, max_input_value: &FpVar<F>) -> FpVar<F> {
+        let mut max_value = FpVar::Constant(F::zero());
+        for i in 0..KERNEL_SIZE {
+            for j in 0..KERNEL_SIZE {
+                if let KernelEntry::Positive(k) = &self.kernel[i][j] {
+                    max_value += k;
+                }
+            }
+        }
+        max_value * max_input_value
+    }
+
     pub fn abs_min_convolution_value(&self, max_input_value: &FpVar<F>) -> FpVar<F> {
         let mut min_value = FpVar::Constant(F::zero());
         for i in 0..KERNEL_SIZE {
             for j in 0..KERNEL_SIZE {
                 if let KernelEntry::Negative(k) = &self.kernel[i][j] {
-                    min_value += k * max_input_value;
+                    min_value += k;
                 }
             }
         }
-        min_value
+        min_value * max_input_value
     }
 }
 

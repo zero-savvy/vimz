@@ -1,15 +1,15 @@
 use std::fs;
 
 use ark_bn254::Fr;
-use rand::{SeedableRng, prelude::StdRng};
+use rand::{prelude::StdRng, SeedableRng};
 use sonobe::Decider as _;
 use tracing::info_span;
 
 use crate::{
     config::{Config, Frontend},
     sonobe_backend::{
-        circuits::{SonobeCircuit, arkworks::*, circom::*},
-        decider::{Decider, verify_final_proof},
+        circuits::{arkworks::*, circom::*, SonobeCircuit},
+        decider::{verify_final_proof, Decider},
         folding::{fold_input, prepare_folding, verify_folding},
         input::prepare_input,
         solidity::prepare_contract_calldata,
@@ -40,12 +40,12 @@ pub fn run(config: &Config) {
             Transformation::Blur => _run::<BlurArkworksCircuit<Fr>>(config),
             Transformation::Brightness => _run::<BrightnessArkworksCircuit<Fr>>(config),
             Transformation::Contrast => _run::<ContrastArkworksCircuit<Fr>>(config),
+            Transformation::Crop => _run::<CropArkworksCircuit<Fr>>(config),
             Transformation::Grayscale => _run::<GrayscaleArkworksCircuit<Fr>>(config),
             Transformation::Hash => _run::<HashArkworksCircuit<Fr>>(config),
             Transformation::Redact => _run::<RedactArkworksCircuit<Fr>>(config),
             Transformation::Resize => _run::<ResizeArkworksCircuit<Fr>>(config),
             Transformation::Sharpness => _run::<SharpnessArkworksCircuit<Fr>>(config),
-            _ => unimplemented!("Not supported for Arkworks frontend yet"),
         },
     }
 }

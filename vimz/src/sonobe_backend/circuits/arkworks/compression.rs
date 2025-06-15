@@ -83,7 +83,8 @@ pub fn unpack<F: PrimeField>(
     Ok(unpacked)
 }
 
-fn pack<F: PrimeField>(unpacked: &[FpVar<F>]) -> FpVar<F> {
+pub fn pack<F: PrimeField>(unpacked: &[FpVar<F>]) -> FpVar<F> {
+    assert!(unpacked.len() <= PACKING_FACTOR);
     unpacked
         .iter()
         .enumerate()

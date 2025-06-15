@@ -58,8 +58,8 @@ impl<F: PrimeField + Absorb> IVCStateT<F> for IVCState<F> {
 
 #[derive(Clone, Debug)]
 pub struct IVCStateWithInfo<F: PrimeField> {
-    base: IVCState<F>,
-    info: FpVar<F>,
+    pub base: IVCState<F>,
+    pub info: FpVar<F>,
 }
 
 impl<F: PrimeField> IVCStateWithInfo<F> {

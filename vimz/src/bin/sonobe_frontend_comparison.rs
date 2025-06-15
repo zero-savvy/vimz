@@ -17,9 +17,8 @@ use vimz::{
     DEMO_STEPS,
 };
 
-const TRANSFORMATIONS: [Transformation; 8] = [
-    Blur, Brightness, Contrast, // Crop,
-    Grayscale, Hash, Redact, Resize, Sharpness,
+const TRANSFORMATIONS: [Transformation; 9] = [
+    Blur, Brightness, Contrast, Crop, Grayscale, Hash, Redact, Resize, Sharpness,
 ];
 
 type Stat = (Transformation, Frontend, Duration);

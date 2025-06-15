@@ -1,22 +1,25 @@
 use ark_crypto_primitives::{
     crh::{
-        CRHSchemeGadget,
         poseidon::constraints::{CRHGadget, CRHParametersVar},
+        CRHSchemeGadget,
     },
     sponge::Absorb,
 };
 use ark_ff::{BigInteger, PrimeField};
 use ark_r1cs_std::{
-    R1CSVar, alloc::AllocVar, boolean::Boolean, eq::EqGadget, fields::fp::FpVar,
-    select::CondSelectGadget,
+    alloc::AllocVar,
+    boolean::Boolean,
+    eq::EqGadget,
+    fields::{fp::FpVar, FieldVar},
+    R1CSVar,
 };
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
-use arkworks_small_values_ops::{le, to_bits};
+use arkworks_small_values_ops::{le, one_hot_encode};
 
 use crate::{
     circuit_from_step_function,
     sonobe_backend::circuits::arkworks::{
-        compression::{PACKING_FACTOR, pack},
+        compression::{pack, PACKING_FACTOR},
         ivc_state::{IVCStateT, IVCStateWithInfo},
         step_input::StepInput,
     },
@@ -98,45 +101,39 @@ fn get_subrow<F: PrimeField>(
     row: &[FpVar<F>],
     crop_index: &FpVar<F>,
 ) -> Result<Vec<FpVar<F>>, SynthesisError> {
-    // 1) Prepare variables and set them to actual values. -----------------------------------------
+    // 1) Convert index to one-hot encoding.
+    let crop_start_one_hot = one_hot_encode::<_, 1280>(cs.clone(), &crop_index)?;
 
-    // 1.1) Cast the `crop_index` from `FpVar` to `usize`.
-    let crop_index_usize = crop_index.value().map(|i| {
-        let bytes = i.into_bigint().to_bytes_le();
-        // We can unwrap, because `crop_index` is guaranteed to be 12-bit number.
-        u64::from_le_bytes(bytes[..8].to_vec().try_into().unwrap()) as usize
-    });
-
-    // 1.2) Provide a witness for the subrow.
-    let mut subrow = vec![];
+    // 2) Create a matrix that represents the crop area, by shifting the one-hot encoding CROP_WIDTH times.
+    let mut matrix = vec![];
     for i in 0..CROP_WIDTH {
-        let index = crop_index_usize.map(|idx| idx + i);
-        subrow.push(FpVar::new_witness(cs.clone(), || row[index?].value())?);
+        let mut row = vec![];
+        for _ in 0..i {
+            row.push(FpVar::zero());
+        }
+        for j in 0..CROP_WIDTH - i {
+            row.push(crop_start_one_hot[j].clone());
+        }
+        matrix.push(row);
     }
 
-    // 2) Add constraints to ensure that the subrow is valid. --------------------------------------
+    // 3) Multiply the row by the matrix to get the subrow.
+    matrix_vector_product(&matrix, row)
+}
 
-    // 2.1) Extend the row to length 2^12 - required by `conditionally_select_power_of_two_vector` to match 12-bit indexing.
-    let mut extended_row = row.to_vec();
-    while extended_row.len() < (1 << 12) {
-        extended_row.push(FpVar::Constant(F::zero()));
+fn matrix_vector_product<F: PrimeField>(
+    matrix: &[Vec<FpVar<F>>],
+    vector: &[FpVar<F>],
+) -> Result<Vec<FpVar<F>>, SynthesisError> {
+    let mut result = vec![];
+    for row in matrix {
+        let mut sum = FpVar::zero();
+        for (i, entry) in row.iter().enumerate() {
+            sum += entry * &vector[i];
+        }
+        result.push(sum);
     }
-
-    // 2.2) Ensure that the subrow is within the crop area.
-    for (i, subrow_element) in subrow.iter().enumerate() {
-        // BIT BOUND: any valid row index must be 12 bits
-        let mut index_bits = to_bits::<_, 12>(
-            cs.clone(),
-            &(crop_index + FpVar::Constant(F::from(i as u128))),
-        )?;
-        // Reverse the bits to match the big-endian order required by `conditionally_select_power_of_two_vector`.
-        index_bits.reverse();
-
-        FpVar::conditionally_select_power_of_two_vector(&index_bits, &extended_row)?
-            .enforce_equal(subrow_element)?;
-    }
-
-    Ok(subrow)
+    Ok(result)
 }
 
 fn check_if_within_crop_area<F: PrimeField>(

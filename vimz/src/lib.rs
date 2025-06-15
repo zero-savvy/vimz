@@ -5,4 +5,4 @@ pub mod nova_snark_backend;
 pub mod sonobe_backend;
 pub mod transformation;
 
-const DEMO_STEPS: usize = 10;
+pub const DEMO_STEPS: usize = 10;

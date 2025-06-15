@@ -3,7 +3,7 @@ use clap::ValueEnum;
 use crate::input::Extra;
 
 /// Supported transformations.
-#[derive(Copy, Clone, PartialEq, Eq, Debug, ValueEnum)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash, ValueEnum)]
 pub enum Transformation {
     Blur,
     Brightness,

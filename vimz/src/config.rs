@@ -31,25 +31,25 @@ pub struct Config {
     ///
     /// The path is assumed to be relative to the current working directory.
     #[clap(short, long)]
-    input: PathBuf,
+    pub input: PathBuf,
 
     ///This file will contain the final Proof to be verified by others.
     ///
     /// The path is assumed to be relative to the current working directory.
     #[clap(short, long)]
-    output: Option<PathBuf>,
+    pub output: Option<PathBuf>,
 
     /// The R1CS file of the compiled Circom circuit.
     ///
     /// The path is assumed to be relative to the current working directory.
     #[clap(short, long)]
-    circuit: PathBuf,
+    pub circuit: PathBuf,
 
     /// Witness generator file of the circuit.
     ///
     /// The path is assumed to be relative to the current working directory.
     #[clap(short, long)]
-    witness_generator: PathBuf,
+    pub witness_generator: PathBuf,
 
     /// The transformation function.
     #[clap(short, long, value_enum)]

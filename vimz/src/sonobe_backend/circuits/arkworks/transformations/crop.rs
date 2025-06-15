@@ -6,9 +6,12 @@ use ark_crypto_primitives::{
     sponge::Absorb,
 };
 use ark_ff::{BigInteger, PrimeField};
-use ark_r1cs_std::{R1CSVar, alloc::AllocVar, boolean::Boolean, eq::EqGadget, fields::fp::FpVar};
+use ark_r1cs_std::{
+    R1CSVar, alloc::AllocVar, boolean::Boolean, eq::EqGadget, fields::fp::FpVar,
+    select::CondSelectGadget,
+};
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
-use arkworks_small_values_ops::le;
+use arkworks_small_values_ops::{le, to_bits};
 
 use crate::{
     circuit_from_step_function,
@@ -100,6 +103,7 @@ fn get_subrow<F: PrimeField>(
     // 1.1) Cast the `crop_index` from `FpVar` to `usize`.
     let crop_index_usize = crop_index.value().map(|i| {
         let bytes = i.into_bigint().to_bytes_le();
+        // We can unwrap, because `crop_index` is guaranteed to be 12-bit number.
         u64::from_le_bytes(bytes[..8].to_vec().try_into().unwrap()) as usize
     });
 
@@ -111,6 +115,26 @@ fn get_subrow<F: PrimeField>(
     }
 
     // 2) Add constraints to ensure that the subrow is valid. --------------------------------------
+
+    // 2.1) Extend the row to length 2^12 - required by `conditionally_select_power_of_two_vector` to match 12-bit indexing.
+    let mut extended_row = row.to_vec();
+    while extended_row.len() < (1 << 12) {
+        extended_row.push(FpVar::Constant(F::zero()));
+    }
+
+    // 2.2) Ensure that the subrow is within the crop area.
+    for (i, subrow_element) in subrow.iter().enumerate() {
+        // BIT BOUND: any valid row index must be 12 bits
+        let mut index_bits = to_bits::<_, 12>(
+            cs.clone(),
+            &(crop_index + FpVar::Constant(F::from(i as u128))),
+        )?;
+        // Reverse the bits to match the big-endian order required by `conditionally_select_power_of_two_vector`.
+        index_bits.reverse();
+
+        FpVar::conditionally_select_power_of_two_vector(&index_bits, &extended_row)?
+            .enforce_equal(subrow_element)?;
+    }
 
     Ok(subrow)
 }

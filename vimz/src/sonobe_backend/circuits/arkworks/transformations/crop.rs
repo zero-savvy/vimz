@@ -17,9 +17,9 @@ use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
 use arkworks_small_values_ops::{le, one_hot_encode};
 
 use crate::{
-    circuit_from_step_function,
+    PACKING_FACTOR, circuit_from_step_function,
     sonobe_backend::circuits::arkworks::{
-        compression::{PACKING_FACTOR, pack},
+        compression::pack,
         ivc_state::{IVCStateT, IVCStateWithInfo},
         step_input::StepInput,
     },

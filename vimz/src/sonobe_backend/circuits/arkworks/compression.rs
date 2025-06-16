@@ -7,9 +7,7 @@ use ark_r1cs_std::{
 };
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
 
-use crate::sonobe_backend::circuits::arkworks::pixel::Pixel;
-
-pub const PACKING_FACTOR: usize = 10;
+use crate::{PACKING_FACTOR, sonobe_backend::circuits::arkworks::pixel::Pixel};
 
 pub fn decompress_pixels<F: PrimeField>(
     cs: ConstraintSystemRef<F>,

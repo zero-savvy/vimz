@@ -7,3 +7,4 @@ pub mod sonobe_backend;
 pub mod transformation;
 
 pub const DEMO_STEPS: usize = 10;
+pub const PACKING_FACTOR: usize = 10;

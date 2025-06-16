@@ -20,7 +20,7 @@ INPUT_TARGET = --output $(INPUT_TARGET_DIR)
 
 EXTRA_ARGS_brightness = --factor 1.4
 EXTRA_ARGS_contrast = --factor 1.4
-EXTRA_ARGS_crop = --x 200 --y 100 --crop-size HD
+EXTRA_ARGS_crop = --x 200 --y 100 --crop-size SD
 EXTRA_ARGS_resize = --resize-option "HD to SD"
 
 .PHONY: generate-input-data
@@ -29,7 +29,7 @@ generate-input-data: $(patsubst %, $(INPUT_TARGET_DIR)%.json, $(TRANSFORMATIONS)
 
 $(INPUT_TARGET_DIR)%.json:
 	@mkdir -p $(INPUT_TARGET_DIR)
-	@image-editor $* $(INPUT_SOURCE) $(INPUT_TARGET) $(EXTRA_ARGS_$*)
+	@image-editor $* $(INPUT_SOURCE) $(INPUT_TARGET) $(EXTRA_ARGS_$*) --save-png $(INPUT_TARGET_DIR)$*.png
 
 ########################################################################################################################
 ########################### CIRCUIT COMPILATION ########################################################################

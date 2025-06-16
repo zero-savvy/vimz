@@ -6,11 +6,9 @@ from os import path
 from tkinter import filedialog
 
 from PIL import Image
-
 from pyvimz.img.ops import compress_by_rows, compress_by_blocks
-from pyvimz.img.transformations import *
-
 from pyvimz.img.plotting import plot_images_side_by_side
+from pyvimz.img.transformations import *
 
 
 def get_image_path(args):
@@ -116,7 +114,9 @@ def main():
         print(
             "WARNING: This tool is not suitable for redaction - use GUI instead. Applying some fixed random redaction.")
         out["original"] = compress_by_blocks(original_image)
-        out["redact"] = random_image_redaction(original_image)
+        (transformed, indicators) = random_image_redaction(original_image)
+        out["redact"] = indicators
+        out["transformed"] = compress_by_blocks(transformed)
 
     elif operation == "resize":
         resize_option = args.resize_option.lower()
@@ -129,7 +129,8 @@ def main():
             raise Exception("Invalid resize option.")
 
     if transformed is not None:
-        out["transformed"] = compress_by_rows(transformed)
+        if operation != "redact":
+            out["transformed"] = compress_by_rows(transformed)
         if args.render:
             plot_images_side_by_side(np.array(original_image), transformed)
 

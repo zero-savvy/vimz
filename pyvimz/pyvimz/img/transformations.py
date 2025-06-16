@@ -71,8 +71,27 @@ def crop_image(image, x: int, y: int, new_width: int, new_height: int):
 def random_image_redaction(image):
     image = np.array(image)
     height, width = image.shape[:2]
-    num_blocks = (height // 40) * (width // 40)
-    return ["0x0" if i % 2 == 0 else "0x1" for i in range(num_blocks)]
+    block_size = 40
+
+    # Number of blocks vertically and horizontally
+    num_blocks_y = height // block_size
+    num_blocks_x = width // block_size
+
+    indicators = []
+    transformed = image.copy()
+
+    for by in range(num_blocks_y):
+        for bx in range(num_blocks_x):
+            # Checkerboard pattern: redact if (row + col) is odd
+            redact = (by + bx) % 2 == 1
+            indicators.append("0x1" if redact else "0x0")
+
+            if redact:
+                y0 = by * block_size
+                x0 = bx * block_size
+                transformed[y0:y0 + block_size, x0:x0 + block_size] = 0  # Zero out
+
+    return transformed, indicators
 
 
 def resize_image(image, new_height: int, new_width: int):

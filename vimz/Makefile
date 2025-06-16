@@ -35,7 +35,8 @@ run-transformation:
  		-f $(TRANSFORMATION) -w ../circuits/$(SUBDIR)/$(TRANSFORMATION)_step_js/$(TRANSFORMATION)_step.wasm \
 		-i ../input_data/$(TRANSFORMATION).json \
 		-c ../circuits/$(SUBDIR)/$(TRANSFORMATION)_step.r1cs -r HD \
-		-b $(BACKEND) $(FRONTEND_ARG) $(DEMO_FLAG) -o ../calldata/$(TRANSFORMATION).bytes
+		-b $(BACKEND) $(FRONTEND_ARG) $(DEMO_FLAG) -o ../calldata/$(TRANSFORMATION).bytes \
+		--source-image ../source_image/HD.png --target-image ../input_data/$(TRANSFORMATION).png \
 
 .PHONY: blur
 blur: # Run the blur transformation.

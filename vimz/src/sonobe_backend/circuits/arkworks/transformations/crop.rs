@@ -1,7 +1,7 @@
 use ark_crypto_primitives::{
     crh::{
-        CRHSchemeGadget,
-        poseidon::constraints::{CRHGadget, CRHParametersVar},
+        CRHSchemeGadget, TwoToOneCRHSchemeGadget,
+        poseidon::constraints::{CRHGadget, CRHParametersVar, TwoToOneCRHGadget},
     },
     sponge::Absorb,
 };
@@ -111,7 +111,7 @@ fn get_subrow<F: PrimeField>(
         for _ in 0..i {
             row.push(FpVar::zero());
         }
-        for indicator in &crop_start_one_hot {
+        for indicator in &crop_start_one_hot[0..CROP_WIDTH - i] {
             row.push(indicator.clone());
         }
         matrix.push(row);
@@ -175,21 +175,14 @@ fn update_state<F: PrimeField + Absorb>(
     let subrow_packed = pack_row(subrow_unpacked);
 
     // 2) Update the source hash
-    let new_source_hash = CRHGadget::<F>::evaluate(
-        crh_params,
-        &[&[old_state.base.source_hash], row_packed.as_slice()].concat(),
-    )?;
+    let row_hash = CRHGadget::<F>::evaluate(crh_params, &row_packed)?;
+    let new_source_hash =
+        TwoToOneCRHGadget::<F>::evaluate(crh_params, &old_state.base.source_hash, &row_hash)?;
 
     // 3) If we are within the crop area, update the target hash.
+    let subrow_hash = CRHGadget::<F>::evaluate(crh_params, &subrow_packed)?;
     let new_target_hash = within_crop_area.select(
-        &CRHGadget::<F>::evaluate(
-            crh_params,
-            &[
-                &[old_state.base.target_hash.clone()],
-                subrow_packed.as_slice(),
-            ]
-            .concat(),
-        )?,
+        &TwoToOneCRHGadget::<F>::evaluate(crh_params, &old_state.base.target_hash, &subrow_hash)?,
         &old_state.base.target_hash,
     )?;
 

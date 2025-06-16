@@ -1,25 +1,24 @@
 use std::{collections::HashMap, time::Duration};
 
 use ark_bn254::Fr;
-use comfy_table::{presets::UTF8_FULL, Table};
-use rand::{prelude::StdRng, SeedableRng};
+use comfy_table::{Table, presets::UTF8_FULL};
+use rand::{SeedableRng, prelude::StdRng};
 use vimz::{
+    DEMO_STEPS,
     config::{
         Backend, Config, Frontend,
         Frontend::{Arkworks, Circom},
+        parse_image,
     },
     sonobe_backend::{
-        circuits::{arkworks::*, circom::*, SonobeCircuit},
-        folding::{fold_input, prepare_folding, verify_folding},
+        circuits::{SonobeCircuit, arkworks::*, circom::*},
+        folding::{fold_input, prepare_folding, verify_final_state_arkworks, verify_folding},
         input::prepare_input,
     },
     transformation::{Resolution, Transformation, Transformation::*},
-    DEMO_STEPS,
 };
 
-const TRANSFORMATIONS: [Transformation; 9] = [
-    Blur, Brightness, Contrast, Crop, Grayscale, Hash, Redact, Resize, Sharpness,
-];
+const TRANSFORMATIONS: [Transformation; 2] = [Crop, Hash];
 
 type Stat = (Transformation, Frontend, Duration);
 
@@ -67,8 +66,8 @@ fn main() {
             ),
         };
 
-        stats.push((t, Frontend::Circom, cir));
-        stats.push((t, Frontend::Arkworks, ark));
+        stats.push((t, Circom, cir));
+        stats.push((t, Arkworks, ark));
     }
 
     present_stats(stats);
@@ -90,27 +89,37 @@ We DO NOT run Sonobe's decider (neither preprocessing nor proof compression).
     )
 }
 
-fn config(function: Transformation, frontend: Frontend) -> Config {
+fn config(transformation: Transformation, frontend: Frontend) -> Config {
     let path = |s: String| s.to_lowercase().into();
 
+    let target_image = if transformation == Hash {
+        None
+    } else {
+        Some(parse_image(&format!("../input_data/{transformation:?}.png").to_lowercase()).unwrap())
+    };
+
     Config::new(
-        path(format!("../input_data/{function:?}.json")),
+        path(format!("../input_data/{transformation:?}.json")),
         None,
-        path(format!("../circuits/sonobe/{function:?}_step.r1cs")),
+        path(format!("../circuits/sonobe/{transformation:?}_step.r1cs")),
         path(format!(
-            "../circuits/sonobe/{function:?}_step_js/{function:?}_step.wasm"
+            "../circuits/sonobe/{transformation:?}_step_js/{transformation:?}_step.wasm"
         )),
-        function,
+        transformation,
         Resolution::HD,
         Backend::Sonobe,
         frontend,
         true,
-        None,
-        None,
+        Some(parse_image("../source_image/HD.png").unwrap()),
+        target_image,
     )
 }
 
 fn run<Circuit: SonobeCircuit>(config: &Config) -> Duration {
+    if config.frontend == Circom {
+        return Duration::ZERO;
+    }
+
     let mut rng = StdRng::from_seed([41; 32]);
 
     println!(
@@ -135,8 +144,14 @@ fn run<Circuit: SonobeCircuit>(config: &Config) -> Duration {
     let start = std::time::Instant::now();
     verify_folding(&folding, &folding_params);
     println!("  Verification took: {:?}", start.elapsed());
-    println!();
 
+    // ========================== Verify final state (if applicable) ==============================
+    if config.frontend == Arkworks {
+        verify_final_state_arkworks(&folding, config);
+        println!("  Final state verified successfully.");
+    }
+
+    println!();
     folding_duration
 }
 

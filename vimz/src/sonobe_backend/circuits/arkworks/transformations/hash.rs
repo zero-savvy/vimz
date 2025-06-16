@@ -1,7 +1,7 @@
 use ark_crypto_primitives::{
     crh::{
-        CRHSchemeGadget,
-        poseidon::constraints::{CRHGadget, CRHParametersVar},
+        CRHSchemeGadget, TwoToOneCRHSchemeGadget,
+        poseidon::constraints::{CRHGadget, CRHParametersVar, TwoToOneCRHGadget},
     },
     sponge::Absorb,
 };
@@ -17,10 +17,9 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
     external_inputs: Vec<FpVar<F>>,
     crh_params: CRHParametersVar<F>,
 ) -> Result<Vec<FpVar<F>>, SynthesisError> {
-    let old_hash = z_i[0].clone();
-    let hash_input = [&[old_hash], external_inputs.as_slice()].concat();
-    let h = CRHGadget::<F>::evaluate(&crh_params, &hash_input)?;
-    Ok(vec![h])
+    let row_hash = CRHGadget::<F>::evaluate(&crh_params, &external_inputs)?;
+    let updated_hash = TwoToOneCRHGadget::<F>::evaluate(&crh_params, &z_i[0], &row_hash)?;
+    Ok(vec![updated_hash])
 }
 
 circuit_from_step_function!(Hash, generate_step_constraints);

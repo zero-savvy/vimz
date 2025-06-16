@@ -6,11 +6,11 @@ use sonobe::Decider as _;
 use tracing::info_span;
 
 use crate::{
-    config::{Config, Frontend},
+    config::{Backend, Config, Frontend},
     sonobe_backend::{
         circuits::{SonobeCircuit, arkworks::*, circom::*},
         decider::{Decider, verify_final_proof},
-        folding::{fold_input, prepare_folding, verify_folding},
+        folding::{fold_input, prepare_folding, verify_final_state_arkworks, verify_folding},
         input::prepare_input,
         solidity::prepare_contract_calldata,
     },
@@ -63,6 +63,9 @@ fn _run<Circuit: SonobeCircuit>(config: &Config) {
 
     fold_input(&mut folding, ivc_step_inputs, &mut rng);
     verify_folding(&folding, &folding_params);
+    if config.backend == Backend::Sonobe && config.frontend == Frontend::Arkworks {
+        verify_final_state_arkworks(&folding, config);
+    }
 
     // ========================== Prepare decider and compress the proof ===========================
 

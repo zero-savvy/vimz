@@ -118,10 +118,6 @@ fn config(transformation: Transformation, frontend: Frontend) -> Config {
 }
 
 fn run<Circuit: SonobeCircuit>(config: &Config) -> Duration {
-    if config.frontend == Circom {
-        return Duration::ZERO;
-    }
-
     let mut rng = StdRng::from_seed([41; 32]);
 
     println!(

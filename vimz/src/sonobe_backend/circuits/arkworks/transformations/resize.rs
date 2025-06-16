@@ -1,4 +1,10 @@
-use ark_crypto_primitives::{crh::poseidon::constraints::CRHParametersVar, sponge::Absorb};
+use ark_crypto_primitives::{
+    crh::{
+        CRHSchemeGadget, TwoToOneCRHSchemeGadget,
+        poseidon::constraints::{CRHGadget, CRHParametersVar, TwoToOneCRHGadget},
+    },
+    sponge::Absorb,
+};
 use ark_ff::PrimeField;
 use ark_r1cs_std::fields::fp::FpVar;
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
@@ -44,7 +50,7 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
         &target_rows[1],
     )?;
 
-    state.update(&crh_params, &external_inputs)
+    update_state(&state, &crh_params, &external_inputs)
 }
 
 circuit_from_step_function!(Resize, generate_step_constraints);
@@ -103,4 +109,26 @@ fn upper_kernel() -> Kernel<2> {
 fn lower_kernel() -> Kernel<2> {
     use KernelEntry::Positive;
     Kernel::new([[Positive(1), Positive(1)], [Positive(2), Positive(2)]])
+}
+
+fn update_state<F: PrimeField + Absorb>(
+    state: &IVCState<F>,
+    crh_params: &CRHParametersVar<F>,
+    input: &impl StepInput<F>,
+) -> Result<Vec<FpVar<F>>, SynthesisError> {
+    let (source_rows, target_rows) = input.as_resize_compressed::<128, 3, 64, 2>()?;
+
+    let mut source_hash = state.source_hash.clone();
+    for row in source_rows {
+        let row_hash = CRHGadget::evaluate(crh_params, row)?;
+        source_hash = TwoToOneCRHGadget::<F>::evaluate(crh_params, &source_hash, &row_hash)?;
+    }
+
+    let mut target_hash = state.target_hash.clone();
+    for row in target_rows {
+        let row_hash = CRHGadget::evaluate(crh_params, row)?;
+        target_hash = TwoToOneCRHGadget::<F>::evaluate(crh_params, &target_hash, &row_hash)?;
+    }
+
+    Ok(vec![source_hash, target_hash])
 }

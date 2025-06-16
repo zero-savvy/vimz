@@ -45,6 +45,15 @@ pub trait StepInput<F: PrimeField> {
         &self,
         cs: ConstraintSystemRef<F>,
     ) -> Result<(Vec<Vec<Pixel<F>>>, Vec<Vec<Pixel<F>>>), SynthesisError>;
+
+    fn as_resize_compressed<
+        const SOURCE_ROW_WIDTH: usize,
+        const SOURCE_ROWS: usize,
+        const TARGET_ROW_WIDTH: usize,
+        const TARGET_ROWS: usize,
+    >(
+        &self,
+    ) -> Result<(Vec<&[FpVar<F>]>, Vec<&[FpVar<F>]>), SynthesisError>;
 }
 
 impl<F: PrimeField> StepInput<F> for Vec<FpVar<F>> {
@@ -126,6 +135,27 @@ impl<F: PrimeField> StepInput<F> for Vec<FpVar<F>> {
             .chunks(TARGET_ROW_WIDTH)
             .map(|row| decompress_row(cs.clone(), row))
             .collect::<Result<Vec<_>, _>>()?;
+        Ok((source_rows, target_rows))
+    }
+
+    fn as_resize_compressed<
+        const SOURCE_ROW_WIDTH: usize,
+        const SOURCE_ROWS: usize,
+        const TARGET_ROW_WIDTH: usize,
+        const TARGET_ROWS: usize,
+    >(
+        &self,
+    ) -> Result<(Vec<&[FpVar<F>]>, Vec<&[FpVar<F>]>), SynthesisError> {
+        assert_eq!(
+            self.len(),
+            SOURCE_ROW_WIDTH * SOURCE_ROWS + TARGET_ROW_WIDTH * TARGET_ROWS
+        );
+        let source_rows = self[..SOURCE_ROW_WIDTH * SOURCE_ROWS]
+            .chunks(SOURCE_ROW_WIDTH)
+            .collect::<Vec<_>>();
+        let target_rows = self[SOURCE_ROW_WIDTH * SOURCE_ROWS..]
+            .chunks(TARGET_ROW_WIDTH)
+            .collect::<Vec<_>>();
         Ok((source_rows, target_rows))
     }
 }

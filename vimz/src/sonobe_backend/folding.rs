@@ -15,7 +15,7 @@ use crate::{
     config::{Backend, Config, Frontend},
     image_hash::hash_image_arkworks,
     sonobe_backend::circuits::{SonobeCircuit, VecFT},
-    transformation::Transformation,
+    transformation::Transformation::{Crop, Redact, Resize},
 };
 
 /// The folding scheme used.
@@ -91,46 +91,41 @@ pub fn verify_final_state_arkworks<Circuit: FCircuit<Fr>>(
         config.resolution.iteration_count()
     };
 
+    let source_hashing_steps = if config.function == Resize && config.demo {
+        3 * nsteps
+    } else {
+        nsteps
+    };
+    let target_hashing_steps = if config.function == Resize && config.demo {
+        2 * nsteps
+    } else {
+        nsteps
+    };
+
     assert_eq!(folding.i, Fr::from(nsteps as u128));
 
     if let Some(source_image) = &config.source_image {
-        let source_hash = hash_image_arkworks::<Fr>(source_image, Some(nsteps));
+        let source_hash = hash_image_arkworks::<Fr>(
+            source_image,
+            config.function.hash_mode(),
+            Some(source_hashing_steps),
+        );
         assert_eq!(
             final_state[0], source_hash,
             "Source image hash does not match final state"
         );
     }
 
-    if let Some(target_image) = &config.target_image {
-        let target_hash =
-            hash_image_arkworks::<Fr>(target_image, config.demo.then_some(DEMO_STEPS));
-        assert_eq!(
-            final_state[1], target_hash,
-            "Target image hash does not match final state"
-        );
-    }
-
-    use Transformation::*;
-    match config.function {
-        // IVC of these transformations has no more data to validate
-        Grayscale | Hash | Redact | Resize => {}
-        // these transformations should preserve the info from the initial state
-        Brightness | Contrast => {
+    if config.function != Crop || !config.demo {
+        if let Some(target_image) = &config.target_image {
+            let target_hash = hash_image_arkworks::<Fr>(
+                target_image,
+                config.function.hash_mode(),
+                Some(target_hashing_steps),
+            );
             assert_eq!(
-                folding.z_0[2], final_state[2],
-                "Transformation factor mismatch"
-            )
-        }
-        // kernel transformations should also contain the last two row hashes
-        Blur | Sharpness => {
-            // TODO
-        }
-        // info in IVC state should be bumped by the number of rows processed
-        Crop => {
-            assert_eq!(
-                folding.z_0[2] + folding.i,
-                final_state[2],
-                "Crop info mismatch"
+                final_state[1], target_hash,
+                "Target image hash does not match final state"
             );
         }
     }

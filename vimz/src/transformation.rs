@@ -18,6 +18,8 @@ pub enum Transformation {
 
 use Transformation::*;
 
+use crate::image_hash::HashMode;
+
 impl Transformation {
     /// Returns the initial state of the IVC for the given transformation, based on the input.
     pub fn ivc_initial_state<ValueOut: From<u64> + Copy, FieldRepr>(
@@ -59,6 +61,14 @@ impl Transformation {
             Redact => 160 + 1,
             // Three rows of 128 entries for the original image and two of 64 entries for the transformed.
             Resize => 128 * 3 + 64 * 2,
+        }
+    }
+
+    /// Returns the mode of image hashing for the given transformation.
+    pub const fn hash_mode(&self) -> HashMode {
+        match self {
+            Redact => HashMode::BlockWise,
+            _ => HashMode::RowWise,
         }
     }
 }

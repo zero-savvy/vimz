@@ -6,25 +6,52 @@ use ark_crypto_primitives::{
     sponge::{Absorb, poseidon::PoseidonConfig},
 };
 use ark_ff::PrimeField;
-use image::{ColorType, DynamicImage, GenericImageView};
+use clap::ValueEnum;
+use image::{ColorType, DynamicImage};
 use sonobe::transcript::poseidon::poseidon_canonical_config;
 
 use crate::PACKING_FACTOR;
 
-pub fn hash_image_arkworks<F: PrimeField + Absorb>(img: &DynamicImage, nrows: Option<usize>) -> F {
-    let (_width, height) = img.dimensions();
-    let rows = nrows.unwrap_or(height as usize).min(height as usize);
+#[derive(Copy, Clone, Debug, ValueEnum)]
+pub enum HashMode {
+    RowWise,
+    BlockWise,
+}
 
-    let crh_params = poseidon_canonical_config::<F>();
+pub fn hash_image_arkworks<F: PrimeField + Absorb>(
+    img: &DynamicImage,
+    mode: HashMode,
+    nsteps: Option<usize>,
+) -> F {
+    let data = match mode {
+        HashMode::RowWise => get_raw_rows(img),
+        HashMode::BlockWise => get_blocks(img, 40),
+    };
+    let limit = nsteps.unwrap_or(data.len()).min(data.len());
+
     let mut hash = F::zero();
-
-    for row in get_raw_rows(img).iter().take(rows) {
-        let packed = pack_pixel_row(row);
-        let hashed_row = hash_row::<F>(&crh_params, &packed);
-        hash = accumulate_hash(&crh_params, &hash, &hashed_row);
+    let crh_params = poseidon_canonical_config::<F>();
+    for chunk in &data[..limit] {
+        hash = hash_step(&crh_params, hash, chunk);
     }
-
     hash
+}
+
+fn hash_step<F: PrimeField + Absorb>(
+    crh_params: &PoseidonConfig<F>,
+    acc: F,
+    pixels: &[[u8; 3]],
+) -> F {
+    let packed = pack_pixels::<F>(pixels);
+    let hashed = CRH::evaluate(crh_params, packed.as_slice()).expect("Failed to hash input");
+    TwoToOneCRH::evaluate(crh_params, &acc, &hashed).expect("Failed to accumulate hash")
+}
+
+fn pack_pixels<F: PrimeField>(pixels: &[[u8; 3]]) -> Vec<F> {
+    pixels
+        .chunks(PACKING_FACTOR)
+        .map(|chunk| F::from_le_bytes_mod_order(&chunk.concat()))
+        .collect()
 }
 
 fn get_raw_rows(img: &DynamicImage) -> Vec<Vec<[u8; 3]>> {
@@ -43,16 +70,26 @@ fn get_raw_rows(img: &DynamicImage) -> Vec<Vec<[u8; 3]>> {
     }
 }
 
-fn pack_pixel_row<F: PrimeField>(row: &[[u8; 3]]) -> Vec<F> {
-    row.chunks(PACKING_FACTOR)
-        .map(|chunk| F::from_le_bytes_mod_order(&chunk.concat()))
-        .collect()
-}
+fn get_blocks(img: &DynamicImage, block_size: u32) -> Vec<Vec<[u8; 3]>> {
+    let rgb_img = img.to_rgb8();
+    let (width, height) = rgb_img.dimensions();
+    let mut blocks = Vec::new();
 
-fn hash_row<F: PrimeField + Absorb>(crh_params: &PoseidonConfig<F>, row: &[F]) -> F {
-    CRH::evaluate(crh_params, row).expect("Failed to hash row")
-}
+    for y in (0..height).step_by(block_size as usize) {
+        for x in (0..width).step_by(block_size as usize) {
+            let mut block = Vec::new();
 
-fn accumulate_hash<F: PrimeField + Absorb>(crh_params: &PoseidonConfig<F>, acc: &F, new: &F) -> F {
-    TwoToOneCRH::evaluate(crh_params, acc, new).expect("Failed to accumulate hash")
+            for dy in 0..block_size {
+                for dx in 0..block_size {
+                    if x + dx < width && y + dy < height {
+                        block.push(rgb_img.get_pixel(x + dx, y + dy).0);
+                    }
+                }
+            }
+
+            blocks.push(block);
+        }
+    }
+
+    blocks
 }

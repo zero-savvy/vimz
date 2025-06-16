@@ -18,6 +18,10 @@ path = "src/bin/generate_verifier_contract.rs"
 name = "sonobe-frontend-comparison"
 path = "src/bin/sonobe_frontend_comparison.rs"
 
+[[bin]]
+name = "image-hasher"
+path = "src/bin/image_hasher.rs"
+
 [dependencies]
 ark-bn254 = { version = "^0.5.0", features = ["r1cs"] }
 ark-crypto-primitives = { version = "^0.5.0" }
@@ -29,6 +33,7 @@ ark-relations = { version = "^0.5.0" }
 arkworks-small-values-ops = { version = "0.0.6" }
 clap = { version = "4.5.16", features = ["derive"] }
 comfy-table = { version = "7.1.4" }
+image = { version = "0.25.6"}
 num-bigint = { version = "0.4.3" }
 num-traits = { version = "0.2.15" }
 paste = { version = "1.0.15" }

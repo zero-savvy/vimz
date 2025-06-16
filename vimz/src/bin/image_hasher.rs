@@ -3,7 +3,7 @@ use clap::Parser;
 use image::DynamicImage;
 use vimz::{
     config::parse_image,
-    image_hash::{hash_image_arkworks, HashMode},
+    image_hash::{HashMode, hash_image_arkworks},
 };
 
 #[derive(Parser)]

@@ -18,7 +18,9 @@ use vimz::{
     transformation::{Resolution, Transformation, Transformation::*},
 };
 
-const TRANSFORMATIONS: [Transformation; 2] = [Resize, Sharpness];
+const TRANSFORMATIONS: [Transformation; 9] = [
+    Blur, Brightness, Contrast, Crop, Grayscale, Hash, Redact, Resize, Sharpness,
+];
 
 type Stat = (Transformation, Frontend, Duration);
 

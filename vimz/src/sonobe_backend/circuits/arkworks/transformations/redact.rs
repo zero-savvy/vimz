@@ -1,7 +1,7 @@
 use ark_crypto_primitives::{
     crh::{
-        CRHSchemeGadget,
-        poseidon::constraints::{CRHGadget, CRHParametersVar},
+        CRHSchemeGadget, TwoToOneCRHSchemeGadget,
+        poseidon::constraints::{CRHGadget, CRHParametersVar, TwoToOneCRHGadget},
     },
     sponge::Absorb,
 };
@@ -29,12 +29,18 @@ fn generate_step_constraints<F: PrimeField + Absorb>(
     let block_hash = CRHGadget::<F>::evaluate(&crh_params, &external_inputs)?;
 
     let source_hash =
-        CRHGadget::<F>::evaluate(&crh_params, &[state.source_hash, block_hash.clone()])?;
+        TwoToOneCRHGadget::<F>::evaluate(&crh_params, &state.source_hash, &block_hash)?;
 
-    // TODO: add constant for hash of the empty block (to be consistent with off-circuit image hash)
-    let redacted_hash = CRHGadget::<F>::evaluate(&crh_params, &[state.target_hash.clone()])?;
-    let nonredacted_hash = CRHGadget::<F>::evaluate(&crh_params, &[state.target_hash, block_hash])?;
-    let target_hash = redaction_indicator.select(&redacted_hash, &nonredacted_hash)?;
+    let mut zeros = vec![];
+    for _ in 0..external_inputs.len() {
+        zeros.push(FpVar::Constant(F::zero()));
+    }
+    let redacted_hash = CRHGadget::<F>::evaluate(&crh_params, zeros.as_slice())?;
+
+    let target_hash = redaction_indicator.select(
+        &TwoToOneCRHGadget::<F>::evaluate(&crh_params, &state.target_hash, &redacted_hash)?,
+        &TwoToOneCRHGadget::<F>::evaluate(&crh_params, &state.target_hash, &block_hash)?,
+    )?;
 
     Ok(vec![source_hash, target_hash])
 }

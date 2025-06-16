@@ -1,20 +1,20 @@
 use std::{collections::HashMap, time::Duration};
 
 use ark_bn254::Fr;
-use comfy_table::{Table, presets::UTF8_FULL};
-use rand::{SeedableRng, prelude::StdRng};
+use comfy_table::{presets::UTF8_FULL, Table};
+use rand::{prelude::StdRng, SeedableRng};
 use vimz::{
-    DEMO_STEPS,
     config::{
         Backend, Config, Frontend,
         Frontend::{Arkworks, Circom},
     },
     sonobe_backend::{
-        circuits::{SonobeCircuit, arkworks::*, circom::*},
+        circuits::{arkworks::*, circom::*, SonobeCircuit},
         folding::{fold_input, prepare_folding, verify_folding},
         input::prepare_input,
     },
     transformation::{Resolution, Transformation, Transformation::*},
+    DEMO_STEPS,
 };
 
 const TRANSFORMATIONS: [Transformation; 9] = [
@@ -93,19 +93,21 @@ We DO NOT run Sonobe's decider (neither preprocessing nor proof compression).
 fn config(function: Transformation, frontend: Frontend) -> Config {
     let path = |s: String| s.to_lowercase().into();
 
-    Config {
-        input: path(format!("../input_data/{function:?}.json")),
-        output: None,
-        circuit: path(format!("../circuits/sonobe/{function:?}_step.r1cs")),
-        witness_generator: path(format!(
+    Config::new(
+        path(format!("../input_data/{function:?}.json")),
+        None,
+        path(format!("../circuits/sonobe/{function:?}_step.r1cs")),
+        path(format!(
             "../circuits/sonobe/{function:?}_step_js/{function:?}_step.wasm"
         )),
         function,
-        resolution: Resolution::HD,
-        backend: Backend::Sonobe,
+        Resolution::HD,
+        Backend::Sonobe,
         frontend,
-        demo: true,
-    }
+        true,
+        None,
+        None,
+    )
 }
 
 fn run<Circuit: SonobeCircuit>(config: &Config) -> Duration {

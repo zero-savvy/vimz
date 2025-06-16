@@ -1,6 +1,7 @@
 use std::{env::current_dir, path::PathBuf};
 
 use clap::{Parser, ValueEnum};
+use image::{DynamicImage, ImageReader};
 
 use crate::transformation::{Resolution, Transformation};
 
@@ -31,25 +32,25 @@ pub struct Config {
     ///
     /// The path is assumed to be relative to the current working directory.
     #[clap(short, long)]
-    pub input: PathBuf,
+    input: PathBuf,
 
     ///This file will contain the final Proof to be verified by others.
     ///
     /// The path is assumed to be relative to the current working directory.
     #[clap(short, long)]
-    pub output: Option<PathBuf>,
+    output: Option<PathBuf>,
 
     /// The R1CS file of the compiled Circom circuit.
     ///
     /// The path is assumed to be relative to the current working directory.
     #[clap(short, long)]
-    pub circuit: PathBuf,
+    circuit: PathBuf,
 
     /// Witness generator file of the circuit.
     ///
     /// The path is assumed to be relative to the current working directory.
     #[clap(short, long)]
-    pub witness_generator: PathBuf,
+    witness_generator: PathBuf,
 
     /// The transformation function.
     #[clap(short, long, value_enum)]
@@ -70,9 +71,45 @@ pub struct Config {
     /// Run the procedure only on a small part of the image.
     #[clap(short, long)]
     pub demo: bool,
+
+    /// Optional source image for the final IVC verification. Applicable only to the Sonobe + Arkworks pipeline.
+    #[clap(long, value_parser = parse_image)]
+    pub source_image: Option<DynamicImage>,
+
+    /// Optional target image for the final IVC verification. Applicable only to the Sonobe + Arkworks pipeline.
+    #[clap(long, value_parser = parse_image)]
+    pub target_image: Option<DynamicImage>,
 }
 
 impl Config {
+    pub fn new(
+        input: PathBuf,
+        output: Option<PathBuf>,
+        circuit: PathBuf,
+        witness_generator: PathBuf,
+        function: Transformation,
+        resolution: Resolution,
+        backend: Backend,
+        frontend: Frontend,
+        demo: bool,
+        source_image: Option<DynamicImage>,
+        target_image: Option<DynamicImage>,
+    ) -> Self {
+        Self {
+            input,
+            output,
+            circuit,
+            witness_generator,
+            function,
+            resolution,
+            backend,
+            frontend,
+            demo,
+            source_image,
+            target_image,
+        }
+    }
+
     fn root_dir() -> PathBuf {
         current_dir().expect("Failed to get the current working directory")
     }
@@ -92,6 +129,13 @@ impl Config {
     pub fn witness_generator_file(&self) -> PathBuf {
         Self::root_dir().join(&self.witness_generator)
     }
+}
+
+pub fn parse_image(path: &str) -> Result<DynamicImage, String> {
+    ImageReader::open(path)
+        .map_err(|e| format!("Failed to open image file `{}`: {e}", path))?
+        .decode()
+        .map_err(|e| format!("Failed to decode image `{}`: {e}", path))
 }
 
 impl Config {

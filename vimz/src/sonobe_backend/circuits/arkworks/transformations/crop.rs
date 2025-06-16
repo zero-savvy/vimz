@@ -1,17 +1,17 @@
 use ark_crypto_primitives::{
     crh::{
-        poseidon::constraints::{CRHGadget, CRHParametersVar},
         CRHSchemeGadget,
+        poseidon::constraints::{CRHGadget, CRHParametersVar},
     },
     sponge::Absorb,
 };
 use ark_ff::{BigInteger, PrimeField};
 use ark_r1cs_std::{
+    R1CSVar,
     alloc::AllocVar,
     boolean::Boolean,
     eq::EqGadget,
-    fields::{fp::FpVar, FieldVar},
-    R1CSVar,
+    fields::{FieldVar, fp::FpVar},
 };
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
 use arkworks_small_values_ops::{le, one_hot_encode};
@@ -19,7 +19,7 @@ use arkworks_small_values_ops::{le, one_hot_encode};
 use crate::{
     circuit_from_step_function,
     sonobe_backend::circuits::arkworks::{
-        compression::{pack, PACKING_FACTOR},
+        compression::{PACKING_FACTOR, pack},
         ivc_state::{IVCStateT, IVCStateWithInfo},
         step_input::StepInput,
     },
@@ -102,7 +102,7 @@ fn get_subrow<F: PrimeField>(
     crop_index: &FpVar<F>,
 ) -> Result<Vec<FpVar<F>>, SynthesisError> {
     // 1) Convert index to one-hot encoding.
-    let crop_start_one_hot = one_hot_encode::<_, 1280>(cs.clone(), &crop_index)?;
+    let crop_start_one_hot = one_hot_encode::<_, 1280>(cs.clone(), crop_index)?;
 
     // 2) Create a matrix that represents the crop area, by shifting the one-hot encoding CROP_WIDTH times.
     let mut matrix = vec![];
@@ -111,8 +111,8 @@ fn get_subrow<F: PrimeField>(
         for _ in 0..i {
             row.push(FpVar::zero());
         }
-        for j in 0..CROP_WIDTH - i {
-            row.push(crop_start_one_hot[j].clone());
+        for indicator in &crop_start_one_hot {
+            row.push(indicator.clone());
         }
         matrix.push(row);
     }

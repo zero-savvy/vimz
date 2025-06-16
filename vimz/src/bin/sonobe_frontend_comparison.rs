@@ -1,20 +1,20 @@
 use std::{collections::HashMap, time::Duration};
 
 use ark_bn254::Fr;
-use comfy_table::{presets::UTF8_FULL, Table};
-use rand::{prelude::StdRng, SeedableRng};
+use comfy_table::{Table, presets::UTF8_FULL};
+use rand::{SeedableRng, prelude::StdRng};
 use vimz::{
+    DEMO_STEPS,
     config::{
         Backend, Config, Frontend,
         Frontend::{Arkworks, Circom},
     },
     sonobe_backend::{
-        circuits::{arkworks::*, circom::*, SonobeCircuit},
+        circuits::{SonobeCircuit, arkworks::*, circom::*},
         folding::{fold_input, prepare_folding, verify_folding},
         input::prepare_input,
     },
     transformation::{Resolution, Transformation, Transformation::*},
-    DEMO_STEPS,
 };
 
 const TRANSFORMATIONS: [Transformation; 9] = [

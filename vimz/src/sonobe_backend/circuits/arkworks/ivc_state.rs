@@ -2,15 +2,15 @@ use std::ops::Not;
 
 use ark_crypto_primitives::{
     crh::{
-        poseidon::constraints::{CRHGadget, CRHParametersVar, TwoToOneCRHGadget}, CRHSchemeGadget,
-        TwoToOneCRHSchemeGadget,
+        CRHSchemeGadget, TwoToOneCRHSchemeGadget,
+        poseidon::constraints::{CRHGadget, CRHParametersVar, TwoToOneCRHGadget},
     },
     sponge::Absorb,
 };
 use ark_ff::PrimeField;
 use ark_r1cs_std::{
     eq::EqGadget,
-    fields::{fp::FpVar, FieldVar},
+    fields::{FieldVar, fp::FpVar},
 };
 use ark_relations::r1cs::SynthesisError;
 

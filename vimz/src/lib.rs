@@ -1,4 +1,5 @@
 pub mod config;
+pub mod image_hash;
 pub mod input;
 pub mod logging;
 pub mod nova_snark_backend;

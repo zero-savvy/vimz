@@ -10,7 +10,7 @@ use ark_crypto_primitives::{
 };
 use ark_ff::PrimeField;
 use clap::Parser;
-use image::{DynamicImage, GenericImageView, ImageReader};
+use image::{DynamicImage, ImageReader};
 use num_traits::Zero;
 use sonobe::transcript::poseidon::poseidon_canonical_config;
 
@@ -42,7 +42,7 @@ fn main() {
         hash = accumulate_hash(&crh_params, &hash, &hashed_row);
     }
 
-    println!("Computed hash: {hash}");
+    println!("{hash}");
 }
 
 fn read_image(path: &PathBuf) -> DynamicImage {

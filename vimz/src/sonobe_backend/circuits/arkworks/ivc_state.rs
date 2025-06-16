@@ -2,15 +2,15 @@ use std::ops::Not;
 
 use ark_crypto_primitives::{
     crh::{
-        CRHSchemeGadget,
-        poseidon::constraints::{CRHGadget, CRHParametersVar},
+        poseidon::constraints::{CRHGadget, CRHParametersVar, TwoToOneCRHGadget}, CRHSchemeGadget,
+        TwoToOneCRHSchemeGadget,
     },
     sponge::Absorb,
 };
 use ark_ff::PrimeField;
 use ark_r1cs_std::{
     eq::EqGadget,
-    fields::{FieldVar, fp::FpVar},
+    fields::{fp::FpVar, FieldVar},
 };
 use ark_relations::r1cs::SynthesisError;
 
@@ -47,12 +47,13 @@ impl<F: PrimeField + Absorb> IVCStateT<F> for IVCState<F> {
     ) -> Result<Vec<FpVar<F>>, SynthesisError> {
         let (source_row, target_row) = step_input.as_two_rows_compressed();
 
-        let new_source_hash_input = [&[self.source_hash], source_row].concat();
-        let new_source_hash = CRHGadget::<F>::evaluate(crh_params, &new_source_hash_input)?;
-        let new_target_hash_input = [&[self.target_hash], target_row].concat();
-        let new_target_hash = CRHGadget::<F>::evaluate(crh_params, &new_target_hash_input)?;
+        let source_row_hash = CRHGadget::<F>::evaluate(crh_params, source_row)?;
+        let target_row_hash = CRHGadget::<F>::evaluate(crh_params, target_row)?;
 
-        Ok(vec![new_source_hash, new_target_hash])
+        Ok(vec![
+            TwoToOneCRHGadget::<F>::evaluate(crh_params, &self.source_hash, &source_row_hash)?,
+            TwoToOneCRHGadget::<F>::evaluate(crh_params, &self.target_hash, &target_row_hash)?,
+        ])
     }
 }
 

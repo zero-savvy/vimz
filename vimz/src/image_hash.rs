@@ -1,16 +1,15 @@
 use ark_crypto_primitives::{
     crh::{
-        CRHScheme, TwoToOneCRHScheme,
-        poseidon::{CRH, TwoToOneCRH},
+        poseidon::{TwoToOneCRH, CRH}, CRHScheme,
+        TwoToOneCRHScheme,
     },
-    sponge::{Absorb, poseidon::PoseidonConfig},
+    sponge::{poseidon::PoseidonConfig, Absorb},
 };
 use ark_ff::PrimeField;
 use clap::ValueEnum;
 use image::{ColorType, DynamicImage};
-use sonobe::transcript::poseidon::poseidon_canonical_config;
 
-use crate::PACKING_FACTOR;
+use crate::{sonobe_backend::circuits::arkworks::poseidon_config, PACKING_FACTOR};
 
 #[derive(Copy, Clone, Debug, ValueEnum)]
 pub enum HashMode {
@@ -30,7 +29,7 @@ pub fn hash_image_arkworks<F: PrimeField + Absorb>(
     let limit = nsteps.unwrap_or(data.len()).min(data.len());
 
     let mut hash = F::zero();
-    let crh_params = poseidon_canonical_config::<F>();
+    let crh_params = poseidon_config::<F>();
     for chunk in &data[..limit] {
         hash = hash_step(&crh_params, hash, chunk);
     }

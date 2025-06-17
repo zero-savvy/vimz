@@ -13,7 +13,7 @@ pub enum Backend {
 }
 
 /// Supported circuits frontend for the Sonobe backend.
-#[derive(Copy, Clone, Default, PartialEq, Eq, Debug, ValueEnum)]
+#[derive(Copy, Clone, Default, PartialEq, Eq, Debug, Hash, ValueEnum)]
 pub enum Frontend {
     #[default]
     Circom,

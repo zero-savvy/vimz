@@ -13,11 +13,11 @@ use crate::{
     },
 };
 
-mod folding;
-mod input;
+pub mod folding;
+pub mod input;
 
-type G1 = nova_snark::provider::bn256_grumpkin::bn256::Point;
-type G2 = nova_snark::provider::bn256_grumpkin::grumpkin::Point;
+pub type G1 = nova_snark::provider::bn256_grumpkin::bn256::Point;
+pub type G2 = nova_snark::provider::bn256_grumpkin::grumpkin::Point;
 
 pub fn run(config: &Config) {
     // ========================== Prepare input and folding ========================================

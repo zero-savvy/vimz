@@ -15,8 +15,8 @@ name = "generate-verifier-contract"
 path = "src/bin/generate_verifier_contract.rs"
 
 [[bin]]
-name = "sonobe-frontend-comparison"
-path = "src/bin/sonobe_frontend_comparison.rs"
+name = "comparison"
+path = "src/bin/comparison.rs"
 
 [[bin]]
 name = "image-hasher"

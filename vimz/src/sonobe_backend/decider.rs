@@ -2,9 +2,9 @@ use ark_bn254::{Bn254, G1Projective as G1};
 use ark_groth16::Groth16;
 use ark_grumpkin::Projective as G2;
 use sonobe::{
-    Decider as DeciderTrait,
     commitment::{kzg::KZG, pedersen::Pedersen},
     folding::{nova::decider_eth::Decider as DeciderEth, traits::CommittedInstanceOps},
+    Decider as DeciderTrait,
 };
 
 use crate::sonobe_backend::{circuits::SonobeCircuit, folding::Folding};
@@ -20,6 +20,8 @@ pub type Decider<Circuit> = DeciderEth<
     Folding<Circuit>,
 >;
 
+pub type DeciderProverParam<Circuit> =
+    <Decider<Circuit> as DeciderTrait<G1, G2, Circuit, Folding<Circuit>>>::ProverParam;
 pub type DeciderVerifierParam<Circuit> =
     <Decider<Circuit> as DeciderTrait<G1, G2, Circuit, Folding<Circuit>>>::VerifierParam;
 pub type DeciderProof<Circuit> =

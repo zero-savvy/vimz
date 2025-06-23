@@ -57,10 +57,17 @@ macro_rules! circuit_from_step_function {
             fn from_config(_config: &$crate::config::Config) -> Self {
                 <Self as sonobe::frontend::FCircuit<ark_bn254::Fr>>::new(
                     $crate::sonobe_backend::circuits::arkworks::poseidon_config::<ark_bn254::Fr>()
-                ).expect("Failed to construct HashStep from config")
+                ).expect("Failed to construct circuit from config")
             }
         }
 
+        impl<F: PrimeField + ark_crypto_primitives::sponge::Absorb> [<$transformation Arkworks Circuit>] <F> {
+            pub fn with_default_poseidon_config() -> Self {
+                <Self as sonobe::frontend::FCircuit<F>>::new(
+                    $crate::sonobe_backend::circuits::arkworks::poseidon_config::<F>()
+                ).expect("Failed to construct circuit")
+            }
+        }
     }
     };
 }

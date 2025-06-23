@@ -1,3 +1,5 @@
+use ark_serialize::Compress;
+
 pub mod config;
 pub mod image_hash;
 pub mod input;
@@ -8,3 +10,4 @@ pub mod transformation;
 
 pub const DEMO_STEPS: usize = 10;
 pub const PACKING_FACTOR: usize = 10;
+pub const COMPRESS_KEYS: Compress = Compress::Yes;

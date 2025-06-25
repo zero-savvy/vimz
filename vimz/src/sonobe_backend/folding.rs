@@ -1,12 +1,11 @@
 use ark_bn254::{Bn254, Fr, G1Projective as G1};
 use ark_grumpkin::Projective as G2;
-use rand::{CryptoRng, RngCore};
+use rand::RngCore;
 use sonobe::{
     FoldingScheme,
     commitment::{kzg::KZG, pedersen::Pedersen},
-    folding::nova::{Nova, PreprocessorParam},
+    folding::nova::Nova,
     frontend::FCircuit,
-    transcript::poseidon::poseidon_canonical_config,
 };
 use tracing::info_span;
 
@@ -14,7 +13,10 @@ use crate::{
     DEMO_STEPS,
     config::{Backend, Config, Frontend},
     image_hash::hash_image_arkworks,
-    sonobe_backend::circuits::{SonobeCircuit, VecFT},
+    sonobe_backend::{
+        circuits::{SonobeCircuit, VecFT},
+        parameters::ParameterProvider,
+    },
     transformation::Transformation::{Crop, Redact, Resize},
 };
 
@@ -31,15 +33,12 @@ pub type FoldingParams<Circuit> = (
 pub fn prepare_folding<Circuit: SonobeCircuit>(
     config: &Config,
     initial_state: Vec<Fr>,
-    rng: &mut (impl RngCore + CryptoRng),
+    parameter_provider: &ParameterProvider,
 ) -> (Folding<Circuit>, FoldingParams<Circuit>) {
     let f_circuit = Circuit::from_config(config);
 
-    let nova_params = info_span!("Preprocess Nova").in_scope(|| {
-        let nova_preprocess_params =
-            PreprocessorParam::new(poseidon_canonical_config::<Fr>(), f_circuit.clone());
-        Folding::preprocess(&mut *rng, &nova_preprocess_params).expect("Failed to preprocess Nova")
-    });
+    let nova_params = info_span!("Preprocess Nova")
+        .in_scope(|| parameter_provider.get_folding_params(&f_circuit, config.function));
     let nova = info_span!("Init Nova").in_scope(|| {
         Folding::init(&nova_params, f_circuit, initial_state).expect("Failed to init Nova")
     });

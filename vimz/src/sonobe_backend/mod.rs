@@ -21,8 +21,8 @@ pub mod circuits;
 pub mod decider;
 pub mod folding;
 pub mod input;
-pub mod solidity;
 pub mod parameters;
+pub mod solidity;
 
 pub fn run(config: &Config) {
     match config.frontend {
@@ -53,12 +53,13 @@ pub fn run(config: &Config) {
 
 fn _run<Circuit: SonobeCircuit>(config: &Config) {
     let mut rng = StdRng::from_seed([41; 32]);
+    let parameter_provider = config.param_provider();
 
     // ========================== Prepare input and folding ========================================
 
     let (ivc_step_inputs, initial_state) = prepare_input(config);
     let (mut folding, folding_params) =
-        prepare_folding::<Circuit>(config, initial_state.clone(), &mut rng);
+        prepare_folding::<Circuit>(config, initial_state.clone(), &parameter_provider);
 
     // ========================== Fold the input and verify the folding proof ======================
 
@@ -71,8 +72,7 @@ fn _run<Circuit: SonobeCircuit>(config: &Config) {
     // ========================== Prepare decider and compress the proof ===========================
 
     let (decider_pp, decider_vp) = info_span!("Prepare decider").in_scope(|| {
-        Decider::<Circuit>::preprocess(&mut rng, (folding_params, initial_state.len()))
-            .expect("Failed to preprocess decider")
+        parameter_provider.get_decider_params::<Circuit>(folding_params, config.function)
     });
     let proof = info_span!("Generate decider proof").in_scope(|| {
         Decider::prove(rng, decider_pp, folding.clone()).expect("Failed to generate proof")

@@ -3,7 +3,10 @@ use std::{env::current_dir, path::PathBuf};
 use clap::{Parser, ValueEnum};
 use image::{DynamicImage, ImageReader};
 
-use crate::transformation::{Resolution, Transformation};
+use crate::{
+    sonobe_backend::parameters::ParameterProvider,
+    transformation::{Resolution, Transformation},
+};
 
 /// Supported backends.
 #[derive(Copy, Clone, PartialEq, Eq, Debug, ValueEnum)]
@@ -79,6 +82,10 @@ pub struct Config {
     /// Optional target image for the final IVC verification. Applicable only to the Sonobe + Arkworks pipeline.
     #[clap(long, value_parser = parse_image)]
     pub target_image: Option<DynamicImage>,
+
+    /// Optional directory with pregenerated parameters. Applicable only to the Sonobe + Arkworks pipeline.
+    #[clap(long)]
+    pub params_dir: Option<PathBuf>,
 }
 
 impl Config {
@@ -95,6 +102,7 @@ impl Config {
         demo: bool,
         source_image: Option<DynamicImage>,
         target_image: Option<DynamicImage>,
+        params_dir: Option<PathBuf>,
     ) -> Self {
         Self {
             input,
@@ -108,6 +116,7 @@ impl Config {
             demo,
             source_image,
             target_image,
+            params_dir,
         }
     }
 
@@ -129,6 +138,13 @@ impl Config {
 
     pub fn witness_generator_file(&self) -> PathBuf {
         Self::root_dir().join(&self.witness_generator)
+    }
+
+    pub fn param_provider(&self) -> ParameterProvider {
+        match &self.params_dir {
+            Some(dir) => ParameterProvider::new_with_lookup_dir(dir.clone()),
+            None => ParameterProvider::new_on_demand(),
+        }
     }
 }
 

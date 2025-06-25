@@ -21,6 +21,7 @@ use vimz::{
         circuits::{SonobeCircuit, arkworks::*, circom::*},
         folding::{fold_input, prepare_folding, verify_final_state_arkworks, verify_folding},
         input::prepare_input,
+        parameters::ParameterProvider,
     },
     transformation::{Resolution, Transformation, Transformation::*},
 };
@@ -172,6 +173,7 @@ fn config(transformation: Transformation, pipeline: Pipeline) -> Config {
         true,
         Some(parse_image("../source_image/HD.png").unwrap()),
         target_image,
+        None,
     )
 }
 
@@ -257,8 +259,11 @@ fn run_sonobe_folding<Circuit: SonobeCircuit>(config: &Config) -> Duration {
     // ========================== Prepare input and folding ========================================
     let start = std::time::Instant::now();
     let (ivc_step_inputs, initial_state) = prepare_input(config);
-    let (mut folding, folding_params) =
-        prepare_folding::<Circuit>(config, initial_state.clone(), &mut rng);
+    let (mut folding, folding_params) = prepare_folding::<Circuit>(
+        config,
+        initial_state.clone(),
+        &ParameterProvider::new_on_demand(),
+    );
     println!("  Circuit preparation took: {:?}", start.elapsed());
 
     // ========================== Run folding steps ================================================
@@ -283,11 +288,13 @@ fn run_sonobe_folding<Circuit: SonobeCircuit>(config: &Config) -> Duration {
 }
 
 fn build_sonobe_circuit<Circuit: SonobeCircuit>(config: &Config) -> (usize, usize) {
-    let mut rng = StdRng::from_seed([41; 32]);
-
     let (_, initial_state) = prepare_input(config);
     let start = std::time::Instant::now();
-    let (folding, _) = prepare_folding::<Circuit>(config, initial_state.clone(), &mut rng);
+    let (folding, _) = prepare_folding::<Circuit>(
+        config,
+        initial_state.clone(),
+        &ParameterProvider::new_on_demand(),
+    );
     println!("  Circuit preparation took: {:?}", start.elapsed());
 
     (folding.r1cs.n_constraints(), folding.r1cs.n_variables())

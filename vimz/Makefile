@@ -19,6 +19,8 @@ endif
 FRONTEND ?=
 FRONTEND_ARG := $(if $(FRONTEND),--frontend $(FRONTEND),)
 
+PARAM_DIR := $(if $(and $(filter sonobe,$(BACKEND)),$(filter arkworks,$(FRONTEND))),--params-dir ../keys/,)
+
 .PHONY: help
 help: # Show help for each of the Makefile recipes.
 	@grep -E '^[a-zA-Z0-9 -]+:.*#'  Makefile | sort | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m:$$(echo $$l | cut -f 2- -d'#')\n"; done
@@ -36,7 +38,7 @@ run-transformation:
 		-i ../input_data/$(TRANSFORMATION).json \
 		-c ../circuits/$(SUBDIR)/$(TRANSFORMATION)_step.r1cs -r HD \
 		-b $(BACKEND) $(FRONTEND_ARG) $(DEMO_FLAG) -o ../calldata/$(TRANSFORMATION).bytes \
-		--source-image ../source_image/HD.png --target-image ../input_data/$(TRANSFORMATION).png \
+		--source-image ../source_image/HD.png --target-image ../input_data/$(TRANSFORMATION).png $(PARAM_DIR)
 
 .PHONY: blur
 blur: # Run the blur transformation.

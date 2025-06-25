@@ -1,17 +1,13 @@
 use std::fs;
 
 use clap::Parser;
-use rand::{SeedableRng, prelude::StdRng};
-use sonobe::Decider as _;
 use sonobe_solidity::{NovaCycleFoldVerifierKey, get_decider_template_for_cyclefold_decider};
 use vimz::{
     config::{Backend, Config},
     logging::init_logging,
     sonobe_backend::{
         circuits::{SonobeCircuit, circom::*},
-        decider::{Decider, DeciderVerifierParam},
-        folding::prepare_folding,
-        input::prepare_input,
+        decider::DeciderVerifierParam,
     },
     transformation::Transformation,
 };
@@ -54,14 +50,10 @@ fn run<Circuit: SonobeCircuit>(config: &Config) {
 fn prepare_decider_verification_parameters<Circuit: SonobeCircuit>(
     config: &Config,
 ) -> DeciderVerifierParam<Circuit> {
-    // TODO: USE THE SAME RNG EVERYWHERE
-    let mut rng = StdRng::from_seed([41; 32]);
-
-    let (_, initial_state) = prepare_input(config);
-    let initial_state_len = initial_state.len();
-    let (_, folding_params) = prepare_folding::<Circuit>(config, initial_state, &mut rng);
-
-    Decider::<Circuit>::preprocess(&mut rng, (folding_params, initial_state_len))
-        .expect("Failed to preprocess decider")
+    let empty_circuit = Circuit::from_config(config);
+    let param_provider = config.param_provider();
+    let folding_params = param_provider.get_folding_params(&empty_circuit, config.function);
+    param_provider
+        .get_decider_params::<Circuit>(folding_params, config.function)
         .1
 }

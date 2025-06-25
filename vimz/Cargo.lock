@@ -2264,7 +2264,7 @@ checksum = "69dc321eb6be977f44674620ca3aa21703cb20ffbe560e1ae97da08401ffbcad"
 [[package]]
 name = "experimental-frontends"
 version = "0.1.0"
-source = "git+https://github.com/pmikolajczyk41/sonobe?rev=d312916#d3129164c3578449d2372b81ae5fd4d14a1a5be9"
+source = "git+https://github.com/pmikolajczyk41/sonobe?rev=d47a34#d47a34d28f50be2c663cf9b3daa7accbff8ea3ba"
 dependencies = [
  "acvm",
  "ark-circom",
@@ -2434,7 +2434,7 @@ checksum = "a0d2fde1f7b3d48b8395d5f2de76c18a528bd6a9cdde438df747bfcba3e05d6f"
 [[package]]
 name = "folding-schemes"
 version = "0.1.0"
-source = "git+https://github.com/pmikolajczyk41/sonobe?rev=d312916#d3129164c3578449d2372b81ae5fd4d14a1a5be9"
+source = "git+https://github.com/pmikolajczyk41/sonobe?rev=d47a34#d47a34d28f50be2c663cf9b3daa7accbff8ea3ba"
 dependencies = [
  "ark-bn254 0.5.0",
  "ark-crypto-primitives",
@@ -5274,7 +5274,7 @@ checksum = "b7c388c1b5e93756d0c740965c41e8822f866621d41acbdf6336a6a168f8840c"
 [[package]]
 name = "solidity-verifiers"
 version = "0.1.0"
-source = "git+https://github.com/pmikolajczyk41/sonobe?rev=d312916#d3129164c3578449d2372b81ae5fd4d14a1a5be9"
+source = "git+https://github.com/pmikolajczyk41/sonobe?rev=d47a34#d47a34d28f50be2c663cf9b3daa7accbff8ea3ba"
 dependencies = [
  "ark-bn254 0.5.0",
  "ark-ec 0.5.0",

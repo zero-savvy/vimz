@@ -1,17 +1,18 @@
 use std::{
+    fs,
     fs::{create_dir_all, File},
     io::Write,
     path::{Path, PathBuf},
 };
 
 use ark_bn254::Fr;
-use ark_serialize::CanonicalSerialize;
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Validate};
 use clap::Parser;
 use humansize::{format_size, DECIMAL};
 use vimz::{
     sonobe_backend::{
         circuits::{arkworks::*, SonobeCircuit},
-        decider::{DeciderProverParam, DeciderVerifierParam},
+        decider::DeciderParams,
         folding::FoldingParams,
         parameters::{generate_decider_params, generate_folding_params},
     },
@@ -68,10 +69,7 @@ fn main() {
 
 fn run<Circuit: SonobeCircuit>(
     circuit: Circuit,
-) -> (
-    FoldingParams<Circuit>,
-    (DeciderProverParam<Circuit>, DeciderVerifierParam<Circuit>),
-) {
+) -> (FoldingParams<Circuit>, DeciderParams<Circuit>) {
     let start = std::time::Instant::now();
     let folding_params = generate_folding_params(&circuit);
     println!("Folding preprocessing took: {:.2?}", start.elapsed());
@@ -84,7 +82,7 @@ fn run<Circuit: SonobeCircuit>(
     (folding_params, decider_params)
 }
 
-fn save<Data: CanonicalSerialize>(
+fn save<Data: CanonicalSerialize + CanonicalDeserialize>(
     data: Data,
     data_title: &str,
     output_dir: &Path,
@@ -111,5 +109,14 @@ fn save<Data: CanonicalSerialize>(
         "Parameters for {transformation:?} {data_title} saved to {file_path:?}. Took {:.2?}. Size: {}.",
         start.elapsed(),
         format_size(size, DECIMAL)
+    );
+
+    let start = std::time::Instant::now();
+    let bytes = fs::read(&file_path).expect("Failed to read file");
+    let _restored = Data::deserialize_with_mode(&*bytes, COMPRESS_PARAMS, Validate::No)
+        .expect("Failed to deserialize data");
+    println!(
+        "Deserialization {data_title} parameters for {transformation:?} from file should take {:.2?}.",
+        start.elapsed()
     );
 }

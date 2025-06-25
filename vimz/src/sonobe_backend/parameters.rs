@@ -2,20 +2,20 @@ use std::{fs, path::PathBuf};
 
 use ark_bn254::Fr;
 use ark_serialize::{CanonicalDeserialize, Validate};
-use rand::{prelude::StdRng, SeedableRng};
+use rand::{SeedableRng, prelude::StdRng};
 use sonobe::{
-    folding::nova::PreprocessorParam, transcript::poseidon::poseidon_canonical_config, Decider as _,
-    FoldingScheme,
+    Decider as _, FoldingScheme, folding::nova::PreprocessorParam,
+    transcript::poseidon::poseidon_canonical_config,
 };
 
 use crate::{
+    COMPRESS_PARAMS,
     sonobe_backend::{
         circuits::SonobeCircuit,
         decider::{Decider, DeciderParams},
         folding::{Folding, FoldingParams},
     },
     transformation::Transformation,
-    COMPRESS_PARAMS,
 };
 
 pub struct ParameterProvider {
@@ -52,10 +52,7 @@ impl ParameterProvider {
         &self,
         circuit: &Circuit,
         transformation: Transformation,
-    ) -> FoldingParams<Circuit>
-    where
-        FoldingParams<Circuit>: CanonicalDeserialize,
-    {
+    ) -> FoldingParams<Circuit> {
         match self.lookup(transformation, ParamType::Folding) {
             Some(params) => params,
             None => generate_folding_params(circuit),
@@ -80,9 +77,7 @@ impl ParameterProvider {
         transformation: Transformation,
         param_type: ParamType,
     ) -> Option<Data> {
-        let Some(dir) = self.lookup_dir.as_ref() else {
-            return None;
-        };
+        let dir = self.lookup_dir.as_ref()?;
 
         let file_path = dir.join(format!(
             "{transformation:?}.{}",
@@ -90,7 +85,7 @@ impl ParameterProvider {
         ));
 
         let content = fs::read(file_path).ok()?;
-        Data::deserialize_with_mode(&*content, COMPRESS_PARAMS, Validate::Yes).ok()
+        Data::deserialize_with_mode(&*content, COMPRESS_PARAMS, Validate::No).ok()
     }
 }
 

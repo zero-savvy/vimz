@@ -23,8 +23,8 @@ name = "image-hasher"
 path = "src/bin/image_hasher.rs"
 
 [[bin]]
-name = "generate-keys"
-path = "src/bin/generate_keys.rs"
+name = "generate-params"
+path = "src/bin/generate_params.rs"
 
 [dependencies]
 ark-bn254 = { version = "^0.5.0", features = ["r1cs"] }

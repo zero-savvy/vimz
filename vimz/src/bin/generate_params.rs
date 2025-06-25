@@ -1,5 +1,5 @@
 use std::{
-    fs::{File, create_dir_all},
+    fs::{create_dir_all, File},
     io::Write,
     path::{Path, PathBuf},
 };
@@ -7,18 +7,13 @@ use std::{
 use ark_bn254::Fr;
 use ark_serialize::CanonicalSerialize;
 use clap::Parser;
-use humansize::{DECIMAL, format_size};
-use rand::{SeedableRng, prelude::StdRng};
-use sonobe::{
-    Decider as _, FoldingScheme, folding::nova::PreprocessorParam,
-    transcript::poseidon::poseidon_canonical_config,
-};
+use humansize::{format_size, DECIMAL};
 use vimz::{
-    COMPRESS_KEYS,
     sonobe_backend::{
-        circuits::{SonobeCircuit, arkworks::*},
-        decider::{Decider, DeciderProverParam, DeciderVerifierParam},
-        folding::{Folding, FoldingParams},
+        circuits::{arkworks::*, SonobeCircuit},
+        decider::{DeciderProverParam, DeciderVerifierParam},
+        folding::FoldingParams,
+        parameters::{generate_decider_params, generate_folding_params},
     },
     transformation::{
         Transformation,
@@ -26,6 +21,7 @@ use vimz::{
             Blur, Brightness, Contrast, Crop, Grayscale, Hash, Redact, Resize, Sharpness,
         },
     },
+    COMPRESS_PARAMS,
 };
 
 const ALL_TRANSFORMATIONS: [Transformation; 9] = [
@@ -76,22 +72,16 @@ fn run<Circuit: SonobeCircuit>(
     FoldingParams<Circuit>,
     (DeciderProverParam<Circuit>, DeciderVerifierParam<Circuit>),
 ) {
-    let mut rng = StdRng::from_seed([41; 32]);
-
     let start = std::time::Instant::now();
-    let nova_preprocess_params =
-        PreprocessorParam::new(poseidon_canonical_config::<Fr>(), circuit.clone());
-    let nova_params =
-        Folding::preprocess(&mut rng, &nova_preprocess_params).expect("Failed to preprocess Nova");
+    let folding_params = generate_folding_params(&circuit);
     println!("Folding preprocessing took: {:.2?}", start.elapsed());
 
     let start = std::time::Instant::now();
     let decider_params =
-        Decider::<Circuit>::preprocess(&mut rng, (nova_params.clone(), circuit.state_len()))
-            .expect("Failed to preprocess decider");
+        generate_decider_params::<Circuit>(circuit.state_len(), folding_params.clone());
     println!("Decider preprocessing took: {:.2?}", start.elapsed());
 
-    (nova_params, decider_params)
+    (folding_params, decider_params)
 }
 
 fn save<Data: CanonicalSerialize>(
@@ -109,7 +99,7 @@ fn save<Data: CanonicalSerialize>(
     let start = std::time::Instant::now();
     let size = {
         let mut serialized = vec![];
-        data.serialize_with_mode(&mut serialized, COMPRESS_KEYS)
+        data.serialize_with_mode(&mut serialized, COMPRESS_PARAMS)
             .expect("Failed to serialize data");
 
         file.write_all(serialized.as_slice())

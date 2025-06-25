@@ -10,4 +10,4 @@ pub mod transformation;
 
 pub const DEMO_STEPS: usize = 10;
 pub const PACKING_FACTOR: usize = 10;
-pub const COMPRESS_KEYS: Compress = Compress::Yes;
+pub const COMPRESS_PARAMS: Compress = Compress::Yes;

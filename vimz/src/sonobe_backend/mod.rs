@@ -22,6 +22,7 @@ pub mod decider;
 pub mod folding;
 pub mod input;
 pub mod solidity;
+pub mod parameters;
 
 pub fn run(config: &Config) {
     match config.frontend {
